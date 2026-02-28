@@ -154,5 +154,18 @@
   "swap_nurses": "החלפת אחיות",
   "total_hours_label": "סה״כ",
   "primary_clinic": "מרפאה ראשית",
-  "none_option": "ללא"
+  "none_option": "ללא",
+  "unfilled_slots": "משבצות פנויות",
+  "your_week": "השבוע שלך",
+  "available_hours": "שעות זמינות",
+  "assigned_hours": "שעות מוקצות",
+  "remaining_hours": "שעות נותרות",
+  "management_hours": "שעות ניהול",
+  "auto_suggest": "הצעה אוטומטית",
+  "save_done": "שמירה וסיום",
+  "no_gaps": "אין משבצות פנויות לשבוע זה",
+  "saving_assignments": "שומר שיבוצים...",
+  "self_assign_saved": "השיבוצים נשמרו בהצלחה",
+  "self_assign_error": "שגיאה בשמירת שיבוצים",
+  "no_schedule_generate_first": "אין לו״ז — יש ליצור תחילה"
 }

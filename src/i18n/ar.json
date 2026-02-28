@@ -154,5 +154,18 @@
   "swap_nurses": "تبديل الممرضات",
   "total_hours_label": "المجموع",
   "primary_clinic": "العيادة الرئيسية",
-  "none_option": "بدون"
+  "none_option": "بدون",
+  "unfilled_slots": "فترات شاغرة",
+  "your_week": "أسبوعك",
+  "available_hours": "ساعات متاحة",
+  "assigned_hours": "ساعات معينة",
+  "remaining_hours": "ساعات متبقية",
+  "management_hours": "ساعات الإدارة",
+  "auto_suggest": "اقتراح تلقائي",
+  "save_done": "حفظ وانتهاء",
+  "no_gaps": "لا توجد فترات شاغرة لهذا الأسبوع",
+  "saving_assignments": "جاري حفظ التعيينات...",
+  "self_assign_saved": "تم حفظ التعيينات بنجاح",
+  "self_assign_error": "خطأ في حفظ التعيينات",
+  "no_schedule_generate_first": "لا يوجد جدول — يجب إنشاؤه أولاً"
 }
