@@ -8,11 +8,13 @@ import type {
 } from "../types";
 import { calculateScore } from "../scoring";
 import { buildDifficultyQueue, getCandidates } from "../difficulty-queue";
+import { checkLookAhead } from "../look-ahead";
+import { tryBacktrack } from "../backtrack";
 
 /**
  * Layer 4: Fill all primary clinic slots (core logic).
  * Uses difficulty queue (MCV heuristic), scoring formula (0-1000),
- * and picks the highest-scoring candidate per slot.
+ * look-ahead (max 5 slots), and backtracking on failure.
  *
  * Processes only genderPref=ANY (or undefined) slots — gender-restricted
  * slots were already handled by Layer 3.
@@ -27,9 +29,7 @@ export function layer4_primary(
 ): void {
   // Only process non-gender-restricted slots
   const anyGenderClinics = clinics.filter(
-    (c) =>
-      !c.genderPref ||
-      c.genderPref === "ANY",
+    (c) => !c.genderPref || c.genderPref === "ANY",
   );
 
   // Build difficulty queue (sorted: hardest slots first)
@@ -40,19 +40,25 @@ export function layer4_primary(
     const candidates = getCandidates(grid, nurses, slot, budgets);
 
     if (candidates.length === 0) {
-      warnings.push({
-        level: "error",
-        message: `Cannot fill slot: no candidates available`,
-        clinicId: slot.clinicId,
-        day: slot.day,
-      });
+      // Try backtracking before giving up
+      const recovered = tryBacktrack(grid, slot, nurses, budgets);
+      if (!recovered) {
+        warnings.push({
+          level: "error",
+          message: `Cannot fill slot: no candidates available`,
+          clinicId: slot.clinicId,
+          day: slot.day,
+        });
+      }
       continue;
     }
 
-    // Score each candidate and pick the best
+    // Score each candidate: base score + look-ahead bonus
     const scored = candidates.map((nurse) => ({
       nurse,
-      score: calculateScore(nurse, slot, grid, budgets, preferences),
+      score:
+        calculateScore(nurse, slot, grid, budgets, preferences) +
+        checkLookAhead(grid, nurse, slot, queue, nurses, budgets),
     }));
 
     scored.sort((a, b) => b.score - a.score);
