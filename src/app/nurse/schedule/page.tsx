@@ -25,6 +25,8 @@ type Assignment = {
   isFixed: boolean;
   primaryClinic: { id: string; name: string } | null;
   secondaryClinic: { id: string; name: string } | null;
+  patientCallProgram: string | null;
+  patientCallCount: number | null;
 };
 
 type ScheduleResponse = {
@@ -192,6 +194,13 @@ export default function NurseSchedulePage() {
                       <div className="text-sm text-muted-foreground">
                         {a.shiftStart} — {a.shiftEnd} ({hours}h)
                       </div>
+                      {a.patientCallProgram && (
+                        <div className="text-sm text-muted-foreground">
+                          {t("program")}: {a.patientCallProgram}
+                          {a.patientCallCount != null &&
+                            ` (${a.patientCallCount})`}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

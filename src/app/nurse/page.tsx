@@ -24,6 +24,8 @@ type Assignment = {
   isOff: boolean;
   primaryClinic: { name: string } | null;
   secondaryClinic: { name: string } | null;
+  patientCallProgram: string | null;
+  patientCallCount: number | null;
 };
 
 type ScheduleResponse = {
@@ -131,6 +133,13 @@ function DayCard({
           <div className="text-sm text-muted-foreground">
             {assignment.shiftStart} — {assignment.shiftEnd} ({hours}h)
           </div>
+          {assignment.patientCallProgram && (
+            <div className="text-sm text-muted-foreground">
+              {t("program")}: {assignment.patientCallProgram}
+              {assignment.patientCallCount != null &&
+                ` (${assignment.patientCallCount})`}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -159,6 +168,11 @@ function CompactDayRow({ assignment }: { assignment: Assignment }) {
       <span className="font-medium">{dayLabels[assignment.day]}</span>
       <div className="text-end">
         <span>{assignment.primaryClinic?.name ?? "—"}</span>
+        {assignment.patientCallProgram && (
+          <span className="text-muted-foreground ms-1">
+            ({assignment.patientCallProgram})
+          </span>
+        )}
         <span className="text-muted-foreground ms-2">
           {assignment.shiftStart}-{assignment.shiftEnd}
         </span>
