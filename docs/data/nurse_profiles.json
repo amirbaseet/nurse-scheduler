@@ -1,0 +1,624 @@
+{
+  "כתיבה בסיט": {
+    "name": "כתיבה בסיט",
+    "weeks_present": 51,
+    "total_shifts": 243,
+    "total_hours": 1834.0,
+    "off_days": 22,
+    "avg_weekly_hours": 36.0,
+    "avg_shift_hours": 7.5,
+    "avg_days_per_week": 4.8,
+    "employment_type": "full_time",
+    "primary_specialty": "מקצועית",
+    "all_specialties": [
+      "מקצועית",
+      "כירורגיה",
+      "Avastin"
+    ],
+    "clinics_detail": {
+      "כירורגיה": 29,
+      "עיניים": 5,
+      "מקצועית": 165,
+      "זוליר": 14,
+      "א.א.ג": 15,
+      "אורטופידיה": 14,
+      "שד": 1,
+      "סכרת": 3,
+      "שטראוס": 1,
+      "Avastin": 16,
+      "פלאסטיקה": 3
+    },
+    "days_distribution": {
+      "Sun": 49,
+      "Mon": 48,
+      "Tue": 44,
+      "Wed": 48,
+      "Thu": 41,
+      "Sat": 8,
+      "Fri": 5
+    },
+    "notes": [
+      "21"
+    ],
+    "section": "main"
+  },
+  "נגלא שוויקי": {
+    "name": "נגלא שוויקי",
+    "weeks_present": 51,
+    "total_shifts": 242,
+    "total_hours": 1443.5,
+    "off_days": 29,
+    "avg_weekly_hours": 28.3,
+    "avg_shift_hours": 6.0,
+    "avg_days_per_week": 4.7,
+    "employment_type": "full_time",
+    "primary_specialty": "כירורגיה",
+    "all_specialties": [
+      "כירורגיה",
+      "אורטופידיה",
+      "העמסת סוכר"
+    ],
+    "clinics_detail": {
+      "העמסת סוכר": 40,
+      "כירורגיה": 77,
+      "עיניים": 12,
+      "א.ק.ג": 6,
+      "שד": 31,
+      "אורטופידיה": 48,
+      "א.א.ג": 32,
+      "עיניים ילדים": 14,
+      "פלאסטיקה": 8,
+      "חיסון": 3,
+      "כף יד": 1,
+      "מקצועית": 1
+    },
+    "days_distribution": {
+      "Sun": 45,
+      "Mon": 45,
+      "Tue": 38,
+      "Wed": 46,
+      "Thu": 33,
+      "Fri": 11,
+      "Sat": 24
+    },
+    "notes": [
+      "חדר 16+20",
+      "חדר 3 + 20",
+      "3",
+      "חדר 16+20+21+19"
+    ],
+    "section": "main"
+  },
+  "נידאל ניגם": {
+    "name": "נידאל ניגם",
+    "weeks_present": 51,
+    "total_shifts": 230,
+    "total_hours": 1753.5,
+    "off_days": 29,
+    "avg_weekly_hours": 34.4,
+    "avg_shift_hours": 7.6,
+    "avg_days_per_week": 4.5,
+    "employment_type": "full_time",
+    "primary_specialty": "אורטופידיה",
+    "all_specialties": [
+      "אורטופידיה",
+      "כירורגיה",
+      "א.א.ג"
+    ],
+    "clinics_detail": {
+      "אורטופידיה": 72,
+      "כירורגיה": 61,
+      "א.א.ג": 40,
+      "זוליר": 19,
+      "עיניים": 22,
+      "פלאסטיקה": 10,
+      "מקצועית": 13,
+      "אי ספיקת לב": 6,
+      "עיניים ילדים": 24,
+      "Avastin": 10,
+      "חיסון": 5,
+      "כף יד": 1
+    },
+    "days_distribution": {
+      "Sat": 11,
+      "Sun": 41,
+      "Mon": 48,
+      "Tue": 44,
+      "Wed": 47,
+      "Thu": 38,
+      "Fri": 1
+    },
+    "notes": [
+      "2",
+      "2 + 6",
+      "2+3+6",
+      "2+6",
+      "1+2+3+6+7"
+    ],
+    "section": "main"
+  },
+  "רבחייה בראגיתי": {
+    "name": "רבחייה בראגיתי",
+    "weeks_present": 51,
+    "total_shifts": 228,
+    "total_hours": 1715.0,
+    "off_days": 23,
+    "avg_weekly_hours": 33.6,
+    "avg_shift_hours": 7.5,
+    "avg_days_per_week": 4.5,
+    "employment_type": "full_time",
+    "primary_specialty": "סכרת",
+    "all_specialties": [
+      "סכרת",
+      "א.א.ג",
+      "Type 1 Diabetes"
+    ],
+    "clinics_detail": {
+      "סכרת": 218,
+      "א.א.ג": 32,
+      "אורטופידיה": 3,
+      "Type 1 Diabetes": 6,
+      "חיסון": 4
+    },
+    "days_distribution": {
+      "Sun": 45,
+      "Mon": 46,
+      "Tue": 43,
+      "Wed": 48,
+      "Thu": 43,
+      "Fri": 3
+    },
+    "notes": [
+      "9 + מכונת שטיפה",
+      "09+10+מכונת שטיפה",
+      "10+מכונת שטיפה",
+      "10 + מכונת שטיפה"
+    ],
+    "section": "main"
+  },
+  "היא חליל": {
+    "name": "היא חליל",
+    "weeks_present": 51,
+    "total_shifts": 265,
+    "total_hours": 1560.0,
+    "off_days": 26,
+    "avg_weekly_hours": 30.6,
+    "avg_shift_hours": 5.9,
+    "avg_days_per_week": 5.2,
+    "employment_type": "full_time",
+    "primary_specialty": "סכרת",
+    "all_specialties": [
+      "סכרת",
+      "א.א.ג",
+      "העמסת סוכר"
+    ],
+    "clinics_detail": {
+      "העמסת סוכר": 17,
+      "א.א.ג": 40,
+      "סכרת": 241,
+      "שד": 1,
+      "כירורגיה": 2,
+      "Avastin": 5,
+      "חיסון": 8,
+      "עיניים": 1
+    },
+    "days_distribution": {
+      "Sun": 41,
+      "Mon": 46,
+      "Tue": 45,
+      "Wed": 46,
+      "Sat": 44,
+      "Thu": 43
+    },
+    "notes": [
+      "9 + 8",
+      "4+5+11",
+      "11 + 8",
+      "11+8",
+      "7",
+      "11+9"
+    ],
+    "section": "main"
+  },
+  "אינאס גאעוני": {
+    "name": "אינאס גאעוני",
+    "weeks_present": 51,
+    "total_shifts": 232,
+    "total_hours": 945.0,
+    "off_days": 16,
+    "avg_weekly_hours": 18.5,
+    "avg_shift_hours": 4.1,
+    "avg_days_per_week": 4.5,
+    "employment_type": "full_time",
+    "primary_specialty": "תעסוקתית",
+    "all_specialties": [
+      "תעסוקתית",
+      "שד",
+      "מנטו"
+    ],
+    "clinics_detail": {
+      "תעסוקתית": 97,
+      "שד": 97,
+      "א.א.ג": 17,
+      "מנטו": 70,
+      "א.ק.ג": 32,
+      "פלאסטיקה": 8,
+      "מ.ש": 30,
+      "כירורגיה": 2,
+      "אורטופידיה": 1
+    },
+    "days_distribution": {
+      "Sun": 49,
+      "Mon": 49,
+      "Tue": 45,
+      "Wed": 48,
+      "Thu": 41
+    },
+    "notes": [
+      "4",
+      "1+2+3",
+      "1+3",
+      "13 +12",
+      "1+3+7"
+    ],
+    "section": "main"
+  },
+  "רוואא משני": {
+    "name": "רוואא משני",
+    "weeks_present": 51,
+    "total_shifts": 147,
+    "total_hours": 731.0,
+    "off_days": 8,
+    "avg_weekly_hours": 14.3,
+    "avg_shift_hours": 5.0,
+    "avg_days_per_week": 2.9,
+    "employment_type": "part_time",
+    "primary_specialty": "אי ספיקת לב",
+    "all_specialties": [
+      "אי ספיקת לב",
+      "העמסת סוכר",
+      "סכרת"
+    ],
+    "clinics_detail": {
+      "אי ספיקת לב": 30,
+      "עיניים": 8,
+      "שד": 6,
+      "העמסת סוכר": 23,
+      "א.ק.ג": 15,
+      "אורטופידיה": 4,
+      "א.א.ג": 5,
+      "שטראוס": 1,
+      "כירורגיה": 6,
+      "סכרת": 22,
+      "עיניים ילדים": 5,
+      "מקצועית": 18,
+      "סקלרותרפיה": 4,
+      "זוליר": 4,
+      "חיסון": 7
+    },
+    "days_distribution": {
+      "Tue": 40,
+      "Wed": 46,
+      "Thu": 20,
+      "Sun": 5,
+      "Sat": 27,
+      "Mon": 8,
+      "Fri": 1
+    },
+    "notes": [
+      "7 + 1",
+      "21",
+      "12+13+14",
+      "12+13",
+      "5 + 1",
+      "14"
+    ],
+    "section": "main"
+  },
+  "הדיל סוריך": {
+    "name": "הדיל סוריך",
+    "weeks_present": 51,
+    "total_shifts": 226,
+    "total_hours": 1335.0,
+    "off_days": 21,
+    "avg_weekly_hours": 26.2,
+    "avg_shift_hours": 5.9,
+    "avg_days_per_week": 4.4,
+    "employment_type": "full_time",
+    "primary_specialty": "אי ספיקת לב",
+    "all_specialties": [
+      "אי ספיקת לב",
+      "א.ק.ג",
+      "העמסת סוכר"
+    ],
+    "clinics_detail": {
+      "עיניים": 8,
+      "שד": 19,
+      "העמסת סוכר": 32,
+      "אי ספיקת לב": 128,
+      "א.ק.ג": 40,
+      "סכרת": 3,
+      "אורטופידיה": 5,
+      "עיניים ילדים": 8,
+      "א.א.ג": 7,
+      "כירורגיה": 9,
+      "שטראוס": 3,
+      "פלאסטיקה": 3,
+      "חיסון": 11
+    },
+    "days_distribution": {
+      "Sun": 46,
+      "Mon": 46,
+      "Tue": 45,
+      "Wed": 49,
+      "Thu": 39,
+      "Fri": 1
+    },
+    "notes": [
+      "15 + 19",
+      "05+06+19+15",
+      "5",
+      "12+14",
+      "15+19",
+      "14 + 15"
+    ],
+    "section": "main"
+  },
+  "סאנדי צאיג": {
+    "name": "סאנדי צאיג",
+    "weeks_present": 7,
+    "total_shifts": 15,
+    "total_hours": 70.0,
+    "off_days": 0,
+    "avg_weekly_hours": 10.0,
+    "avg_shift_hours": 4.7,
+    "avg_days_per_week": 2.1,
+    "employment_type": "part_time",
+    "primary_specialty": "אורטופידיה",
+    "all_specialties": [
+      "אורטופידיה",
+      "העמסת סוכר",
+      "כירורגיה"
+    ],
+    "clinics_detail": {
+      "העמסת סוכר": 4,
+      "א.ק.ג": 3,
+      "אורטופידיה": 8,
+      "כירורגיה": 4
+    },
+    "days_distribution": {
+      "Sun": 2,
+      "Mon": 2,
+      "Tue": 2,
+      "Wed": 7,
+      "Thu": 2
+    },
+    "notes": [],
+    "section": "main"
+  },
+  "נסרין עלי": {
+    "name": "נסרין עלי",
+    "weeks_present": 12,
+    "total_shifts": 19,
+    "total_hours": 92.0,
+    "off_days": 0,
+    "avg_weekly_hours": 7.7,
+    "avg_shift_hours": 4.8,
+    "avg_days_per_week": 1.6,
+    "employment_type": "part_time",
+    "primary_specialty": "עיניים",
+    "all_specialties": [
+      "עיניים"
+    ],
+    "clinics_detail": {
+      "עיניים": 19
+    },
+    "days_distribution": {
+      "Sun": 7,
+      "Tue": 11,
+      "Mon": 1
+    },
+    "notes": [],
+    "section": "main"
+  },
+  "נסרין משני": {
+    "name": "נסרין משני",
+    "weeks_present": 50,
+    "total_shifts": 238,
+    "total_hours": 1350.0,
+    "off_days": 5,
+    "avg_weekly_hours": 27.0,
+    "avg_shift_hours": 5.7,
+    "avg_days_per_week": 4.8,
+    "employment_type": "full_time",
+    "primary_specialty": "עיניים",
+    "all_specialties": [
+      "עיניים",
+      "א.א.ג"
+    ],
+    "clinics_detail": {
+      "עיניים": 236,
+      "א.א.ג": 2
+    },
+    "days_distribution": {
+      "Sun": 46,
+      "Mon": 46,
+      "Tue": 46,
+      "Wed": 41,
+      "Thu": 34,
+      "Sat": 25
+    },
+    "notes": [],
+    "section": "main"
+  },
+  "עלאא אבו סנינה": {
+    "name": "עלאא אבו סנינה",
+    "weeks_present": 46,
+    "total_shifts": 256,
+    "total_hours": 1868.0,
+    "off_days": 4,
+    "avg_weekly_hours": 40.6,
+    "avg_shift_hours": 7.3,
+    "avg_days_per_week": 5.6,
+    "employment_type": "full_time",
+    "primary_specialty": "אורטופידיה",
+    "all_specialties": [
+      "אורטופידיה",
+      "עיניים",
+      "אורטופיד ילדים"
+    ],
+    "clinics_detail": {
+      "אורטופידיה": 211,
+      "עיניים": 82,
+      "אורטופיד ילדים": 34
+    },
+    "days_distribution": {
+      "Sun": 45,
+      "Mon": 43,
+      "Tue": 44,
+      "Wed": 41,
+      "Thu": 39,
+      "Sat": 43,
+      "Fri": 1
+    },
+    "notes": [
+      "חדר 15"
+    ],
+    "section": "main"
+  },
+  "גמילה שקיראת": {
+    "name": "גמילה שקיראת",
+    "weeks_present": 3,
+    "total_shifts": 12,
+    "total_hours": 72.0,
+    "off_days": 0,
+    "avg_weekly_hours": 24.0,
+    "avg_shift_hours": 6.0,
+    "avg_days_per_week": 4.0,
+    "employment_type": "full_time",
+    "primary_specialty": "העמסת סוכר",
+    "all_specialties": [
+      "העמסת סוכר",
+      "א.ק.ג",
+      "כירורגיה"
+    ],
+    "clinics_detail": {
+      "העמסת סוכר": 5,
+      "כירורגיה": 3,
+      "א.א.ג": 1,
+      "א.ק.ג": 5,
+      "אורטופידיה": 2,
+      "שד": 3,
+      "זוליר": 1
+    },
+    "days_distribution": {
+      "Sun": 2,
+      "Mon": 2,
+      "Tue": 3,
+      "Wed": 2,
+      "Thu": 3
+    },
+    "notes": [],
+    "section": "main"
+  },
+  "אנוואר אדעיס": {
+    "name": "אנוואר אדעיס",
+    "weeks_present": 37,
+    "total_shifts": 170,
+    "total_hours": 938.0,
+    "off_days": 16,
+    "avg_weekly_hours": 25.4,
+    "avg_shift_hours": 5.5,
+    "avg_days_per_week": 4.6,
+    "employment_type": "full_time",
+    "primary_specialty": "העמסת סוכר",
+    "all_specialties": [
+      "העמסת סוכר",
+      "סכרת",
+      "אי ספיקת לב"
+    ],
+    "clinics_detail": {
+      "העמסת סוכר": 61,
+      "סכרת": 37,
+      "אורטופידיה": 6,
+      "כירורגיה": 7,
+      "א.ק.ג": 9,
+      "עיניים": 6,
+      "זוליר": 4,
+      "שד": 4,
+      "פלאסטיקה": 2,
+      "סקלרותרפיה": 6,
+      "א.א.ג": 5,
+      "עיניים ילדים": 2,
+      "אי ספיקת לב": 25,
+      "חיסון": 7,
+      "כף יד": 2
+    },
+    "days_distribution": {
+      "Sun": 31,
+      "Mon": 34,
+      "Tue": 34,
+      "Wed": 36,
+      "Thu": 28,
+      "Sat": 6,
+      "Fri": 1
+    },
+    "notes": [
+      "19",
+      "19+21",
+      "19 + 21"
+    ],
+    "section": "main"
+  },
+  "רוואן אבו סרור": {
+    "name": "רוואן אבו סרור",
+    "weeks_present": 37,
+    "total_shifts": 162,
+    "total_hours": 951.0,
+    "off_days": 19,
+    "avg_weekly_hours": 25.7,
+    "avg_shift_hours": 5.9,
+    "avg_days_per_week": 4.4,
+    "employment_type": "full_time",
+    "primary_specialty": "שד",
+    "all_specialties": [
+      "שד",
+      "מ.ש",
+      "עיניים ילדים"
+    ],
+    "clinics_detail": {
+      "העמסת סוכר": 12,
+      "שד": 54,
+      "עיניים": 5,
+      "א.ק.ג": 7,
+      "אורטופידיה": 5,
+      "עיניים ילדים": 18,
+      "אי ספיקת לב": 2,
+      "זוליר": 9,
+      "א.א.ג": 9,
+      "כירורגיה": 16,
+      "סכרת": 2,
+      "מ.ש": 32,
+      "חיסון": 5,
+      "פלאסטיקה": 1,
+      "כף יד": 1
+    },
+    "days_distribution": {
+      "Sun": 31,
+      "Mon": 32,
+      "Tue": 35,
+      "Wed": 36,
+      "Thu": 27,
+      "Fri": 1
+    },
+    "notes": [
+      "6",
+      "7 + 4",
+      "12+13+14",
+      "5 + 4",
+      "7+4",
+      "14"
+    ],
+    "section": "main"
+  }
+}

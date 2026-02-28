@@ -1,0 +1,456 @@
+# Database Schema (Prisma) — FIXED
+
+All review issues fixed:
+- BUG 4: Added pinPrefix for fast auth lookup
+- BUG 5: Added ClinicDefaultConfig for template schedules
+- GAP 4: Added modifiedBy/modifiedAt to ScheduleAssignment
+- GAP 5: Fixed FixedAssignment unique constraint (sentinel date instead of null)
+- GAP 7: Added recurringOffDays to NurseProfile
+- QUALITY 3: Route-safe model (no ambiguous route conflicts)
+
+Copy this COMPLETE schema into prisma/schema.prisma:
+
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ═══════════════════════════════════════════
+// USERS & AUTH
+// ═══════════════════════════════════════════
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  nameAr         String?
+  role           Role     @default(NURSE)
+  pinHash        String
+  pinPrefix      String   @default("")    // First 2 digits of PIN (plaintext) for fast lookup
+  phone          String?
+  isActive       Boolean  @default(true)
+  failedAttempts Int      @default(0)
+  lockedUntil    DateTime?
+  lastLogin      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  nurseProfile      NurseProfile?
+  timeOffRequests   TimeOffRequest[]
+  preferences       WeeklyPreference[]
+  assignedTasks     Task[]              @relation("AssignedTo")
+  createdTasks      Task[]              @relation("CreatedBy")
+  announcements     Announcement[]      @relation("Author")
+  readAnnouncements AnnouncementRead[]
+  notifications     Notification[]
+}
+
+enum Role {
+  MANAGER
+  NURSE
+}
+
+// ═══════════════════════════════════════════
+// NURSE PROFILES
+// ═══════════════════════════════════════════
+
+model NurseProfile {
+  id               String     @id @default(cuid())
+  userId           String     @unique
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gender           Gender
+  contractHours    Float                          // Actual contract hours (8-40), NOT assumed
+  shiftPreference  ShiftPref  @default(ANYTIME)
+  canWorkFriday    Boolean    @default(false)
+  canWorkSaturday  Boolean    @default(false)
+  maxDaysPerWeek   Int        @default(5)
+  employmentType   Employment @default(FULL_TIME)
+  isManager        Boolean    @default(false)
+  managementHours  Float?
+  recurringOffDays String     @default("[]")      // JSON array of DayOfWeek, e.g. ["THU"]
+
+  blockedClinics   NurseBlockedClinic[]
+  fixedAssignments FixedAssignment[]
+  assignments      ScheduleAssignment[]
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum ShiftPref {
+  MORNING
+  AFTERNOON
+  ANYTIME
+}
+
+enum Employment {
+  FULL_TIME
+  PART_TIME
+  TEMPORARY
+}
+
+// ═══════════════════════════════════════════
+// CLINICS
+// ═══════════════════════════════════════════
+
+model Clinic {
+  id                    String    @id @default(cuid())
+  name                  String
+  nameAr                String?
+  code                  String    @unique
+  genderPref            GenderPref @default(ANY)
+  canBeSecondary        Boolean   @default(false)
+  secondaryHours        Float?
+  secondaryNursesNeeded Int       @default(0)       // How many nurses needed for secondary role
+  isActive              Boolean   @default(true)
+
+  defaultConfigs       ClinicDefaultConfig[]
+  weeklyConfigs        ClinicWeeklyConfig[]
+  blockedNurses        NurseBlockedClinic[]
+  fixedAssignments     FixedAssignment[]
+  primaryAssignments   ScheduleAssignment[] @relation("PrimaryClinic")
+  secondaryAssignments ScheduleAssignment[] @relation("SecondaryClinic")
+}
+
+enum GenderPref {
+  FEMALE_ONLY
+  FEMALE_PREFERRED
+  ANY
+}
+
+// DEFAULT clinic config — the template used every week
+// Manager sets this up once. Algorithm uses it unless overridden.
+model ClinicDefaultConfig {
+  id           String    @id @default(cuid())
+  clinicId     String
+  clinic       Clinic    @relation(fields: [clinicId], references: [id])
+  day          DayOfWeek
+  shiftStart   String                          // "08:00"
+  shiftEnd     String                          // "16:00"
+  nursesNeeded Int       @default(1)
+  isActive     Boolean   @default(true)
+
+  @@unique([clinicId, day])
+}
+
+// WEEKLY clinic config — overrides for specific weeks only
+// Only created when manager needs to change something for one week.
+model ClinicWeeklyConfig {
+  id           String    @id @default(cuid())
+  clinicId     String
+  clinic       Clinic    @relation(fields: [clinicId], references: [id])
+  weekStart    DateTime
+  day          DayOfWeek
+  shiftStart   String
+  shiftEnd     String
+  nursesNeeded Int       @default(1)
+  isActive     Boolean   @default(true)
+
+  @@unique([clinicId, weekStart, day])
+}
+
+enum DayOfWeek {
+  SUN
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+}
+
+// ═══════════════════════════════════════════
+// BLOCKED & FIXED
+// ═══════════════════════════════════════════
+
+model NurseBlockedClinic {
+  id       String       @id @default(cuid())
+  nurseId  String
+  clinicId String
+  nurse    NurseProfile @relation(fields: [nurseId], references: [id])
+  clinic   Clinic       @relation(fields: [clinicId], references: [id])
+
+  @@unique([nurseId, clinicId])
+}
+
+// Fixed = nurse is ALWAYS assigned to this clinic on this day
+// For permanent assignments: weekStart = "1970-01-01T00:00:00Z" (sentinel value)
+// For one-week-only fixed: weekStart = the specific week's Sunday
+model FixedAssignment {
+  id        String       @id @default(cuid())
+  nurseId   String
+  clinicId  String
+  day       DayOfWeek
+  weekStart DateTime     @default("1970-01-01T00:00:00.000Z")  // sentinel = every week
+  nurse     NurseProfile @relation(fields: [nurseId], references: [id])
+  clinic    Clinic       @relation(fields: [clinicId], references: [id])
+
+  @@unique([nurseId, clinicId, day, weekStart])
+}
+
+// ═══════════════════════════════════════════
+// PATIENT PROGRAMS
+// ═══════════════════════════════════════════
+
+model PatientProgram {
+  id               String      @id @default(cuid())
+  name             String
+  nameAr           String?
+  type             ProgramType
+  linkedClinicCode String?
+  defaultHours     Float?
+
+  assignments ProgramAssignment[]
+}
+
+enum ProgramType {
+  PURE_PROGRAM
+  CLINIC_ADDON
+}
+
+model ProgramAssignment {
+  id           String         @id @default(cuid())
+  programId    String
+  program      PatientProgram @relation(fields: [programId], references: [id])
+  nurseId      String
+  weekStart    DateTime
+  day          DayOfWeek
+  patientCount Int?
+  shiftStart   String?
+  shiftEnd     String?
+}
+
+// ═══════════════════════════════════════════
+// SCHEDULES
+// ═══════════════════════════════════════════
+
+model WeeklySchedule {
+  id           String         @id @default(cuid())
+  weekStart    DateTime       @unique
+  status       ScheduleStatus @default(DRAFT)
+  qualityScore Float?
+  publishedAt  DateTime?
+  generatedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  assignments ScheduleAssignment[]
+}
+
+enum ScheduleStatus {
+  DRAFT
+  GENERATED
+  PUBLISHED
+  ARCHIVED
+}
+
+model ScheduleAssignment {
+  id                 String          @id @default(cuid())
+  scheduleId         String
+  schedule           WeeklySchedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  nurseId            String
+  nurse              NurseProfile    @relation(fields: [nurseId], references: [id])
+  day                DayOfWeek
+  primaryClinicId    String?
+  primaryClinic      Clinic?         @relation("PrimaryClinic", fields: [primaryClinicId], references: [id])
+  secondaryClinicId  String?
+  secondaryClinic    Clinic?         @relation("SecondaryClinic", fields: [secondaryClinicId], references: [id])
+  shiftStart         String?
+  shiftEnd           String?
+  hours              Float           @default(0)
+  patientCallProgram String?
+  patientCallCount   Int?
+  isOff              Boolean         @default(false)
+  isFixed            Boolean         @default(false)
+  isManagerSelf      Boolean         @default(false)
+  notes              String?
+  modifiedBy         String?         // userId who last edited (for audit trail)
+  modifiedAt         DateTime?       // when it was last edited
+
+  @@unique([scheduleId, nurseId, day])
+}
+
+// ═══════════════════════════════════════════
+// TIME-OFF REQUESTS
+// ═══════════════════════════════════════════
+
+model TimeOffRequest {
+  id          String        @id @default(cuid())
+  nurseId     String
+  nurse       User          @relation(fields: [nurseId], references: [id])
+  type        RequestType
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  status      RequestStatus @default(PENDING)
+  managerNote String?
+  requestedAt DateTime      @default(now())
+  respondedAt DateTime?
+}
+
+enum RequestType {
+  VACATION
+  SICK
+  PERSONAL
+  OFF_DAY
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ═══════════════════════════════════════════
+// WEEKLY PREFERENCES
+// ═══════════════════════════════════════════
+
+model WeeklyPreference {
+  id               String    @id @default(cuid())
+  nurseId          String
+  nurse            User      @relation(fields: [nurseId], references: [id])
+  weekStart        DateTime
+  shiftPreference  ShiftPref?
+  preferredDaysOff String    @default("[]")   // JSON array: ["TUE","FRI"]
+  preferredDaysOn  String    @default("[]")   // JSON array
+  preferredClinics String    @default("[]")   // JSON array of clinic codes
+  avoidClinics     String    @default("[]")   // JSON array of clinic codes
+  notes            String?
+  submittedAt      DateTime  @default(now())
+
+  @@unique([nurseId, weekStart])
+}
+
+// NOTE: preferredDaysOff, preferredDaysOn, preferredClinics, avoidClinics are
+// stored as JSON strings because SQLite doesn't support arrays.
+// Use the helpers in src/lib/json-arrays.ts to parse/stringify:
+//   parseJsonArray(field) → string[]
+//   toJsonArray(arr) → string
+
+// ═══════════════════════════════════════════
+// TASKS
+// ═══════════════════════════════════════════
+
+model Task {
+  id           String     @id @default(cuid())
+  assignedToId String?
+  assignedTo   User?      @relation("AssignedTo", fields: [assignedToId], references: [id])
+  createdById  String
+  createdBy    User       @relation("CreatedBy", fields: [createdById], references: [id])
+  title        String
+  description  String?
+  dueDate      DateTime?
+  priority     Priority   @default(NORMAL)
+  isForAll     Boolean    @default(false)
+  status       TaskStatus @default(PENDING)
+  completedAt  DateTime?
+  createdAt    DateTime   @default(now())
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  URGENT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+// ═══════════════════════════════════════════
+// ANNOUNCEMENTS
+// ═══════════════════════════════════════════
+
+model Announcement {
+  id             String   @id @default(cuid())
+  authorId       String
+  author         User     @relation("Author", fields: [authorId], references: [id])
+  title          String
+  body           String
+  priority       Priority @default(NORMAL)
+  targetAll      Boolean  @default(true)
+  targetNurseIds String   @default("[]")    // JSON array of user IDs
+  expiresAt      DateTime?
+  createdAt      DateTime @default(now())
+
+  reads AnnouncementRead[]
+}
+
+model AnnouncementRead {
+  id             String       @id @default(cuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  readAt         DateTime     @default(now())
+
+  @@unique([announcementId, userId])
+}
+
+// ═══════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  body      String?
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════
+// LEARNING ENGINE
+// ═══════════════════════════════════════════
+
+model ScheduleCorrection {
+  id                String    @id @default(cuid())
+  scheduleId        String
+  originalNurseId   String
+  originalClinicId  String
+  day               DayOfWeek
+  correctedNurseId  String?
+  correctedClinicId String?
+  correctionType    String    // "swap", "remove", "add", "change_shift"
+  createdAt         DateTime  @default(now())
+}
+```
+
+## SQLite → PostgreSQL Migration Notes
+When switching to PostgreSQL in Phase 10:
+1. Change provider to "postgresql"
+2. Change url to env("DATABASE_URL")
+3. Convert JSON string fields to actual arrays:
+   - `recurringOffDays String` → `recurringOffDays DayOfWeek[]`
+   - `preferredDaysOff String` → `preferredDaysOff DayOfWeek[]`
+   - `preferredDaysOn String` → `preferredDaysOn DayOfWeek[]`
+   - `preferredClinics String` → `preferredClinics String[]`
+   - `avoidClinics String` → `avoidClinics String[]`
+   - `targetNurseIds String` → `targetNurseIds String[]`
+4. Remove json-arrays.ts utility (no longer needed)
+
+## Utility: src/lib/json-arrays.ts
+```typescript
+// Required because SQLite doesn't support array fields
+export function parseJsonArray(field: string | null): string[] {
+  if (!field) return [];
+  try { return JSON.parse(field); }
+  catch { return []; }
+}
+
+export function toJsonArray(arr: string[]): string {
+  return JSON.stringify(arr);
+}
+```
