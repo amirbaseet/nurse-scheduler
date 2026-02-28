@@ -1,5 +1,6 @@
 import type {
   AlgoNurse,
+  ClinicSlot,
   Grid,
   Cell,
   Budgets,
@@ -38,10 +39,7 @@ export function resetNurseCounter(): void {
 }
 
 /** Build an initialized Grid — every cell AVAILABLE, 0 hours. */
-export function makeGrid(
-  nurses: AlgoNurse[],
-  days: DayOfWeek[] = DAYS,
-): Grid {
+export function makeGrid(nurses: AlgoNurse[], days: DayOfWeek[] = DAYS): Grid {
   const grid: Grid = new Map();
   for (const nurse of nurses) {
     const dayMap = new Map<DayOfWeek, Cell>();
@@ -68,16 +66,25 @@ export function makeBudgets(nurses: AlgoNurse[]): Budgets {
 }
 
 /** Shorthand to get a single cell (throws if missing). */
-export function getCell(
-  grid: Grid,
-  nurseId: string,
-  day: DayOfWeek,
-): Cell {
+export function getCell(grid: Grid, nurseId: string, day: DayOfWeek): Cell {
   const dayMap = grid.get(nurseId);
   if (!dayMap) throw new Error(`Nurse ${nurseId} not in grid`);
   const cell = dayMap.get(day);
   if (!cell) throw new Error(`Day ${day} not in grid for ${nurseId}`);
   return cell;
+}
+
+/** Create a ClinicSlot with sensible defaults; override any field. */
+export function makeClinicSlot(overrides?: Partial<ClinicSlot>): ClinicSlot {
+  return {
+    clinicId: "clinic-default",
+    day: "SUN",
+    shiftStart: "08:00",
+    shiftEnd: "15:00",
+    shiftHours: 7,
+    nursesNeeded: 1,
+    ...overrides,
+  };
 }
 
 export { DAYS };
