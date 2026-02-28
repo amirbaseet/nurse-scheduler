@@ -55,6 +55,7 @@ export type ScheduleAssignment = {
   isOff: boolean;
   isFixed: boolean;
   isManagerSelf: boolean;
+  notes?: string | null;
   nurse: {
     id: string;
     user: { id: string; name: string };
