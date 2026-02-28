@@ -10,7 +10,18 @@ export async function GET() {
     await authGuard("MANAGER");
 
     const users = await db.user.findMany({
-      include: { nurseProfile: true },
+      select: {
+        id: true,
+        name: true,
+        nameAr: true,
+        role: true,
+        phone: true,
+        isActive: true,
+        lastLogin: true,
+        createdAt: true,
+        nurseProfile: true,
+        // pinHash and pinPrefix intentionally excluded
+      },
       orderBy: { name: "asc" },
     });
 
@@ -31,13 +42,13 @@ export async function POST(request: Request) {
     if (input.role === "NURSE" && input.pin.length !== 4) {
       return NextResponse.json(
         { error: "PIN של אחות חייב להיות 4 ספרות" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (input.role === "MANAGER" && input.pin.length !== 6) {
       return NextResponse.json(
         { error: "PIN של מנהלת חייב להיות 6 ספרות" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,7 +63,7 @@ export async function POST(request: Request) {
       if (isMatch) {
         return NextResponse.json(
           { error: "קוד PIN כבר בשימוש" },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
@@ -80,7 +91,17 @@ export async function POST(request: Request) {
 
     const fullUser = await db.user.findUnique({
       where: { id: user.id },
-      include: { nurseProfile: true },
+      select: {
+        id: true,
+        name: true,
+        nameAr: true,
+        role: true,
+        phone: true,
+        isActive: true,
+        lastLogin: true,
+        createdAt: true,
+        nurseProfile: true,
+      },
     });
 
     return NextResponse.json(fullUser, { status: 201 });

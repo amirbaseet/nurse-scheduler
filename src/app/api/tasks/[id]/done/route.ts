@@ -4,7 +4,7 @@ import { authGuard, handleApiError } from "@/lib/permissions";
 
 export async function PUT(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const user = await authGuard();
@@ -14,9 +14,14 @@ export async function PUT(
     });
 
     if (!existing) {
+      return NextResponse.json({ error: "משימה לא נמצאה" }, { status: 404 });
+    }
+
+    // Only the assigned nurse or any nurse (if isForAll) can mark done
+    if (!existing.isForAll && existing.assignedToId !== user.id) {
       return NextResponse.json(
-        { error: "משימה לא נמצאה" },
-        { status: 404 }
+        { error: "אין הרשאה לסמן משימה זו" },
+        { status: 403 },
       );
     }
 
