@@ -14,6 +14,7 @@ import type {
   ClinicSlot,
   AssignmentData,
 } from "./types";
+import { calculateQualityScore } from "./scoring";
 
 import { layer1_block } from "./layers/1-block";
 import { layer2_fixed } from "./layers/2-fixed";
@@ -92,8 +93,9 @@ export function generateWeeklySchedule(
 
   // Compute results
   const managerGaps = findUnfilledSlots(grid, config.clinics);
-  const qualityScore = calculateQuality(
+  const qualityScore = calculateQualityScore(
     grid,
+    regularNurses,
     config.clinics,
     config.preferences,
   );
@@ -129,36 +131,13 @@ function findUnfilledSlots(grid: Grid, clinics: ClinicSlot[]): Gap[] {
 }
 
 // ═══════════════════════════════════════════
-// Quality Score (0-100)
-// ═══════════════════════════════════════════
-
-function calculateQuality(
-  grid: Grid,
-  clinics: ClinicSlot[],
-  _preferences: AlgorithmConfig["preferences"],
-): number {
-  let score = 100.0;
-
-  // -10 per unfilled required clinic slot
-  for (const slot of clinics) {
-    const filled = countNursesAt(grid, slot.clinicId, slot.day);
-    if (filled < slot.nursesNeeded) {
-      score -= 10 * (slot.nursesNeeded - filled);
-    }
-  }
-
-  // Layers are stubs, so for now just deduct for unfilled slots
-  return Math.max(0, Math.round(score));
-}
-
-// ═══════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════
 
 function countNursesAt(grid: Grid, clinicId: string, day: DayOfWeek): number {
   let count = 0;
-  for (const [, days] of Array.from(grid)) {
-    const cell = days.get(day);
+  for (const [, dayMap] of Array.from(grid)) {
+    const cell = dayMap.get(day);
     if (
       cell &&
       cell.status === "ASSIGNED" &&
