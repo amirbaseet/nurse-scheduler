@@ -8,7 +8,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["tests/**/*.test.ts"],
-    exclude: ["tests/integration/**"],
+    include: ["tests/integration/**/*.test.ts"],
+    fileParallelism: false,
   },
 });

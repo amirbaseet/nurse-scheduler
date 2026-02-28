@@ -39,6 +39,10 @@ next-env.d.ts
 
 # testing
 coverage/
+prisma/test.db
+prisma/test.db-journal
+playwright-report/
+test-results/
 
 # vercel
 .vercel
