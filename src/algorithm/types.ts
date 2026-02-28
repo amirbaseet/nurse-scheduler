@@ -54,8 +54,8 @@ export interface ClinicSlot {
 // ── Nurse (algorithm-friendly) ──
 
 export interface AlgoNurse {
-  id: string;         // NurseProfile.id
-  userId: string;     // User.id
+  id: string; // NurseProfile.id
+  userId: string; // User.id
   name: string;
   gender: Gender;
   contractHours: number;
@@ -78,6 +78,8 @@ export interface AlgorithmConfig {
   fixedAssignments: FixedEntry[];
   programs: ProgramEntry[];
   preferences: PreferenceEntry[];
+  /** Correction-based probability adjustments (from learning engine). */
+  adjustments?: Map<string, number>;
 }
 
 export interface TimeOffEntry {
@@ -87,7 +89,7 @@ export interface TimeOffEntry {
 }
 
 export interface FixedEntry {
-  nurseId: string;   // NurseProfile.id
+  nurseId: string; // NurseProfile.id
   clinicId: string;
   day: DayOfWeek;
   shiftStart?: string;
@@ -96,7 +98,7 @@ export interface FixedEntry {
 }
 
 export interface ProgramEntry {
-  nurseId: string;   // NurseProfile.id
+  nurseId: string; // NurseProfile.id
   programName: string;
   programType: "PURE_PROGRAM" | "CLINIC_ADDON";
   day: DayOfWeek;

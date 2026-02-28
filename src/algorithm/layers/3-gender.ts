@@ -1,4 +1,5 @@
 import type { Grid, AlgoNurse, ClinicSlot, Budgets, Warning } from "../types";
+import type { AdjustmentMap } from "../../learning/corrections";
 import { calculateScore } from "../scoring";
 import { getCandidates, countFilledForSlot } from "../difficulty-queue";
 
@@ -14,6 +15,7 @@ export function layer3_gender(
   clinics: ClinicSlot[],
   budgets: Budgets,
   warnings: Warning[],
+  adjustments?: AdjustmentMap,
 ): void {
   const genderClinics = clinics
     .filter(
@@ -71,7 +73,7 @@ export function layer3_gender(
       }
 
       // Score candidates and pick the best
-      const best = pickBest(candidates, slot, grid, budgets);
+      const best = pickBest(candidates, slot, grid, budgets, adjustments);
       assignNurse(grid, best, slot, budgets);
     }
   }
@@ -83,12 +85,13 @@ function pickBest(
   slot: ClinicSlot,
   grid: Grid,
   budgets: Budgets,
+  adjustments?: AdjustmentMap,
 ): AlgoNurse {
   let bestNurse = candidates[0];
   let bestScore = -1;
 
   for (const nurse of candidates) {
-    const score = calculateScore(nurse, slot, grid, budgets, []);
+    const score = calculateScore(nurse, slot, grid, budgets, [], adjustments);
     if (score > bestScore) {
       bestScore = score;
       bestNurse = nurse;

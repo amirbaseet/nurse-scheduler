@@ -7,6 +7,8 @@ import type {
   DayOfWeek,
 } from "./types";
 import { getProb } from "../learning/models";
+import type { AdjustmentMap } from "../learning/corrections";
+import { applyAdjustment } from "../learning/corrections";
 
 /**
  * Score a candidate nurse for a clinic slot.
@@ -22,10 +24,16 @@ export function calculateScore(
   grid: Grid,
   budgets: Budgets,
   preferences: PreferenceEntry[],
+  adjustments?: AdjustmentMap,
 ): number {
   const sPref = calcPreferenceScore(nurse, slot, preferences);
   const sBudget = calcBudgetScore(nurse, budgets);
-  const sHist = calcHistoricalScore(nurse.id, slot.clinicId, slot.day);
+  const sHist = calcHistoricalScore(
+    nurse.id,
+    slot.clinicId,
+    slot.day,
+    adjustments,
+  );
   const sFair = calcFairnessScore(nurse, grid);
 
   return sPref + sBudget + sHist + sFair;
@@ -37,8 +45,12 @@ function calcHistoricalScore(
   nurseId: string,
   clinicId: string,
   day: string,
+  adjustments?: AdjustmentMap,
 ): number {
-  const probability = getProb(nurseId, clinicId, day);
+  let probability = getProb(nurseId, clinicId, day);
+  if (adjustments) {
+    probability = applyAdjustment(probability, nurseId, clinicId, adjustments);
+  }
   return Math.round(probability * 150);
 }
 

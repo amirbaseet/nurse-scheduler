@@ -6,7 +6,7 @@ import { determineCorrectionType } from "@/lib/utils";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const user = await authGuard("MANAGER");
@@ -20,10 +20,7 @@ export async function PUT(
     });
 
     if (!schedule) {
-      return NextResponse.json(
-        { error: "לו״ז לא נמצא" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "לו״ז לא נמצא" }, { status: 404 });
     }
 
     // Fetch original assignment
@@ -32,10 +29,7 @@ export async function PUT(
     });
 
     if (!old || old.scheduleId !== params.id) {
-      return NextResponse.json(
-        { error: "שיבוץ לא נמצא" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "שיבוץ לא נמצא" }, { status: 404 });
     }
 
     // Update the assignment
@@ -56,9 +50,13 @@ export async function PUT(
 
     // Save correction for learning engine
     const nurseChanged = input.nurseId && input.nurseId !== old.nurseId;
-    const clinicChanged = input.primaryClinicId && input.primaryClinicId !== old.primaryClinicId;
+    const clinicChanged =
+      input.primaryClinicId && input.primaryClinicId !== old.primaryClinicId;
+    const shiftChanged =
+      (input.shiftStart && input.shiftStart !== old.shiftStart) ||
+      (input.shiftEnd && input.shiftEnd !== old.shiftEnd);
 
-    if (nurseChanged || clinicChanged) {
+    if (nurseChanged || clinicChanged || shiftChanged) {
       await db.scheduleCorrection.create({
         data: {
           scheduleId: old.scheduleId,

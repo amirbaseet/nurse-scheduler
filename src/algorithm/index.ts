@@ -70,7 +70,14 @@ export function generateWeeklySchedule(
     budgets,
     warnings,
   );
-  layer3_gender(grid, regularNurses, config.clinics, budgets, warnings);
+  layer3_gender(
+    grid,
+    regularNurses,
+    config.clinics,
+    budgets,
+    warnings,
+    config.adjustments,
+  );
   layer4_primary(
     grid,
     regularNurses,
@@ -78,6 +85,7 @@ export function generateWeeklySchedule(
     budgets,
     config.preferences,
     warnings,
+    config.adjustments,
   );
   layer5_secondary(grid, regularNurses, config.clinics, budgets);
   layer6_programs(grid, regularNurses, config.programs, budgets, warnings);

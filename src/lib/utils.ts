@@ -55,13 +55,33 @@ export function formatDate(date: Date): string {
 
 /**
  * Determine correction type when a manager edits a schedule assignment.
+ *
+ * Types:
+ *  - "swap"          — different nurse assigned to this slot
+ *  - "change_clinic" — same nurse, different clinic
+ *  - "change_shift"  — same nurse + clinic, shift times changed
  */
 export function determineCorrectionType(
-  old: { nurseId: string; primaryClinicId: string | null },
-  input: { nurseId?: string; primaryClinicId?: string },
+  old: {
+    nurseId: string;
+    primaryClinicId: string | null;
+    shiftStart: string | null;
+    shiftEnd: string | null;
+  },
+  input: {
+    nurseId?: string;
+    primaryClinicId?: string;
+    shiftStart?: string;
+    shiftEnd?: string;
+  },
 ): string {
   if (input.nurseId && input.nurseId !== old.nurseId) return "swap";
   if (input.primaryClinicId && input.primaryClinicId !== old.primaryClinicId)
+    return "change_clinic";
+  if (
+    (input.shiftStart && input.shiftStart !== old.shiftStart) ||
+    (input.shiftEnd && input.shiftEnd !== old.shiftEnd)
+  )
     return "change_shift";
   return "change_shift";
 }

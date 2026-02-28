@@ -6,15 +6,27 @@ import type {
   PreferenceEntry,
   Warning,
 } from "../types";
+import type { AdjustmentMap } from "../../learning/corrections";
+import { applyAdjustment } from "../../learning/corrections";
+import { getProb } from "../../learning/models";
 import { calculateScore } from "../scoring";
-import { buildDifficultyQueue, getCandidates } from "../difficulty-queue";
+import {
+  buildDifficultyQueue,
+  getCandidates,
+  countFilledForSlot,
+} from "../difficulty-queue";
 import { checkLookAhead } from "../look-ahead";
 import { tryBacktrack } from "../backtrack";
 
+/** Confidence threshold: auto-assign without scoring when P > this value. */
+const CONFIDENCE_THRESHOLD = 0.7;
+
 /**
  * Layer 4: Fill all primary clinic slots (core logic).
- * Uses difficulty queue (MCV heuristic), scoring formula (0-1000),
- * look-ahead (max 5 slots), and backtracking on failure.
+ *
+ * Two-pass approach:
+ * 1. **Fast path** — auto-assign high-confidence pairings (P > 0.7)
+ * 2. **Full scoring** — difficulty queue + MCV heuristic + look-ahead + backtrack
  *
  * Processes only genderPref=ANY (or undefined) slots — gender-restricted
  * slots were already handled by Layer 3.
@@ -26,21 +38,24 @@ export function layer4_primary(
   budgets: Budgets,
   preferences: PreferenceEntry[],
   warnings: Warning[],
+  adjustments?: AdjustmentMap,
 ): void {
   // Only process non-gender-restricted slots
   const anyGenderClinics = clinics.filter(
     (c) => !c.genderPref || c.genderPref === "ANY",
   );
 
-  // Build difficulty queue (sorted: hardest slots first)
+  // ── Pass 1: Confidence fast path ──
+  // Auto-assign when historical data shows P > 0.7
+  confidenceFastPath(grid, nurses, anyGenderClinics, budgets, adjustments);
+
+  // ── Pass 2: Full scoring for remaining unfilled slots ──
   const queue = buildDifficultyQueue(grid, nurses, anyGenderClinics, budgets);
 
   for (const slot of queue) {
-    // Re-check: slot may have been filled by an earlier iteration
     const candidates = getCandidates(grid, nurses, slot, budgets);
 
     if (candidates.length === 0) {
-      // Try backtracking before giving up
       const recovered = tryBacktrack(grid, slot, nurses, budgets);
       if (!recovered) {
         warnings.push({
@@ -57,7 +72,7 @@ export function layer4_primary(
     const scored = candidates.map((nurse) => ({
       nurse,
       score:
-        calculateScore(nurse, slot, grid, budgets, preferences) +
+        calculateScore(nurse, slot, grid, budgets, preferences, adjustments) +
         checkLookAhead(grid, nurse, slot, queue, nurses, budgets),
     }));
 
@@ -65,6 +80,48 @@ export function layer4_primary(
     const best = scored[0].nurse;
 
     assignNurse(grid, best, slot, budgets);
+  }
+}
+
+/**
+ * Fast path: for each unfilled slot, find candidates with P > 0.7
+ * and auto-assign the highest-probability one without full scoring.
+ *
+ * Respects: availability, blocked clinics, budget (via getCandidates).
+ */
+function confidenceFastPath(
+  grid: Grid,
+  nurses: AlgoNurse[],
+  clinics: ClinicSlot[],
+  budgets: Budgets,
+  adjustments?: AdjustmentMap,
+): void {
+  for (const slot of clinics) {
+    const filled = countFilledForSlot(grid, slot.clinicId, slot.day);
+    const remaining = slot.nursesNeeded - filled;
+    if (remaining <= 0) continue;
+
+    // Get eligible candidates
+    const candidates = getCandidates(grid, nurses, slot, budgets);
+    if (candidates.length === 0) continue;
+
+    // Score by probability only, filter by threshold
+    const highConf = candidates
+      .map((nurse) => {
+        let prob = getProb(nurse.id, slot.clinicId, slot.day);
+        if (adjustments) {
+          prob = applyAdjustment(prob, nurse.id, slot.clinicId, adjustments);
+        }
+        return { nurse, prob };
+      })
+      .filter((c) => c.prob > CONFIDENCE_THRESHOLD)
+      .sort((a, b) => b.prob - a.prob);
+
+    // Auto-assign up to the remaining seats
+    const toAssign = Math.min(remaining, highConf.length);
+    for (let i = 0; i < toAssign; i++) {
+      assignNurse(grid, highConf[i].nurse, slot, budgets);
+    }
   }
 }
 
