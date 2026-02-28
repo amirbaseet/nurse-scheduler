@@ -220,5 +220,15 @@
   "deactivate_error": "שגיאה בהשבתת משתמש",
   "role_manager": "מנהלת",
   "role_nurse": "אחות",
-  "inactive": "לא פעיל"
+  "inactive": "לא פעיל",
+  "new_request": "בקשה חדשה",
+  "select_type": "סוג בקשה",
+  "start_date": "תאריך התחלה",
+  "end_date": "תאריך סיום",
+  "request_sent": "הבקשה נשלחה",
+  "no_requests": "אין בקשות",
+  "submitted_at": "הוגש ב-",
+  "not_submitted": "טרם הוגש",
+  "select_days_off": "בחר ימי חופש",
+  "preferences_count": "העדפות שהוגשו"
 }

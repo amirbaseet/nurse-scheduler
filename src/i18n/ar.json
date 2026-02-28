@@ -220,5 +220,15 @@
   "deactivate_error": "خطأ في إلغاء التفعيل",
   "role_manager": "مديرة",
   "role_nurse": "ممرضة",
-  "inactive": "غير نشط"
+  "inactive": "غير نشط",
+  "new_request": "طلب جديد",
+  "select_type": "نوع الطلب",
+  "start_date": "تاريخ البداية",
+  "end_date": "تاريخ الانتهاء",
+  "request_sent": "تم إرسال الطلب",
+  "no_requests": "لا توجد طلبات",
+  "submitted_at": "تم التقديم في",
+  "not_submitted": "لم يتم التقديم",
+  "select_days_off": "اختر أيام الإجازة",
+  "preferences_count": "التفضيلات المقدمة"
 }

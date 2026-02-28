@@ -184,7 +184,7 @@ export default function NurseDashboard() {
         .then((r) => (r.ok ? r.json() : []))
         .then((all: Announcement[]) => setAnnouncements(all.slice(0, 3))),
       // Tasks (count pending)
-      fetch("/api/tasks")
+      fetch("/api/tasks/my")
         .then((r) => (r.ok ? r.json() : []))
         .then((tasks: Task[]) =>
           setPendingTaskCount(
@@ -220,9 +220,7 @@ export default function NurseDashboard() {
   const todayKey = getTodayDayKey();
   const tomorrowKey = getTomorrowDayKey();
 
-  const todayAssignment = schedule?.assignments.find(
-    (a) => a.day === todayKey,
-  );
+  const todayAssignment = schedule?.assignments.find((a) => a.day === todayKey);
   const tomorrowAssignment = schedule?.assignments.find(
     (a) => a.day === tomorrowKey,
   );
@@ -230,9 +228,7 @@ export default function NurseDashboard() {
   return (
     <div className="flex flex-col gap-4">
       {/* Greeting */}
-      <h1 className="text-lg font-bold">
-        {t("hello")} 👋
-      </h1>
+      <h1 className="text-lg font-bold">{t("hello")} 👋</h1>
 
       {/* STATE B: No published schedule */}
       {!isPublished && (
