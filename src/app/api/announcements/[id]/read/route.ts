@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 
-export async function PUT(
+export async function POST(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const user = await authGuard();
 
+    // Upsert to handle duplicate reads gracefully
     await db.announcementRead.upsert({
       where: {
         announcementId_userId: {
@@ -20,9 +21,7 @@ export async function PUT(
         announcementId: params.id,
         userId: user.id,
       },
-      update: {
-        readAt: new Date(),
-      },
+      update: {},
     });
 
     return NextResponse.json({ success: true });
