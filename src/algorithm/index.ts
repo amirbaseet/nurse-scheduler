@@ -60,7 +60,7 @@ export function generateWeeklySchedule(
   }
 
   // Execute 9 layers
-  layer1_block(grid, regularNurses, config.timeOff, DAYS, warnings);
+  layer1_block(grid, regularNurses, config.timeOff, DAYS, _weekStart, warnings);
   layer2_fixed(
     grid,
     regularNurses,
