@@ -1,0 +1,367 @@
+[
+  {
+    "primary": "diabetes",
+    "secondary": "ent",
+    "count": 79
+  },
+  {
+    "primary": "orthopedics",
+    "secondary": "ophthalmology",
+    "count": 70
+  },
+  {
+    "primary": "surgery",
+    "secondary": "ent",
+    "count": 57
+  },
+  {
+    "primary": "breast",
+    "secondary": "mantoux",
+    "count": 54
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "ecg",
+    "count": 35
+  },
+  {
+    "primary": "breast",
+    "secondary": "ecg",
+    "count": 30
+  },
+  {
+    "primary": "surgery",
+    "secondary": "orthopedics",
+    "count": 24
+  },
+  {
+    "primary": "breast",
+    "secondary": "ent",
+    "count": 19
+  },
+  {
+    "primary": "orthopedics",
+    "secondary": "ent",
+    "count": 17
+  },
+  {
+    "primary": "diabetes",
+    "secondary": "vaccination",
+    "count": 17
+  },
+  {
+    "primary": "xolair",
+    "secondary": "orthopedics",
+    "count": 16
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "mantoux",
+    "count": 13
+  },
+  {
+    "primary": "pediatric_ophthalmology",
+    "secondary": "surgery",
+    "count": 11
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "ecg",
+    "count": 11
+  },
+  {
+    "primary": "hand_clinic",
+    "secondary": "surgery",
+    "count": 10
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "vaccination",
+    "count": 10
+  },
+  {
+    "primary": "plastic_surgery",
+    "secondary": "orthopedics",
+    "count": 8
+  },
+  {
+    "primary": "plastic_surgery",
+    "secondary": "surgery",
+    "count": 8
+  },
+  {
+    "primary": "surgery",
+    "secondary": "avastin",
+    "count": 7
+  },
+  {
+    "primary": "xolair",
+    "secondary": "avastin",
+    "count": 7
+  },
+  {
+    "primary": "ophthalmology",
+    "secondary": "ent",
+    "count": 7
+  },
+  {
+    "primary": "professional",
+    "secondary": "orthopedics",
+    "count": 6
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "breast",
+    "count": 6
+  },
+  {
+    "primary": "pediatric_ophthalmology",
+    "secondary": "urinary_catheter",
+    "count": 6
+  },
+  {
+    "primary": "breast",
+    "secondary": "plastic_surgery",
+    "count": 5
+  },
+  {
+    "primary": "diabetes",
+    "secondary": "avastin",
+    "count": 5
+  },
+  {
+    "primary": "sugar_load",
+    "secondary": "vaccination",
+    "count": 5
+  },
+  {
+    "primary": "sugar_load",
+    "secondary": "ecg",
+    "count": 4
+  },
+  {
+    "primary": "sugar_load",
+    "secondary": "ent",
+    "count": 4
+  },
+  {
+    "primary": "professional",
+    "secondary": "avastin",
+    "count": 4
+  },
+  {
+    "primary": "plastic_surgery",
+    "secondary": "urinary_catheter",
+    "count": 4
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "orthopedics",
+    "count": 3
+  },
+  {
+    "primary": "avastin",
+    "secondary": "professional",
+    "count": 3
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "plastic_surgery",
+    "count": 3
+  },
+  {
+    "primary": "orthopedics",
+    "secondary": "surgery",
+    "count": 3
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "surgery",
+    "count": 3
+  },
+  {
+    "primary": "type1_diabetes",
+    "secondary": "diabetes",
+    "count": 3
+  },
+  {
+    "primary": "xolair",
+    "secondary": "vaccination",
+    "count": 3
+  },
+  {
+    "primary": "professional",
+    "secondary": "ent",
+    "count": 2
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "ent",
+    "count": 2
+  },
+  {
+    "primary": "xolair",
+    "secondary": "ent",
+    "count": 2
+  },
+  {
+    "primary": "diabetes",
+    "secondary": "ecg",
+    "count": 2
+  },
+  {
+    "primary": "ecg",
+    "secondary": "surgery",
+    "count": 2
+  },
+  {
+    "primary": "plastic_surgery",
+    "secondary": "professional",
+    "count": 2
+  },
+  {
+    "primary": "surgery",
+    "secondary": "vaccination",
+    "count": 2
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "vaccination",
+    "count": 2
+  },
+  {
+    "primary": "pediatric_ophthalmology",
+    "secondary": "professional",
+    "count": 2
+  },
+  {
+    "primary": "hand_clinic",
+    "secondary": "diabetes",
+    "count": 2
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "pediatric_ophthalmology",
+    "count": 1
+  },
+  {
+    "primary": "diabetes",
+    "secondary": "breast",
+    "count": 1
+  },
+  {
+    "primary": "professional",
+    "secondary": "surgery",
+    "count": 1
+  },
+  {
+    "primary": "professional",
+    "secondary": "diabetes",
+    "count": 1
+  },
+  {
+    "primary": "surgery",
+    "secondary": "ecg",
+    "count": 1
+  },
+  {
+    "primary": "hand_clinic",
+    "secondary": "ecg",
+    "count": 1
+  },
+  {
+    "primary": "pediatric_ophthalmology",
+    "secondary": "orthopedics",
+    "count": 1
+  },
+  {
+    "primary": "plastic_surgery",
+    "secondary": "mantoux",
+    "count": 1
+  },
+  {
+    "primary": "ophthalmology",
+    "secondary": "orthopedics",
+    "count": 1
+  },
+  {
+    "primary": "breast",
+    "secondary": "surgery",
+    "count": 1
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "orthopedics",
+    "count": 1
+  },
+  {
+    "primary": "orthopedics",
+    "secondary": "mantoux",
+    "count": 1
+  },
+  {
+    "primary": "vaccination",
+    "secondary": "diabetes",
+    "count": 1
+  },
+  {
+    "primary": "avastin",
+    "secondary": "xolair",
+    "count": 1
+  },
+  {
+    "primary": "hand_clinic",
+    "secondary": "orthopedics",
+    "count": 1
+  },
+  {
+    "primary": "pediatric_ophthalmology",
+    "secondary": "avastin",
+    "count": 1
+  },
+  {
+    "primary": "ophthalmology",
+    "secondary": "surgery",
+    "count": 1
+  },
+  {
+    "primary": "surgery",
+    "secondary": "urinary_catheter",
+    "count": 1
+  },
+  {
+    "primary": "professional",
+    "secondary": "vaccination",
+    "count": 1
+  },
+  {
+    "primary": "type1_diabetes",
+    "secondary": "vaccination",
+    "count": 1
+  },
+  {
+    "primary": "mantoux",
+    "secondary": "ent",
+    "count": 1
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "ent",
+    "count": 1
+  },
+  {
+    "primary": "orthopedics",
+    "secondary": "professional",
+    "count": 1
+  },
+  {
+    "primary": "breast",
+    "secondary": "orthopedics",
+    "count": 1
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "breast",
+    "count": 1
+  }
+]

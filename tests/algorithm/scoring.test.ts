@@ -27,10 +27,25 @@ describe("Scoring — calculateScore", () => {
     const grid = makeGrid([morningNurse, afternoonNurse]);
     const budgets = makeBudgets([morningNurse, afternoonNurse]);
 
-    const morningSlot = makeClinicSlot({ shiftStart: "08:00", shiftEnd: "15:00" });
+    const morningSlot = makeClinicSlot({
+      shiftStart: "08:00",
+      shiftEnd: "15:00",
+    });
 
-    const scoreMorning = calculateScore(morningNurse, morningSlot, grid, budgets, []);
-    const scoreAfternoon = calculateScore(afternoonNurse, morningSlot, grid, budgets, []);
+    const scoreMorning = calculateScore(
+      morningNurse,
+      morningSlot,
+      grid,
+      budgets,
+      [],
+    );
+    const scoreAfternoon = calculateScore(
+      afternoonNurse,
+      morningSlot,
+      grid,
+      budgets,
+      [],
+    );
 
     // Morning nurse gets 350 (match) vs afternoon nurse gets 50 (mismatch)
     expect(scoreMorning).toBeGreaterThan(scoreAfternoon);
@@ -59,9 +74,21 @@ describe("Scoring — calculateScore", () => {
 
     const morningSlot = makeClinicSlot({ shiftStart: "08:00" });
 
-    const sAnytime = calculateScore(anytimeNurse, morningSlot, grid, budgets, []);
+    const sAnytime = calculateScore(
+      anytimeNurse,
+      morningSlot,
+      grid,
+      budgets,
+      [],
+    );
     const sMatch = calculateScore(matchNurse, morningSlot, grid, budgets, []);
-    const sMismatch = calculateScore(mismatchNurse, morningSlot, grid, budgets, []);
+    const sMismatch = calculateScore(
+      mismatchNurse,
+      morningSlot,
+      grid,
+      budgets,
+      [],
+    );
 
     expect(sMatch).toBeGreaterThan(sAnytime);
     expect(sAnytime).toBeGreaterThan(sMismatch);
@@ -104,7 +131,11 @@ describe("Scoring — calculateScore", () => {
   });
 
   it("penalty applied when working on preferred day off", () => {
-    const nurse = makeNurse({ id: "n1", userId: "u1", shiftPreference: "MORNING" });
+    const nurse = makeNurse({
+      id: "n1",
+      userId: "u1",
+      shiftPreference: "MORNING",
+    });
     const grid = makeGrid([nurse]);
     const budgets = makeBudgets([nurse]);
 
@@ -135,8 +166,8 @@ describe("Scoring — calculateScore", () => {
 
     const score = calculateScore(nurse, slot, grid, budgets, []);
 
-    // S_pref=350 (perfect match) + S_budget=250 (full budget) + S_hist=75 + S_fair=150 (0 assigned days)
-    expect(score).toBe(350 + 250 + 75 + 150);
+    // S_pref=350 (perfect match) + S_budget=250 (full budget) + S_hist=0 (no historical data for test IDs) + S_fair=150 (0 assigned days)
+    expect(score).toBe(350 + 250 + 0 + 150);
   });
 });
 

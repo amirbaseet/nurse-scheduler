@@ -6,12 +6,13 @@ import type {
   PreferenceEntry,
   DayOfWeek,
 } from "./types";
+import { getProb } from "../learning/models";
 
 /**
  * Score a candidate nurse for a clinic slot.
  * Returns 0-900 via RAW ADDITION (no multiplied weights).
  *
- * S_pref (0-350) + S_budget (0-250) + S_hist (75) + S_fair (0-150)
+ * S_pref (0-350) + S_budget (0-250) + S_hist (0-150) + S_fair (0-150)
  *
  * The caller may add S_lookahead (±100) separately for a total range of 0-1000.
  */
@@ -24,10 +25,21 @@ export function calculateScore(
 ): number {
   const sPref = calcPreferenceScore(nurse, slot, preferences);
   const sBudget = calcBudgetScore(nurse, budgets);
-  const sHist = 75; // placeholder until Phase 9 learning engine
+  const sHist = calcHistoricalScore(nurse.id, slot.clinicId, slot.day);
   const sFair = calcFairnessScore(nurse, grid);
 
   return sPref + sBudget + sHist + sFair;
+}
+
+// ── S_historical (0-150) ──
+
+function calcHistoricalScore(
+  nurseId: string,
+  clinicId: string,
+  day: string,
+): number {
+  const probability = getProb(nurseId, clinicId, day);
+  return Math.round(probability * 150);
 }
 
 // ── S_preference (0-350) ──
