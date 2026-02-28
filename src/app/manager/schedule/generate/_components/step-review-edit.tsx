@@ -29,16 +29,7 @@ import type {
   ScheduleAssignment,
   ScheduleWarning,
 } from "@/types/schedule";
-
-const DAY_LABELS: Record<string, string> = {
-  SUN: "א׳",
-  MON: "ב׳",
-  TUE: "ג׳",
-  WED: "ד׳",
-  THU: "ה׳",
-  FRI: "ו׳",
-  SAT: "ש׳",
-};
+import { useTranslation } from "@/i18n/use-translation";
 
 function getQualityColor(score: number) {
   if (score >= 70) return "text-emerald-700 bg-emerald-50 border-emerald-200";
@@ -88,6 +79,17 @@ export function StepReviewEdit({
   onBack: () => void;
   onPublish: () => void;
 }) {
+  const { t } = useTranslation();
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun_short"),
+    MON: t("mon_short"),
+    TUE: t("tue_short"),
+    WED: t("wed_short"),
+    THU: t("thu_short"),
+    FRI: t("fri_short"),
+    SAT: t("sat_short"),
+  };
+
   const [schedule, setSchedule] = useState<ScheduleWithAssignments | null>(
     null,
   );
@@ -104,7 +106,9 @@ export function StepReviewEdit({
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="me-2 text-muted-foreground">טוען לו״ז...</span>
+        <span className="me-2 text-muted-foreground">
+          {t("loading_schedule")}
+        </span>
       </div>
     );
   }
@@ -124,14 +128,14 @@ export function StepReviewEdit({
       <div className="flex-1 min-w-0">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">לו״ז שבועי</CardTitle>
+            <CardTitle className="text-base">{t("weekly_schedule")}</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="sticky start-0 bg-background z-10 min-w-[120px]">
-                    אחות
+                    {t("role_nurse")}
                   </TableHead>
                   {DAY_ORDER.map((day) => (
                     <TableHead key={day} className="text-center min-w-[80px]">
@@ -162,7 +166,7 @@ export function StepReviewEdit({
                       colSpan={8}
                       className="text-center text-muted-foreground"
                     >
-                      אין נתוני לו״ז
+                      {t("no_schedule_data")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -177,7 +181,9 @@ export function StepReviewEdit({
         {/* Quality Score */}
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-sm text-muted-foreground mb-1">ציון איכות</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              {t("quality_score")}
+            </p>
             <div
               className={cn(
                 "inline-flex items-center justify-center rounded-lg border px-4 py-2 text-3xl font-bold",
@@ -194,7 +200,7 @@ export function StepReviewEdit({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">
-                אזהרות ({sortedWarnings.length})
+                {t("warnings")} ({sortedWarnings.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -210,7 +216,7 @@ export function StepReviewEdit({
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">
-                משבצות לא מאוישות ({managerGaps.length})
+                {t("unfilled_gaps_label")} ({managerGaps.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -222,7 +228,7 @@ export function StepReviewEdit({
                     <span className="text-muted-foreground">
                       {" "}
                       — {DAY_LABELS[gap.day] ?? gap.day} — {gap.shiftStart}–
-                      {gap.shiftEnd} ({gap.hours} שע׳)
+                      {gap.shiftEnd} ({gap.hours} {t("hours_short")})
                     </span>
                   </div>
                 </div>
@@ -237,7 +243,7 @@ export function StepReviewEdit({
         <div className="flex flex-col gap-2">
           <Button variant="outline" onClick={onBack} className="w-full">
             <RefreshCw className="h-4 w-4 me-2" />
-            יצירה מחדש
+            {t("regenerate")}
           </Button>
           <Button
             onClick={onPublish}
@@ -247,12 +253,12 @@ export function StepReviewEdit({
             {isPublishing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin me-2" />
-                מפרסם...
+                {t("publishing")}
               </>
             ) : (
               <>
                 <Send className="h-4 w-4 me-2" />
-                פרסום לו״ז
+                {t("publish_schedule")}
               </>
             )}
           </Button>
@@ -262,7 +268,13 @@ export function StepReviewEdit({
   );
 }
 
-function ScheduleCell({ assignment }: { assignment: ScheduleAssignment | null }) {
+function ScheduleCell({
+  assignment,
+}: {
+  assignment: ScheduleAssignment | null;
+}) {
+  const { t } = useTranslation();
+
   if (!assignment) {
     return <span className="text-muted-foreground">—</span>;
   }
@@ -270,7 +282,7 @@ function ScheduleCell({ assignment }: { assignment: ScheduleAssignment | null })
   if (assignment.isOff) {
     return (
       <div className="rounded bg-gray-100 px-1 py-0.5 text-xs text-muted-foreground">
-        חופש
+        {t("off_day")}
       </div>
     );
   }
@@ -292,9 +304,7 @@ function ScheduleCell({ assignment }: { assignment: ScheduleAssignment | null })
       <div className="font-medium truncate" title={clinicName}>
         {clinicName}
       </div>
-      {time && (
-        <div className="text-[10px] text-muted-foreground">{time}</div>
-      )}
+      {time && <div className="text-[10px] text-muted-foreground">{time}</div>}
     </div>
   );
 }

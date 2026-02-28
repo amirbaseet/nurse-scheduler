@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { ScheduleAssignment } from "@/types/schedule";
+import { useTranslation } from "@/i18n/use-translation";
 
 type NurseOption = {
   id: string;
@@ -47,6 +48,8 @@ export function EditAssignmentDialog({
   onClose: () => void;
   onSaved: (updated: ScheduleAssignment) => void;
 }) {
+  const { t } = useTranslation();
+
   const [nurseId, setNurseId] = useState("");
   const [primaryClinicId, setPrimaryClinicId] = useState("");
   const [secondaryClinicId, setSecondaryClinicId] = useState("");
@@ -104,7 +107,7 @@ export function EditAssignmentDialog({
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error ?? "שגיאה בעדכון שיבוץ");
+        throw new Error(data?.error ?? t("assignment_update_error"));
       }
 
       const updated = await res.json();
@@ -120,7 +123,7 @@ export function EditAssignmentDialog({
         secondaryClinic: updated.secondaryClinic ?? assignment.secondaryClinic,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בעדכון שיבוץ");
+      setError(err instanceof Error ? err.message : t("assignment_update_error"));
     } finally {
       setSaving(false);
     }
@@ -130,7 +133,7 @@ export function EditAssignmentDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>עריכת שיבוץ</DialogTitle>
+          <DialogTitle>{t("edit_assignment")}</DialogTitle>
           <DialogDescription>
             {assignment?.nurse.user.name} — {assignment?.day}
           </DialogDescription>
@@ -140,14 +143,14 @@ export function EditAssignmentDialog({
         {isFixed && (
           <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
             <Lock className="h-4 w-4 shrink-0" />
-            <span>שיבוץ קבוע — לא ניתן לשנות</span>
+            <span>{t("fixed_locked")}</span>
           </div>
         )}
 
         <div className="grid gap-4 py-2">
           {/* Nurse */}
           <div className="grid gap-1.5">
-            <Label>אחות</Label>
+            <Label>{t("role_nurse")}</Label>
             <Select
               value={nurseId}
               onValueChange={setNurseId}
@@ -168,7 +171,7 @@ export function EditAssignmentDialog({
 
           {/* Primary Clinic */}
           <div className="grid gap-1.5">
-            <Label>מרפאה ראשית</Label>
+            <Label>{t("primary_clinic")}</Label>
             <Select
               value={primaryClinicId}
               onValueChange={setPrimaryClinicId}
@@ -189,7 +192,7 @@ export function EditAssignmentDialog({
 
           {/* Secondary Clinic */}
           <div className="grid gap-1.5">
-            <Label>מרפאה משנית</Label>
+            <Label>{t("secondary_clinic")}</Label>
             <Select
               value={secondaryClinicId || "__none__"}
               onValueChange={(v) =>
@@ -201,7 +204,7 @@ export function EditAssignmentDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">ללא</SelectItem>
+                <SelectItem value="__none__">{t("none_option")}</SelectItem>
                 {clinics.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
@@ -214,7 +217,7 @@ export function EditAssignmentDialog({
           {/* Shift times */}
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
-              <Label>תחילת משמרת</Label>
+              <Label>{t("shift_start")}</Label>
               <Input
                 type="time"
                 value={shiftStart}
@@ -223,7 +226,7 @@ export function EditAssignmentDialog({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label>סוף משמרת</Label>
+              <Label>{t("shift_end")}</Label>
               <Input
                 type="time"
                 value={shiftEnd}
@@ -235,11 +238,11 @@ export function EditAssignmentDialog({
 
           {/* Notes */}
           <div className="grid gap-1.5">
-            <Label>הערות</Label>
+            <Label>{t("notes")}</Label>
             <Input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="הערה לשיבוץ..."
+              placeholder={t("assignment_note")}
             />
           </div>
         </div>
@@ -253,16 +256,16 @@ export function EditAssignmentDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            ביטול
+            {t("cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin me-2" />
-                שומר...
+                {t("saving")}
               </>
             ) : (
-              "שמירה"
+              t("save")
             )}
           </Button>
         </DialogFooter>

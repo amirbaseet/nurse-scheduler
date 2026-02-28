@@ -11,7 +11,7 @@ export default async function NurseLayout({
   const token = cookies().get("token")?.value;
   if (!token) redirect("/");
 
-  let userName = "אחות";
+  let userName = "Nurse";
   try {
     const payload = await verifyJwt(token);
     if (payload.role !== "NURSE") redirect("/");

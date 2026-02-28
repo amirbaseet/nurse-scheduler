@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { WeekNavigator } from "@/components/week-navigator";
 import { formatDate } from "@/lib/utils";
 import type { ScheduleWithAssignments } from "@/types/schedule";
+import { useTranslation } from "@/i18n/use-translation";
 
 type SummaryData = {
   activeNurses: number;
@@ -27,6 +28,7 @@ export function StepSelectWeek({
   onActiveNurseCount: (n: number) => void;
   onNext: () => void;
 }) {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState<SummaryData>({
     activeNurses: 0,
     approvedTimeOffs: 0,
@@ -39,12 +41,14 @@ export function StepSelectWeek({
     setLoading(true);
     try {
       const weekStr = formatDate(weekStart);
-      const [nursesRes, timeOffsRes, prefsRes, scheduleRes] = await Promise.all([
-        fetch("/api/nurses"),
-        fetch("/api/requests/pending"),
-        fetch(`/api/preferences/week/${weekStr}`),
-        fetch(`/api/schedule/week/${weekStr}`),
-      ]);
+      const [nursesRes, timeOffsRes, prefsRes, scheduleRes] = await Promise.all(
+        [
+          fetch("/api/nurses"),
+          fetch("/api/requests/pending"),
+          fetch(`/api/preferences/week/${weekStr}`),
+          fetch(`/api/schedule/week/${weekStr}`),
+        ],
+      );
 
       const nurses = nursesRes.ok ? await nursesRes.json() : [];
       const timeOffs = timeOffsRes.ok ? await timeOffsRes.json() : [];
@@ -86,9 +90,12 @@ export function StepSelectWeek({
       {/* Existing schedule warning */}
       {hasExistingSchedule && (
         <div className="flex justify-center">
-          <Badge variant="outline" className="gap-1 border-amber-300 bg-amber-50 text-amber-800">
+          <Badge
+            variant="outline"
+            className="gap-1 border-amber-300 bg-amber-50 text-amber-800"
+          >
             <AlertTriangle className="h-3.5 w-3.5" />
-            לו״ז קיים — יוחלף
+            {t("schedule_exists_warning")}
           </Badge>
         </div>
       )}
@@ -97,17 +104,17 @@ export function StepSelectWeek({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <SummaryCard
           icon={<Users className="h-5 w-5 text-blue-600" />}
-          label="אחיות פעילות"
+          label={t("active_nurses")}
           value={loading ? "..." : String(summary.activeNurses)}
         />
         <SummaryCard
           icon={<CalendarOff className="h-5 w-5 text-orange-600" />}
-          label="חופשות מאושרות"
+          label={t("approved_time_offs")}
           value={loading ? "..." : String(summary.approvedTimeOffs)}
         />
         <SummaryCard
           icon={<ClipboardList className="h-5 w-5 text-green-600" />}
-          label="העדפות שהוגשו"
+          label={t("preferences_submitted")}
           value={
             loading
               ? "..."
@@ -119,7 +126,7 @@ export function StepSelectWeek({
       {/* Next button */}
       <div className="flex justify-start">
         <Button onClick={onNext} disabled={loading}>
-          הבא ←
+          {t("next")} ←
         </Button>
       </div>
     </div>

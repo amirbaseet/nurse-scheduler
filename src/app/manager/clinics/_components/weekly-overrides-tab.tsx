@@ -32,28 +32,34 @@ import {
 } from "@/components/ui/table";
 import { WeekNavigator } from "@/components/week-navigator";
 import { getWeekStart, formatDate, DAY_ORDER } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 import type { MergedConfig } from "@/types/clinic";
 import type { ClinicWithDefaults } from "@/types/clinic";
-
-const DAY_LABELS: Record<string, string> = {
-  SUN: "ראשון",
-  MON: "שני",
-  TUE: "שלישי",
-  WED: "רביעי",
-  THU: "חמישי",
-  FRI: "שישי",
-  SAT: "שבת",
-};
 
 export function WeeklyOverridesTab({
   clinics,
 }: {
   clinics: ClinicWithDefaults[];
 }) {
+  const { t } = useTranslation();
+
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun"),
+    MON: t("mon"),
+    TUE: t("tue"),
+    WED: t("wed"),
+    THU: t("thu"),
+    FRI: t("fri"),
+    SAT: t("sat"),
+  };
+
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart());
   const [configs, setConfigs] = useState<MergedConfig[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
   // Add override dialog
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -98,10 +104,10 @@ export function WeeklyOverridesTab({
         }),
       });
       if (!res.ok) throw new Error();
-      setMessage({ text: "הועתק בהצלחה", type: "success" });
+      setMessage({ text: t("copy_success"), type: "success" });
       fetchConfigs();
     } catch {
-      setMessage({ text: "שגיאה בהעתקה", type: "error" });
+      setMessage({ text: t("copy_error"), type: "error" });
     } finally {
       setTimeout(() => setMessage(null), 3000);
     }
@@ -136,10 +142,10 @@ export function WeeklyOverridesTab({
         nursesNeeded: 1,
         isActive: true,
       });
-      setMessage({ text: "נשמר בהצלחה", type: "success" });
+      setMessage({ text: t("save_success"), type: "success" });
       fetchConfigs();
     } catch {
-      setMessage({ text: "שגיאה בשמירה", type: "error" });
+      setMessage({ text: t("save_error"), type: "error" });
     } finally {
       setTimeout(() => setMessage(null), 3000);
     }
@@ -152,11 +158,11 @@ export function WeeklyOverridesTab({
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={copyPreviousWeek}>
             <Copy className="me-1 h-4 w-4" />
-            העתקה משבוע קודם
+            {t("copy_previous_week")}
           </Button>
           <Button size="sm" onClick={() => setDialogOpen(true)}>
             <Plus className="me-1 h-4 w-4" />
-            הוספת שינוי
+            {t("add_override")}
           </Button>
         </div>
       </div>
@@ -177,7 +183,7 @@ export function WeeklyOverridesTab({
         <p className="text-sm text-muted-foreground">טוען...</p>
       ) : overrides.length === 0 ? (
         <div className="rounded-md border border-dashed p-8 text-center text-muted-foreground">
-          אין שינויים לשבוע זה
+          {t("no_overrides")}
         </div>
       ) : (
         <Table>
@@ -185,10 +191,10 @@ export function WeeklyOverridesTab({
             <TableRow>
               <TableHead>מרפאה</TableHead>
               <TableHead>יום</TableHead>
-              <TableHead>התחלה</TableHead>
-              <TableHead>סיום</TableHead>
-              <TableHead>אחיות</TableHead>
-              <TableHead>פעיל</TableHead>
+              <TableHead>{t("shift_start")}</TableHead>
+              <TableHead>{t("shift_end")}</TableHead>
+              <TableHead>{t("nurses")}</TableHead>
+              <TableHead>{t("active")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -210,7 +216,7 @@ export function WeeklyOverridesTab({
                         : "bg-red-100 text-red-800 border-red-300"
                     }
                   >
-                    {config.isActive ? "פעיל" : "מושבת"}
+                    {config.isActive ? t("active") : t("disabled_status")}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -223,7 +229,7 @@ export function WeeklyOverridesTab({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>הוספת שינוי שבועי</DialogTitle>
+            <DialogTitle>{t("add_override")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-2">
@@ -235,7 +241,7 @@ export function WeeklyOverridesTab({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="בחירת מרפאה" />
+                  <SelectValue placeholder={t("select_clinic")} />
                 </SelectTrigger>
                 <SelectContent>
                   {clinics.map((c) => (
@@ -270,23 +276,29 @@ export function WeeklyOverridesTab({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>התחלה</Label>
+                <Label>{t("shift_start")}</Label>
                 <Input
                   type="time"
                   value={newOverride.shiftStart}
                   onChange={(e) =>
-                    setNewOverride((prev) => ({ ...prev, shiftStart: e.target.value }))
+                    setNewOverride((prev) => ({
+                      ...prev,
+                      shiftStart: e.target.value,
+                    }))
                   }
                   dir="ltr"
                 />
               </div>
               <div className="grid gap-2">
-                <Label>סיום</Label>
+                <Label>{t("shift_end")}</Label>
                 <Input
                   type="time"
                   value={newOverride.shiftEnd}
                   onChange={(e) =>
-                    setNewOverride((prev) => ({ ...prev, shiftEnd: e.target.value }))
+                    setNewOverride((prev) => ({
+                      ...prev,
+                      shiftEnd: e.target.value,
+                    }))
                   }
                   dir="ltr"
                 />
@@ -294,7 +306,7 @@ export function WeeklyOverridesTab({
             </div>
 
             <div className="grid gap-2">
-              <Label>מספר אחיות</Label>
+              <Label>{t("nurses_needed")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -315,18 +327,21 @@ export function WeeklyOverridesTab({
                 id="overrideActive"
                 checked={newOverride.isActive}
                 onCheckedChange={(checked) =>
-                  setNewOverride((prev) => ({ ...prev, isActive: checked === true }))
+                  setNewOverride((prev) => ({
+                    ...prev,
+                    isActive: checked === true,
+                  }))
                 }
               />
-              <Label htmlFor="overrideActive">פעיל</Label>
+              <Label htmlFor="overrideActive">{t("active")}</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              ביטול
+              {t("cancel")}
             </Button>
             <Button onClick={addOverride} disabled={!newOverride.clinicId}>
-              שמירה
+              {t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>

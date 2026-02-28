@@ -11,31 +11,33 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/i18n/use-translation";
 import type { SerializedNurse } from "@/types/nurse";
 import { parseJsonArray } from "@/lib/json-arrays";
-
-const SHIFT_LABELS: Record<string, string> = {
-  MORNING: "בוקר",
-  AFTERNOON: "אחה״צ",
-  ANYTIME: "גמיש",
-};
 
 const PERMANENT_SENTINEL = "1970-01-01T00:00:00.000Z";
 
 export function NursesTable({ nurses }: { nurses: SerializedNurse[] }) {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const SHIFT_LABELS: Record<string, string> = {
+    MORNING: t("morning"),
+    AFTERNOON: t("afternoon"),
+    ANYTIME: t("anytime"),
+  };
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>שם</TableHead>
-          <TableHead>שעות חוזה</TableHead>
-          <TableHead>העדפת משמרת</TableHead>
-          <TableHead>שישי</TableHead>
-          <TableHead>שבת</TableHead>
-          <TableHead>מקס׳ ימים</TableHead>
-          <TableHead>שיבוצים קבועים</TableHead>
+          <TableHead>{t("name")}</TableHead>
+          <TableHead>{t("contract_hours")}</TableHead>
+          <TableHead>{t("shift_preference")}</TableHead>
+          <TableHead>{t("fri")}</TableHead>
+          <TableHead>{t("sat")}</TableHead>
+          <TableHead>{t("max_days_short")}</TableHead>
+          <TableHead>{t("fixed_assignments")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -50,9 +52,7 @@ export function NursesTable({ nurses }: { nurses: SerializedNurse[] }) {
               className="cursor-pointer"
               onClick={() => router.push(`/manager/nurses/${nurse.id}`)}
             >
-              <TableCell className="font-medium">
-                {nurse.user.name}
-              </TableCell>
+              <TableCell className="font-medium">{nurse.user.name}</TableCell>
               <TableCell>{nurse.contractHours}</TableCell>
               <TableCell>
                 <Badge variant="outline">

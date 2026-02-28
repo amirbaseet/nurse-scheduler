@@ -1,13 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  Loader2,
-  Plus,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-} from "lucide-react";
+import { Loader2, Plus, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +24,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 
 type Task = {
   id: string;
@@ -53,12 +48,6 @@ const PRIORITY_STYLES: Record<string, string> = {
   URGENT: "bg-red-100 text-red-700",
 };
 
-const PRIORITY_LABELS: Record<string, string> = {
-  LOW: "נמוכה",
-  NORMAL: "רגילה",
-  URGENT: "דחופה",
-};
-
 function formatDateHe(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
@@ -78,6 +67,14 @@ export default function TasksPage() {
   const [isForAll, setIsForAll] = useState(false);
   const [priority, setPriority] = useState("NORMAL");
   const [dueDate, setDueDate] = useState("");
+
+  const { t } = useTranslation();
+
+  const PRIORITY_LABELS: Record<string, string> = {
+    LOW: t("priority_low"),
+    NORMAL: t("priority_normal"),
+    URGENT: t("priority_urgent"),
+  };
 
   useEffect(() => {
     Promise.all([
@@ -149,22 +146,22 @@ export default function TasksPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">משימות</h1>
+        <h1 className="text-xl font-bold">{t("tasks")}</h1>
         <Button size="sm" onClick={() => setShowCreate(true)}>
           <Plus className="h-4 w-4 me-2" />
-          יצירת משימה
+          {t("create_task")}
         </Button>
       </div>
 
       {/* Pending tasks */}
       <div className="space-y-3">
         <h2 className="text-sm font-medium text-muted-foreground">
-          ממתינות ({pendingTasks.length})
+          {t("pending")} ({pendingTasks.length})
         </h2>
         {pendingTasks.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              אין משימות ממתינות
+              {t("no_tasks")}
             </CardContent>
           </Card>
         ) : (
@@ -183,13 +180,13 @@ export default function TasksPage() {
                       )}
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         {task.isForAll ? (
-                          <span>לכל האחיות</span>
+                          <span>{t("for_all_nurses")}</span>
                         ) : task.assignedTo ? (
                           <span>{task.assignedTo.name}</span>
                         ) : null}
                         {task.dueDate && (
                           <span>
-                            יעד: {formatDateHe(task.dueDate)}
+                            {t("due_date")}: {formatDateHe(task.dueDate)}
                           </span>
                         )}
                       </div>
@@ -209,7 +206,7 @@ export default function TasksPage() {
       {completedTasks.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-medium text-muted-foreground">
-            הושלמו ({completedTasks.length})
+            {t("task_completed")} ({completedTasks.length})
           </h2>
           {completedTasks.map((task) => (
             <Card key={task.id} className="opacity-60">
@@ -218,7 +215,7 @@ export default function TasksPage() {
                   <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
                   <span className="line-through">{task.title}</span>
                   <span className="text-xs text-muted-foreground ms-auto">
-                    {task.assignedTo?.name ?? "כולן"}
+                    {task.assignedTo?.name ?? t("all_label")}
                   </span>
                 </div>
               </CardContent>
@@ -237,43 +234,40 @@ export default function TasksPage() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>יצירת משימה</DialogTitle>
+            <DialogTitle>{t("create_task")}</DialogTitle>
             <DialogDescription>הוסף משימה חדשה לאחיות</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
             <div className="grid gap-1.5">
-              <Label>כותרת</Label>
+              <Label>{t("task_title")}</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="כותרת המשימה..."
+                placeholder={t("task_title_placeholder")}
               />
             </div>
 
             <div className="grid gap-1.5">
-              <Label>תיאור</Label>
+              <Label>{t("task_description")}</Label>
               <Input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="תיאור (אופציונלי)..."
+                placeholder={t("task_desc_placeholder")}
               />
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch
-                checked={isForAll}
-                onCheckedChange={setIsForAll}
-              />
-              <Label>לכל האחיות</Label>
+              <Switch checked={isForAll} onCheckedChange={setIsForAll} />
+              <Label>{t("for_all_nurses")}</Label>
             </div>
 
             {!isForAll && (
               <div className="grid gap-1.5">
-                <Label>הקצה ל</Label>
+                <Label>{t("assign_to")}</Label>
                 <Select value={assignedToId} onValueChange={setAssignedToId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="בחר אחות..." />
+                    <SelectValue placeholder={t("select_nurse")} />
                   </SelectTrigger>
                   <SelectContent>
                     {nurses.map((n) => (
@@ -294,14 +288,18 @@ export default function TasksPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="LOW">נמוכה</SelectItem>
-                    <SelectItem value="NORMAL">רגילה</SelectItem>
-                    <SelectItem value="URGENT">דחופה</SelectItem>
+                    <SelectItem value="LOW">{t("priority_low")}</SelectItem>
+                    <SelectItem value="NORMAL">
+                      {t("priority_normal")}
+                    </SelectItem>
+                    <SelectItem value="URGENT">
+                      {t("priority_urgent")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-1.5">
-                <Label>תאריך יעד</Label>
+                <Label>{t("due_date")}</Label>
                 <Input
                   type="date"
                   value={dueDate}
@@ -317,12 +315,9 @@ export default function TasksPage() {
               onClick={() => setShowCreate(false)}
               disabled={creating}
             >
-              ביטול
+              {t("cancel")}
             </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={creating || !title.trim()}
-            >
+            <Button onClick={handleCreate} disabled={creating || !title.trim()}>
               {creating ? (
                 <Loader2 className="h-4 w-4 animate-spin me-2" />
               ) : (

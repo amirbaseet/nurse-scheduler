@@ -9,12 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -29,27 +24,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/i18n/use-translation";
 import { DAY_ORDER } from "@/lib/utils";
 import { parseJsonArray } from "@/lib/json-arrays";
 import type { SerializedNurse } from "@/types/nurse";
 
 type Clinic = { id: string; name: string };
-
-const SHIFT_OPTIONS = [
-  { value: "MORNING", label: "בוקר" },
-  { value: "AFTERNOON", label: "אחה״צ" },
-  { value: "ANYTIME", label: "גמיש" },
-] as const;
-
-const DAY_LABELS: Record<string, string> = {
-  SUN: "ראשון",
-  MON: "שני",
-  TUE: "שלישי",
-  WED: "רביעי",
-  THU: "חמישי",
-  FRI: "שישי",
-  SAT: "שבת",
-};
 
 const PERMANENT_SENTINEL = "1970-01-01T00:00:00.000Z";
 
@@ -61,6 +41,23 @@ export function NurseProfileForm({
   allClinics: Clinic[];
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const SHIFT_OPTIONS = [
+    { value: "MORNING", label: t("morning") },
+    { value: "AFTERNOON", label: t("afternoon") },
+    { value: "ANYTIME", label: t("anytime") },
+  ] as const;
+
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun"),
+    MON: t("mon"),
+    TUE: t("tue"),
+    WED: t("wed"),
+    THU: t("thu"),
+    FRI: t("fri"),
+    SAT: t("sat"),
+  };
 
   // ── Card 1: Profile state ──
   const [profileData, setProfileData] = useState({
@@ -84,7 +81,10 @@ export function NurseProfileForm({
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
 
   // ── Feedback ──
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
   function showMessage(text: string, type: "success" | "error") {
     setMessage({ text, type });
@@ -108,9 +108,9 @@ export function NurseProfileForm({
         }),
       });
       if (!res.ok) throw new Error();
-      showMessage("נשמר בהצלחה", "success");
+      showMessage(t("save_success"), "success");
     } catch {
-      showMessage("שגיאה בשמירה", "error");
+      showMessage(t("save_error"), "error");
     } finally {
       setProfileSaving(false);
     }
@@ -126,9 +126,9 @@ export function NurseProfileForm({
         body: JSON.stringify({ clinicIds: Array.from(blockedSet) }),
       });
       if (!res.ok) throw new Error();
-      showMessage("נשמר בהצלחה", "success");
+      showMessage(t("save_success"), "success");
     } catch {
-      showMessage("שגיאה בשמירה", "error");
+      showMessage(t("save_error"), "error");
     } finally {
       setBlockedSaving(false);
     }
@@ -144,11 +144,11 @@ export function NurseProfileForm({
         body: JSON.stringify({ newPin }),
       });
       if (!res.ok) throw new Error();
-      showMessage("PIN עודכן", "success");
+      showMessage(t("pin_updated"), "success");
       setPinDialogOpen(false);
       setNewPin("");
     } catch {
-      showMessage("שגיאה בעדכון PIN", "error");
+      showMessage(t("pin_update_error"), "error");
     }
   }
 
@@ -161,7 +161,7 @@ export function NurseProfileForm({
       if (!res.ok) throw new Error();
       router.push("/manager/nurses");
     } catch {
-      showMessage("שגיאה בהשבתה", "error");
+      showMessage(t("deactivate_error"), "error");
     }
   }
 
@@ -169,7 +169,11 @@ export function NurseProfileForm({
     <>
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.push("/manager/nurses")}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push("/manager/nurses")}
+        >
           <ArrowRight className="h-4 w-4" />
         </Button>
         <h1 className="text-2xl font-bold">{nurse.user.name}</h1>
@@ -191,12 +195,12 @@ export function NurseProfileForm({
       {/* ── Card 1: Profile ── */}
       <Card>
         <CardHeader>
-          <CardTitle>פרופיל אחות</CardTitle>
+          <CardTitle>{t("nurse_profile")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Contract hours */}
           <div className="grid gap-2">
-            <Label htmlFor="contractHours">שעות חוזה</Label>
+            <Label htmlFor="contractHours">{t("contract_hours")}</Label>
             <Input
               id="contractHours"
               type="number"
@@ -215,7 +219,7 @@ export function NurseProfileForm({
 
           {/* Shift preference */}
           <div className="grid gap-2">
-            <Label>העדפת משמרת</Label>
+            <Label>{t("shift_preference")}</Label>
             <Select
               value={profileData.shiftPreference}
               onValueChange={(val) =>
@@ -245,26 +249,32 @@ export function NurseProfileForm({
                 id="canWorkFriday"
                 checked={profileData.canWorkFriday}
                 onCheckedChange={(checked) =>
-                  setProfileData((prev) => ({ ...prev, canWorkFriday: checked }))
+                  setProfileData((prev) => ({
+                    ...prev,
+                    canWorkFriday: checked,
+                  }))
                 }
               />
-              <Label htmlFor="canWorkFriday">עבודה בשישי</Label>
+              <Label htmlFor="canWorkFriday">{t("can_work_friday")}</Label>
             </div>
             <div className="flex items-center gap-2">
               <Switch
                 id="canWorkSaturday"
                 checked={profileData.canWorkSaturday}
                 onCheckedChange={(checked) =>
-                  setProfileData((prev) => ({ ...prev, canWorkSaturday: checked }))
+                  setProfileData((prev) => ({
+                    ...prev,
+                    canWorkSaturday: checked,
+                  }))
                 }
               />
-              <Label htmlFor="canWorkSaturday">עבודה בשבת</Label>
+              <Label htmlFor="canWorkSaturday">{t("can_work_saturday")}</Label>
             </div>
           </div>
 
           {/* Max days */}
           <div className="grid gap-2">
-            <Label>מקסימום ימים בשבוע</Label>
+            <Label>{t("max_days_per_week")}</Label>
             <Select
               value={String(profileData.maxDaysPerWeek)}
               onValueChange={(val) =>
@@ -289,7 +299,7 @@ export function NurseProfileForm({
 
           {/* Recurring off days */}
           <div className="grid gap-2">
-            <Label>ימי חופש קבועים</Label>
+            <Label>{t("recurring_off_days")}</Label>
             <div className="flex flex-wrap gap-3">
               {DAY_ORDER.map((day) => (
                 <div key={day} className="flex items-center gap-1.5">
@@ -314,7 +324,7 @@ export function NurseProfileForm({
           </div>
 
           <Button onClick={saveProfile} disabled={profileSaving}>
-            {profileSaving ? "שומר..." : "שמירה"}
+            {profileSaving ? t("saving") : t("save")}
           </Button>
         </CardContent>
       </Card>
@@ -322,7 +332,7 @@ export function NurseProfileForm({
       {/* ── Card 2: Blocked Clinics ── */}
       <Card>
         <CardHeader>
-          <CardTitle>מרפאות חסומות</CardTitle>
+          <CardTitle>{t("blocked_clinics")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -350,7 +360,7 @@ export function NurseProfileForm({
             ))}
           </div>
           <Button onClick={saveBlockedClinics} disabled={blockedSaving}>
-            {blockedSaving ? "שומר..." : "שמירה"}
+            {blockedSaving ? t("saving") : t("save")}
           </Button>
         </CardContent>
       </Card>
@@ -358,25 +368,22 @@ export function NurseProfileForm({
       {/* ── Card 3: Fixed Assignments (read-only) ── */}
       <Card>
         <CardHeader>
-          <CardTitle>שיבוצים קבועים</CardTitle>
+          <CardTitle>{t("fixed_assignments")}</CardTitle>
         </CardHeader>
         <CardContent>
           {nurse.fixedAssignments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">אין שיבוצים קבועים</p>
+            <p className="text-sm text-muted-foreground">{t("no_fixed")}</p>
           ) : (
             <div className="space-y-2">
               {nurse.fixedAssignments.map((fa) => (
-                <div
-                  key={fa.id}
-                  className="flex items-center gap-2 text-sm"
-                >
+                <div key={fa.id} className="flex items-center gap-2 text-sm">
                   <span className="font-medium">{fa.clinic.name}</span>
                   <span className="text-muted-foreground">
                     {DAY_LABELS[fa.day]}
                   </span>
                   <Badge variant="outline">
                     {fa.weekStart === PERMANENT_SENTINEL
-                      ? "קבוע"
+                      ? t("permanent")
                       : new Date(fa.weekStart).toLocaleDateString("he-IL")}
                   </Badge>
                 </div>
@@ -389,17 +396,17 @@ export function NurseProfileForm({
       {/* ── Card 4: Account Actions ── */}
       <Card>
         <CardHeader>
-          <CardTitle>פעולות חשבון</CardTitle>
+          <CardTitle>{t("account_actions")}</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-3">
           <Button variant="outline" onClick={() => setPinDialogOpen(true)}>
-            איפוס PIN
+            {t("reset_pin")}
           </Button>
           <Button
             variant="destructive"
             onClick={() => setDeactivateDialogOpen(true)}
           >
-            השבתה
+            {t("deactivate")}
           </Button>
         </CardContent>
       </Card>
@@ -408,10 +415,10 @@ export function NurseProfileForm({
       <Dialog open={pinDialogOpen} onOpenChange={setPinDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>איפוס PIN</DialogTitle>
+            <DialogTitle>{t("reset_pin")}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-2">
-            <Label htmlFor="newPin">PIN חדש (4 ספרות)</Label>
+            <Label htmlFor="newPin">{t("new_pin_4_digits")}</Label>
             <Input
               id="newPin"
               type="text"
@@ -425,30 +432,37 @@ export function NurseProfileForm({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPinDialogOpen(false)}>
-              ביטול
+              {t("cancel")}
             </Button>
             <Button onClick={resetPin} disabled={newPin.length !== 4}>
-              שמירה
+              {t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ── Deactivate Dialog ── */}
-      <Dialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
+      <Dialog
+        open={deactivateDialogOpen}
+        onOpenChange={setDeactivateDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>השבתת חשבון</DialogTitle>
+            <DialogTitle>{t("deactivate_account")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            להשבית את חשבון {nurse.user.name}? לא ניתן לבטל פעולה זו.
+            {t("deactivate_warning")} {nurse.user.name}
+            {t("deactivate_irreversible")}
           </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeactivateDialogOpen(false)}>
-              ביטול
+            <Button
+              variant="outline"
+              onClick={() => setDeactivateDialogOpen(false)}
+            >
+              {t("cancel")}
             </Button>
             <Button variant="destructive" onClick={deactivateNurse}>
-              השבתה
+              {t("deactivate")}
             </Button>
           </DialogFooter>
         </DialogContent>

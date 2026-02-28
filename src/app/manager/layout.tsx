@@ -12,7 +12,7 @@ export default async function ManagerLayout({
   const token = cookies().get("token")?.value;
   if (!token) redirect("/");
 
-  let userName = "מנהלת";
+  let userName = "Manager";
   try {
     const payload = await verifyJwt(token);
     if (payload.role !== "MANAGER") redirect("/");

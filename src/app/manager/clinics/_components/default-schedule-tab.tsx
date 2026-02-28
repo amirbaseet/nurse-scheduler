@@ -21,23 +21,8 @@ import {
 } from "@/components/ui/table";
 import { DAY_ORDER } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 import type { ClinicWithDefaults } from "@/types/clinic";
-
-const DAY_LABELS: Record<string, string> = {
-  SUN: "ראשון",
-  MON: "שני",
-  TUE: "שלישי",
-  WED: "רביעי",
-  THU: "חמישי",
-  FRI: "שישי",
-  SAT: "שבת",
-};
-
-const GENDER_LABELS: Record<string, { label: string; variant: string }> = {
-  FEMALE_ONLY: { label: "נשים בלבד", variant: "bg-pink-100 text-pink-800 border-pink-300" },
-  FEMALE_PREFERRED: { label: "עדיפות לנשים", variant: "bg-purple-100 text-purple-800 border-purple-300" },
-  ANY: { label: "ללא העדפה", variant: "bg-gray-100 text-gray-800 border-gray-300" },
-};
 
 type DayConfig = {
   isActive: boolean;
@@ -74,15 +59,47 @@ export function DefaultScheduleTab({
 }: {
   clinics: ClinicWithDefaults[];
 }) {
-  const [allStates, setAllStates] = useState<Record<string, ClinicState>>(() => {
-    const initial: Record<string, ClinicState> = {};
-    for (const clinic of clinics) {
-      initial[clinic.id] = buildClinicState(clinic);
-    }
-    return initial;
-  });
+  const { t } = useTranslation();
+
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun"),
+    MON: t("mon"),
+    TUE: t("tue"),
+    WED: t("wed"),
+    THU: t("thu"),
+    FRI: t("fri"),
+    SAT: t("sat"),
+  };
+
+  const GENDER_LABELS: Record<string, { label: string; variant: string }> = {
+    FEMALE_ONLY: {
+      label: t("female_only"),
+      variant: "bg-pink-100 text-pink-800 border-pink-300",
+    },
+    FEMALE_PREFERRED: {
+      label: t("female_preferred"),
+      variant: "bg-purple-100 text-purple-800 border-purple-300",
+    },
+    ANY: {
+      label: t("any_gender"),
+      variant: "bg-gray-100 text-gray-800 border-gray-300",
+    },
+  };
+
+  const [allStates, setAllStates] = useState<Record<string, ClinicState>>(
+    () => {
+      const initial: Record<string, ClinicState> = {};
+      for (const clinic of clinics) {
+        initial[clinic.id] = buildClinicState(clinic);
+      }
+      return initial;
+    },
+  );
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
   function updateDay(clinicId: string, day: string, patch: Partial<DayConfig>) {
     setAllStates((prev) => ({
@@ -113,9 +130,9 @@ export function DefaultScheduleTab({
         body: JSON.stringify({ configs }),
       });
       if (!res.ok) throw new Error();
-      setMessage({ text: "נשמר בהצלחה", type: "success" });
+      setMessage({ text: t("save_success"), type: "success" });
     } catch {
-      setMessage({ text: "שגיאה בשמירה", type: "error" });
+      setMessage({ text: t("save_error"), type: "error" });
     } finally {
       setSavingId(null);
       setTimeout(() => setMessage(null), 3000);
@@ -148,11 +165,14 @@ export function DefaultScheduleTab({
                     {gender.label}
                   </Badge>
                   {clinic.canBeSecondary && (
-                    <Badge variant="outline">מרפאה משנית</Badge>
+                    <Badge variant="outline">{t("secondary_clinic")}</Badge>
                   )}
                   {!clinic.isActive && (
-                    <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
-                      לא פעיל
+                    <Badge
+                      variant="outline"
+                      className="bg-red-100 text-red-800 border-red-300"
+                    >
+                      {t("inactive")}
                     </Badge>
                   )}
                 </div>
@@ -164,10 +184,10 @@ export function DefaultScheduleTab({
                 <TableHeader>
                   <TableRow>
                     <TableHead>יום</TableHead>
-                    <TableHead>פעיל</TableHead>
-                    <TableHead>התחלה</TableHead>
-                    <TableHead>סיום</TableHead>
-                    <TableHead>אחיות</TableHead>
+                    <TableHead>{t("active")}</TableHead>
+                    <TableHead>{t("shift_start")}</TableHead>
+                    <TableHead>{t("shift_end")}</TableHead>
+                    <TableHead>{t("nurses")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -241,7 +261,7 @@ export function DefaultScheduleTab({
                   disabled={savingId === clinic.id}
                   size="sm"
                 >
-                  {savingId === clinic.id ? "שומר..." : "שמירת ברירת מחדל"}
+                  {savingId === clinic.id ? t("saving") : t("save_defaults")}
                 </Button>
               </div>
             </CollapsibleContent>

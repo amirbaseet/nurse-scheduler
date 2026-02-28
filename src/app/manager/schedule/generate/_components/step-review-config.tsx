@@ -15,16 +15,7 @@ import {
 } from "@/components/ui/table";
 import { formatDate, DAY_ORDER } from "@/lib/utils";
 import type { MergedConfig } from "@/types/clinic";
-
-const DAY_LABELS: Record<string, string> = {
-  SUN: "א׳",
-  MON: "ב׳",
-  TUE: "ג׳",
-  WED: "ד׳",
-  THU: "ה׳",
-  FRI: "ו׳",
-  SAT: "ש׳",
-};
+import { useTranslation } from "@/i18n/use-translation";
 
 type TimeOff = {
   id: string;
@@ -81,6 +72,17 @@ export function StepReviewConfig({
   onBack: () => void;
   onGenerate: () => void;
 }) {
+  const { t } = useTranslation();
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun_short"),
+    MON: t("mon_short"),
+    TUE: t("tue_short"),
+    WED: t("wed_short"),
+    THU: t("thu_short"),
+    FRI: t("fri_short"),
+    SAT: t("sat_short"),
+  };
+
   const [clinicConfigs, setClinicConfigs] = useState<MergedConfig[]>([]);
   const [timeOffs, setTimeOffs] = useState<TimeOff[]>([]);
   const [nurses, setNurses] = useState<NurseWithFixed[]>([]);
@@ -113,14 +115,14 @@ export function StepReviewConfig({
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="me-2 text-muted-foreground">טוען הגדרות...</span>
+        <span className="me-2 text-muted-foreground">
+          {t("loading_config")}
+        </span>
       </div>
     );
   }
 
-  const clinicGroups = groupByClinic(
-    clinicConfigs.filter((c) => c.isActive),
-  );
+  const clinicGroups = groupByClinic(clinicConfigs.filter((c) => c.isActive));
 
   // Extract permanent fixed assignments from nurse data
   const fixedAssignments = nurses.flatMap((n) =>
@@ -138,15 +140,15 @@ export function StepReviewConfig({
       {/* 1. Clinic Grid */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">הגדרות מרפאות</CardTitle>
+          <CardTitle className="text-base">{t("clinic_config")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>מרפאה</TableHead>
-                <TableHead>ימים פעילים</TableHead>
-                <TableHead>סה״כ אחיות</TableHead>
+                <TableHead>{t("clinic_label")}</TableHead>
+                <TableHead>{t("active_days")}</TableHead>
+                <TableHead>{t("total_nurses_needed")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -193,21 +195,22 @@ export function StepReviewConfig({
       {/* 2. Time-offs */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">בקשות חופשה ממתינות</CardTitle>
+          <CardTitle className="text-base">{t("pending_time_offs")}</CardTitle>
         </CardHeader>
         <CardContent>
           {timeOffs.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              אין בקשות חופשה ממתינות
+              {t("no_pending_time_offs")}
             </p>
           ) : (
             <ul className="space-y-1 text-sm">
-              {timeOffs.map((t) => (
-                <li key={t.id}>
-                  <span className="font-medium">{t.nurse.name}</span> —{" "}
-                  {t.type === "OFF_DAY" ? "יום חופש" : t.type} —{" "}
-                  {t.startDate.slice(0, 10)}
-                  {t.startDate !== t.endDate && ` עד ${t.endDate.slice(0, 10)}`}
+              {timeOffs.map((timeOff) => (
+                <li key={timeOff.id}>
+                  <span className="font-medium">{timeOff.nurse.name}</span> —{" "}
+                  {timeOff.type === "OFF_DAY" ? t("off_day") : timeOff.type} —{" "}
+                  {timeOff.startDate.slice(0, 10)}
+                  {timeOff.startDate !== timeOff.endDate &&
+                    ` ${t("until_connector")} ${timeOff.endDate.slice(0, 10)}`}
                 </li>
               ))}
             </ul>
@@ -218,13 +221,11 @@ export function StepReviewConfig({
       {/* 3. Fixed Assignments */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">שיבוצים קבועים</CardTitle>
+          <CardTitle className="text-base">{t("fixed_assignments")}</CardTitle>
         </CardHeader>
         <CardContent>
           {fixedAssignments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              אין שיבוצים קבועים
-            </p>
+            <p className="text-sm text-muted-foreground">{t("no_fixed")}</p>
           ) : (
             <ul className="space-y-1 text-sm">
               {fixedAssignments.map((fa, i) => (
@@ -241,18 +242,21 @@ export function StepReviewConfig({
       {/* 4. Preferences */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">העדפות אחיות</CardTitle>
+          <CardTitle className="text-base">{t("nurse_preferences")}</CardTitle>
         </CardHeader>
         <CardContent>
           {preferences.length === 0 ? (
-            <p className="text-sm text-muted-foreground">לא הוגשו העדפות</p>
+            <p className="text-sm text-muted-foreground">
+              {t("no_preferences")}
+            </p>
           ) : (
             <ul className="space-y-1 text-sm">
               {preferences.map((p) => (
                 <li key={p.id}>
                   <span className="font-medium">{p.nurse.name}</span>
                   {p.shiftPreference && ` — ${p.shiftPreference}`}
-                  {p.preferredDaysOff && ` — ימי חופש: ${p.preferredDaysOff}`}
+                  {p.preferredDaysOff &&
+                    ` — ${t("days_off_colon")} ${p.preferredDaysOff}`}
                   {p.notes && ` — ${p.notes}`}
                 </li>
               ))}
@@ -264,18 +268,18 @@ export function StepReviewConfig({
       {/* Actions */}
       <div className="flex gap-2">
         <Button variant="outline" onClick={onBack}>
-          → חזרה
+          → {t("back")}
         </Button>
         <Button onClick={onGenerate} disabled={isGenerating}>
           {isGenerating ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin me-2" />
-              מייצר לו״ז...
+              {t("generating")}
             </>
           ) : (
             <>
               <Zap className="h-4 w-4 me-2" />
-              יצירת לו״ז
+              {t("generate_schedule")}
             </>
           )}
         </Button>

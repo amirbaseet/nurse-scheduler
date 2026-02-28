@@ -47,15 +47,18 @@ type Task = {
   status: string;
 };
 
-const DAY_LABELS_HE: Record<string, string> = {
-  SUN: "ראשון",
-  MON: "שני",
-  TUE: "שלישי",
-  WED: "רביעי",
-  THU: "חמישי",
-  FRI: "שישי",
-  SAT: "שבת",
-};
+function useDayLabels(): Record<string, string> {
+  const { t } = useTranslation();
+  return {
+    SUN: t("sun"),
+    MON: t("mon"),
+    TUE: t("tue"),
+    WED: t("wed"),
+    THU: t("thu"),
+    FRI: t("fri"),
+    SAT: t("sat"),
+  };
+}
 
 function parseHours(start: string, end: string): number {
   const [sh, sm] = start.split(":").map(Number);
@@ -84,6 +87,8 @@ function DayCard({
   label: string;
   isToday?: boolean;
 }) {
+  const { t } = useTranslation();
+
   if (assignment.isOff) {
     return (
       <Card className={isToday ? "border-primary/50" : undefined}>
@@ -93,7 +98,7 @@ function DayCard({
               <Sun className="h-5 w-5 text-amber-500" />
               <span className="font-medium">{label}</span>
             </div>
-            <Badge variant="secondary">יום חופש</Badge>
+            <Badge variant="secondary">{t("off_day")}</Badge>
           </div>
         </CardContent>
       </Card>
@@ -113,7 +118,7 @@ function DayCard({
             <span className="font-medium">{label}</span>
           </div>
           {isToday && (
-            <Badge className="bg-primary/10 text-primary">היום</Badge>
+            <Badge className="bg-primary/10 text-primary">{t("today")}</Badge>
           )}
         </div>
         <div className="space-y-1 ps-7">
@@ -133,14 +138,17 @@ function DayCard({
 }
 
 function CompactDayRow({ assignment }: { assignment: Assignment }) {
+  const { t } = useTranslation();
+  const dayLabels = useDayLabels();
+
   if (assignment.isOff) {
     return (
       <div className="flex items-center justify-between py-1.5 text-sm">
         <span className="text-muted-foreground">
-          {DAY_LABELS_HE[assignment.day]}
+          {dayLabels[assignment.day]}
         </span>
         <Badge variant="secondary" className="text-xs">
-          חופש
+          {t("off_day")}
         </Badge>
       </div>
     );
@@ -148,7 +156,7 @@ function CompactDayRow({ assignment }: { assignment: Assignment }) {
 
   return (
     <div className="flex items-center justify-between py-1.5 text-sm">
-      <span className="font-medium">{DAY_LABELS_HE[assignment.day]}</span>
+      <span className="font-medium">{dayLabels[assignment.day]}</span>
       <div className="text-end">
         <span>{assignment.primaryClinic?.name ?? "—"}</span>
         <span className="text-muted-foreground ms-2">
@@ -161,6 +169,7 @@ function CompactDayRow({ assignment }: { assignment: Assignment }) {
 
 export default function NurseDashboard() {
   const { t } = useTranslation();
+  const dayLabels = useDayLabels();
   const [loading, setLoading] = useState(true);
   const [schedule, setSchedule] = useState<ScheduleResponse | null>(null);
   const [nextWeekSchedule, setNextWeekSchedule] =
@@ -294,7 +303,7 @@ export default function NurseDashboard() {
           {todayAssignment ? (
             <DayCard
               assignment={todayAssignment}
-              label={`${t("today")} — ${DAY_LABELS_HE[todayKey]}`}
+              label={`${t("today")} — ${dayLabels[todayKey]}`}
               isToday
             />
           ) : (
@@ -303,7 +312,7 @@ export default function NurseDashboard() {
                 <div className="flex items-center gap-2">
                   <Sun className="h-5 w-5 text-amber-500" />
                   <span className="font-medium">
-                    {t("today")} — {DAY_LABELS_HE[todayKey]}
+                    {t("today")} — {dayLabels[todayKey]}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1 ps-7">
@@ -316,7 +325,7 @@ export default function NurseDashboard() {
           {tomorrowAssignment ? (
             <DayCard
               assignment={tomorrowAssignment}
-              label={`${t("tomorrow")} — ${DAY_LABELS_HE[tomorrowKey]}`}
+              label={`${t("tomorrow")} — ${dayLabels[tomorrowKey]}`}
             />
           ) : (
             <Card>
@@ -324,7 +333,7 @@ export default function NurseDashboard() {
                 <div className="flex items-center gap-2">
                   <Moon className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium">
-                    {t("tomorrow")} — {DAY_LABELS_HE[tomorrowKey]}
+                    {t("tomorrow")} — {dayLabels[tomorrowKey]}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1 ps-7">

@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { WeekNavigator } from "@/components/week-navigator";
 import { getWeekStart, formatDate, DAY_ORDER } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 
 type PatientProgram = {
   id: string;
@@ -47,27 +48,29 @@ type ProgramAssignment = {
 
 type NurseOption = { id: string; name: string };
 
-const DAY_LABELS: Record<string, string> = {
-  SUN: "ראשון",
-  MON: "שני",
-  TUE: "שלישי",
-  WED: "רביעי",
-  THU: "חמישי",
-  FRI: "שישי",
-  SAT: "שבת",
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  PURE_PROGRAM: "תוכנית עצמאית",
-  CLINIC_ADDON: "תוספת למרפאה",
-};
-
 export default function ProgramsPage() {
   const [programs, setPrograms] = useState<PatientProgram[]>([]);
   const [assignments, setAssignments] = useState<ProgramAssignment[]>([]);
   const [nurses, setNurses] = useState<NurseOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(() => getWeekStart());
+
+  const { t } = useTranslation();
+
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun"),
+    MON: t("mon"),
+    TUE: t("tue"),
+    WED: t("wed"),
+    THU: t("thu"),
+    FRI: t("fri"),
+    SAT: t("sat"),
+  };
+
+  const TYPE_LABELS: Record<string, string> = {
+    PURE_PROGRAM: t("pure_program"),
+    CLINIC_ADDON: t("clinic_addon"),
+  };
 
   // Assign dialog state
   const [showAssign, setShowAssign] = useState(false);
@@ -167,10 +170,10 @@ export default function ProgramsPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">תוכניות</h1>
+        <h1 className="text-xl font-bold">{t("programs")}</h1>
         <Button size="sm" onClick={() => openAssignDialog()}>
           <Plus className="h-4 w-4 me-2" />
-          שיבוץ אחות ליום
+          {t("assign_nurse_to_day")}
         </Button>
       </div>
 
@@ -179,7 +182,7 @@ export default function ProgramsPage() {
       {programs.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            אין תוכניות
+            {t("no_programs")}
           </CardContent>
         </Card>
       ) : (
@@ -202,7 +205,9 @@ export default function ProgramsPage() {
                           {TYPE_LABELS[prog.type]}
                         </Badge>
                         {prog.defaultHours && (
-                          <span>{prog.defaultHours} שעות</span>
+                          <span>
+                            {prog.defaultHours} {t("hours")}
+                          </span>
                         )}
                         {prog.linkedClinicCode && (
                           <span>מרפאה: {prog.linkedClinicCode}</span>
@@ -263,7 +268,7 @@ export default function ProgramsPage() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>שיבוץ אחות ליום</DialogTitle>
+            <DialogTitle>{t("assign_nurse_to_day")}</DialogTitle>
             <DialogDescription>
               שיבוץ אחות לתוכנית בשבוע הנוכחי
             </DialogDescription>
@@ -277,7 +282,7 @@ export default function ProgramsPage() {
                 onValueChange={setAssignProgramId}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="בחר תוכנית..." />
+                  <SelectValue placeholder={t("select_program")} />
                 </SelectTrigger>
                 <SelectContent>
                   {programs.map((p) => (
@@ -293,7 +298,7 @@ export default function ProgramsPage() {
               <Label>אחות</Label>
               <Select value={assignNurseId} onValueChange={setAssignNurseId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="בחר אחות..." />
+                  <SelectValue placeholder={t("select_nurse")} />
                 </SelectTrigger>
                 <SelectContent>
                   {nurses.map((n) => (
@@ -333,7 +338,7 @@ export default function ProgramsPage() {
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label>שעת התחלה</Label>
+                <Label>{t("shift_start")}</Label>
                 <Input
                   type="time"
                   value={assignShiftStart}
@@ -341,7 +346,7 @@ export default function ProgramsPage() {
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label>שעת סיום</Label>
+                <Label>{t("shift_end")}</Label>
                 <Input
                   type="time"
                   value={assignShiftEnd}
@@ -357,7 +362,7 @@ export default function ProgramsPage() {
               onClick={() => setShowAssign(false)}
               disabled={assigning}
             >
-              ביטול
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleAssign}

@@ -54,7 +54,7 @@ export function LoginForm() {
           setErrorKey((k) => k + 1);
         }
       } catch {
-        setError("שגיאת חיבור");
+        setError(t("connection_error"));
         setErrorKey((k) => k + 1);
       } finally {
         setLoading(false);
@@ -92,7 +92,7 @@ export function LoginForm() {
               onClick={() => setPinLength(6)}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              {locale === "he" ? "מנהלת? הזיני 6 ספרות" : "مديرة؟ أدخلي 6 أرقام"}
+              {t("manager_6_digits")}
             </button>
           )}
           {pinLength === 6 && (
@@ -101,7 +101,7 @@ export function LoginForm() {
               onClick={() => setPinLength(4)}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              {locale === "he" ? "אחות? הזיני 4 ספרות" : "ممرضة؟ أدخلي 4 أرقام"}
+              {t("nurse_4_digits")}
             </button>
           )}
 
@@ -126,7 +126,7 @@ export function LoginForm() {
             onClick={() => setLocale(locale === "he" ? "ar" : "he")}
             className="text-muted-foreground"
           >
-            {locale === "he" ? "العربية" : "עברית"}
+            {locale === "he" ? t("arabic") : t("hebrew")}
           </Button>
         </div>
       </div>

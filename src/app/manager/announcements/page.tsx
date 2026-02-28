@@ -1,13 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  Loader2,
-  Plus,
-  Megaphone,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Loader2, Plus, Megaphone, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +24,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useTranslation } from "@/i18n/use-translation";
 
 type Announcement = {
   id: string;
@@ -53,12 +48,6 @@ const PRIORITY_STYLES: Record<string, string> = {
   URGENT: "bg-red-100 text-red-700",
 };
 
-const PRIORITY_LABELS: Record<string, string> = {
-  LOW: "נמוכה",
-  NORMAL: "רגילה",
-  URGENT: "דחופה",
-};
-
 function formatDateHe(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
@@ -78,6 +67,14 @@ export default function AnnouncementsPage() {
   const [targetAll, setTargetAll] = useState(true);
   const [targetNurseIds, setTargetNurseIds] = useState<string[]>([]);
   const [expiresAt, setExpiresAt] = useState("");
+
+  const { t } = useTranslation();
+
+  const PRIORITY_LABELS: Record<string, string> = {
+    LOW: t("priority_low"),
+    NORMAL: t("priority_normal"),
+    URGENT: t("priority_urgent"),
+  };
 
   useEffect(() => {
     Promise.all([
@@ -125,7 +122,11 @@ export default function AnnouncementsPage() {
       if (res.ok) {
         const created = await res.json();
         setAnnouncements((prev) => [
-          { ...created, author: { id: created.authorId, name: "את" }, isRead: true },
+          {
+            ...created,
+            author: { id: created.authorId, name: "את" },
+            isRead: true,
+          },
           ...prev,
         ]);
         setShowCreate(false);
@@ -157,17 +158,17 @@ export default function AnnouncementsPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">הודעות</h1>
+        <h1 className="text-xl font-bold">{t("announcements")}</h1>
         <Button size="sm" onClick={() => setShowCreate(true)}>
           <Plus className="h-4 w-4 me-2" />
-          יצירת הודעה
+          {t("create_announcement")}
         </Button>
       </div>
 
       {announcements.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            אין הודעות
+            {t("no_announcements")}
           </CardContent>
         </Card>
       ) : (
@@ -186,11 +187,17 @@ export default function AnnouncementsPage() {
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                         <span>{formatDateHe(ann.createdAt)}</span>
                         <span>•</span>
-                        <span>{ann.targetAll ? "כל האחיות" : "אחיות מסוימות"}</span>
+                        <span>
+                          {ann.targetAll
+                            ? t("target_all")
+                            : t("target_specific")}
+                        </span>
                         {ann.expiresAt && (
                           <>
                             <span>•</span>
-                            <span>תפוגה: {formatDateHe(ann.expiresAt)}</span>
+                            <span>
+                              {t("expires_at")}: {formatDateHe(ann.expiresAt)}
+                            </span>
                           </>
                         )}
                       </div>
@@ -223,27 +230,27 @@ export default function AnnouncementsPage() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>יצירת הודעה</DialogTitle>
+            <DialogTitle>{t("create_announcement")}</DialogTitle>
             <DialogDescription>שלח הודעה לאחיות</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
             <div className="grid gap-1.5">
-              <Label>כותרת</Label>
+              <Label>{t("announcement_title")}</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="כותרת ההודעה..."
+                placeholder={t("announcement_title_placeholder")}
               />
             </div>
 
             <div className="grid gap-1.5">
-              <Label>תוכן</Label>
+              <Label>{t("announcement_body")}</Label>
               <textarea
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="תוכן ההודעה..."
+                placeholder={t("announcement_body_placeholder")}
               />
             </div>
 
@@ -255,14 +262,18 @@ export default function AnnouncementsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="LOW">נמוכה</SelectItem>
-                    <SelectItem value="NORMAL">רגילה</SelectItem>
-                    <SelectItem value="URGENT">דחופה</SelectItem>
+                    <SelectItem value="LOW">{t("priority_low")}</SelectItem>
+                    <SelectItem value="NORMAL">
+                      {t("priority_normal")}
+                    </SelectItem>
+                    <SelectItem value="URGENT">
+                      {t("priority_urgent")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-1.5">
-                <Label>תפוגה</Label>
+                <Label>{t("expires_at")}</Label>
                 <Input
                   type="date"
                   value={expiresAt}
@@ -272,19 +283,19 @@ export default function AnnouncementsPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch
-                checked={targetAll}
-                onCheckedChange={setTargetAll}
-              />
-              <Label>לכל האחיות</Label>
+              <Switch checked={targetAll} onCheckedChange={setTargetAll} />
+              <Label>{t("target_all")}</Label>
             </div>
 
             {!targetAll && (
               <div className="grid gap-1.5">
-                <Label>אחיות מסוימות</Label>
+                <Label>{t("target_specific")}</Label>
                 <div className="max-h-40 overflow-y-auto border rounded-md p-2 space-y-2">
                   {nurses.map((n) => (
-                    <label key={n.id} className="flex items-center gap-2 cursor-pointer">
+                    <label
+                      key={n.id}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
                       <Checkbox
                         checked={targetNurseIds.includes(n.id)}
                         onCheckedChange={() => toggleNurseTarget(n.id)}
@@ -303,7 +314,7 @@ export default function AnnouncementsPage() {
               onClick={() => setShowCreate(false)}
               disabled={creating}
             >
-              ביטול
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleCreate}

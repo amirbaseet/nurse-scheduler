@@ -1,13 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  Loader2,
-  KeyRound,
-  UserX,
-  Shield,
-  Users,
-} from "lucide-react";
+import { Loader2, KeyRound, UserX, Shield, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useTranslation } from "@/i18n/use-translation";
 
 type UserRecord = {
   id: string;
@@ -44,12 +39,14 @@ type UserRecord = {
   } | null;
 };
 
-const ROLE_LABELS: Record<string, string> = {
-  MANAGER: "מנהלת",
-  NURSE: "אחות",
-};
-
 export default function UsersPage() {
+  const { t } = useTranslation();
+
+  const ROLE_LABELS: Record<string, string> = {
+    MANAGER: t("role_manager"),
+    NURSE: t("role_nurse"),
+  };
+
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,7 +57,9 @@ export default function UsersPage() {
   const [pinSaving, setPinSaving] = useState(false);
 
   // Deactivate dialog
-  const [deactivateTarget, setDeactivateTarget] = useState<UserRecord | null>(null);
+  const [deactivateTarget, setDeactivateTarget] = useState<UserRecord | null>(
+    null,
+  );
   const [deactivating, setDeactivating] = useState(false);
 
   useEffect(() => {
@@ -75,7 +74,11 @@ export default function UsersPage() {
 
     const expectedLen = pinTarget.role === "NURSE" ? 4 : 6;
     if (newPin.length !== expectedLen || !/^\d+$/.test(newPin)) {
-      setPinError(`PIN חייב להיות ${expectedLen} ספרות`);
+      setPinError(
+        pinTarget.role === "NURSE"
+          ? t("pin_must_be_4_digits")
+          : t("pin_must_be_6_digits"),
+      );
       return;
     }
 
@@ -93,15 +96,15 @@ export default function UsersPage() {
         setNewPin("");
       } else {
         const data = await res.json();
-        setPinError(data.error ?? "שגיאה באיפוס PIN");
+        setPinError(data.error ?? t("pin_reset_error"));
       }
     } catch (err) {
       console.error("Failed to reset PIN:", err);
-      setPinError("שגיאה באיפוס PIN");
+      setPinError(t("pin_reset_error"));
     } finally {
       setPinSaving(false);
     }
-  }, [pinTarget, newPin]);
+  }, [pinTarget, newPin, t]);
 
   const handleDeactivate = useCallback(async () => {
     if (!deactivateTarget) return;
@@ -137,10 +140,10 @@ export default function UsersPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">משתמשים</h1>
+        <h1 className="text-xl font-bold">{t("users")}</h1>
         <Badge variant="outline">
           <Users className="h-3 w-3 me-1" />
-          {users.filter((u) => u.isActive).length} פעילים
+          {users.filter((u) => u.isActive).length} {t("active_count")}
         </Badge>
       </div>
 
@@ -149,11 +152,11 @@ export default function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>שם</TableHead>
-                <TableHead>תפקיד</TableHead>
-                <TableHead>שעות חוזה</TableHead>
-                <TableHead>סטטוס</TableHead>
-                <TableHead className="text-end">פעולות</TableHead>
+                <TableHead>{t("name")}</TableHead>
+                <TableHead>{t("role_label")}</TableHead>
+                <TableHead>{t("contract_hours")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
+                <TableHead className="text-end">{t("actions_label")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -174,7 +177,9 @@ export default function UsersPage() {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={user.role === "MANAGER" ? "default" : "secondary"}
+                      variant={
+                        user.role === "MANAGER" ? "default" : "secondary"
+                      }
                     >
                       {user.role === "MANAGER" && (
                         <Shield className="h-3 w-3 me-1" />
@@ -187,9 +192,13 @@ export default function UsersPage() {
                   </TableCell>
                   <TableCell>
                     {user.isActive ? (
-                      <Badge className="bg-green-100 text-green-700">פעיל</Badge>
+                      <Badge className="bg-green-100 text-green-700">
+                        {t("active")}
+                      </Badge>
                     ) : (
-                      <Badge className="bg-gray-100 text-gray-500">לא פעיל</Badge>
+                      <Badge className="bg-gray-100 text-gray-500">
+                        {t("inactive")}
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-end">
@@ -237,15 +246,15 @@ export default function UsersPage() {
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>איפוס PIN</DialogTitle>
+            <DialogTitle>{t("reset_pin")}</DialogTitle>
             <DialogDescription>
-              הגדר PIN חדש ל{pinTarget?.name}
+              {t("set_new_pin_for")} {pinTarget?.name}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-3 py-2">
             <div className="grid gap-1.5">
-              <Label>PIN חדש</Label>
+              <Label>{t("new_pin")}</Label>
               <Input
                 type="text"
                 inputMode="numeric"
@@ -256,12 +265,10 @@ export default function UsersPage() {
                   setPinError("");
                 }}
                 placeholder={
-                  pinTarget?.role === "NURSE" ? "4 ספרות" : "6 ספרות"
+                  pinTarget?.role === "NURSE" ? t("digits_4") : t("digits_6")
                 }
               />
-              {pinError && (
-                <p className="text-xs text-red-600">{pinError}</p>
-              )}
+              {pinError && <p className="text-xs text-red-600">{pinError}</p>}
             </div>
           </div>
 
@@ -271,14 +278,11 @@ export default function UsersPage() {
               onClick={() => setPinTarget(null)}
               disabled={pinSaving}
             >
-              ביטול
+              {t("cancel")}
             </Button>
-            <Button
-              onClick={handleResetPin}
-              disabled={pinSaving || !newPin}
-            >
+            <Button onClick={handleResetPin} disabled={pinSaving || !newPin}>
               {pinSaving && <Loader2 className="h-4 w-4 animate-spin me-2" />}
-              איפוס
+              {t("reset_action")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -293,14 +297,14 @@ export default function UsersPage() {
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>השבתת משתמש</DialogTitle>
+            <DialogTitle>{t("deactivate_user")}</DialogTitle>
             <DialogDescription>
-              להשבית את חשבון {deactivateTarget?.name}?
+              {t("deactivate_warning")} {deactivateTarget?.name}?
             </DialogDescription>
           </DialogHeader>
 
           <p className="text-sm text-muted-foreground">
-            המשתמש לא יוכל להתחבר למערכת לאחר ההשבתה.
+            {t("user_cannot_login")}
           </p>
 
           <DialogFooter>
@@ -309,7 +313,7 @@ export default function UsersPage() {
               onClick={() => setDeactivateTarget(null)}
               disabled={deactivating}
             >
-              ביטול
+              {t("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -319,7 +323,7 @@ export default function UsersPage() {
               {deactivating && (
                 <Loader2 className="h-4 w-4 animate-spin me-2" />
               )}
-              השבתה
+              {t("deactivate")}
             </Button>
           </DialogFooter>
         </DialogContent>

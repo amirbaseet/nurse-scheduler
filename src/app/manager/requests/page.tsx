@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/status-badge";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 
 type TimeOffRequest = {
   id: string;
@@ -29,13 +30,6 @@ type TimeOffRequest = {
   managerNote: string | null;
   requestedAt: string;
   respondedAt: string | null;
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  VACATION: "חופשה",
-  SICK: "מחלה",
-  PERSONAL: "אישי",
-  OFF_DAY: "יום חופש",
 };
 
 const TYPE_ICONS: Record<string, string> = {
@@ -64,6 +58,15 @@ export default function RequestsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
+  const { t } = useTranslation();
+
+  const TYPE_LABELS: Record<string, string> = {
+    VACATION: t("type_vacation"),
+    SICK: t("type_sick"),
+    PERSONAL: t("type_personal"),
+    OFF_DAY: t("type_off_day"),
+  };
+
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
@@ -91,10 +94,7 @@ export default function RequestsPage() {
     fetchRequests();
   }, [fetchRequests]);
 
-  const handleAction = async (
-    id: string,
-    action: "approve" | "reject",
-  ) => {
+  const handleAction = async (id: string, action: "approve" | "reject") => {
     setActionLoading(id);
     try {
       const res = await fetch(`/api/requests/${id}/${action}`, {
@@ -107,7 +107,13 @@ export default function RequestsPage() {
         const updated = await res.json();
         // Move from pending to history
         setPending((prev) => prev.filter((r) => r.id !== id));
-        setHistory((prev) => [{ ...updated, nurse: pending.find(r => r.id === id)?.nurse }, ...prev] as TimeOffRequest[]);
+        setHistory(
+          (prev) =>
+            [
+              { ...updated, nurse: pending.find((r) => r.id === id)?.nurse },
+              ...prev,
+            ] as TimeOffRequest[],
+        );
       }
     } catch (err) {
       console.error("Action failed:", err);
@@ -120,14 +126,13 @@ export default function RequestsPage() {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="me-2 text-muted-foreground">טוען בקשות...</span>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold">בקשות חופש</h1>
+      <h1 className="text-xl font-bold">{t("vacation_requests")}</h1>
 
       {/* Tabs */}
       <div className="flex gap-2 border-b">
@@ -140,7 +145,7 @@ export default function RequestsPage() {
               : "border-transparent text-muted-foreground hover:text-foreground",
           )}
         >
-          ממתינות ({pending.length})
+          {t("pending")} ({pending.length})
         </button>
         <button
           onClick={() => setTab("history")}
@@ -151,7 +156,7 @@ export default function RequestsPage() {
               : "border-transparent text-muted-foreground hover:text-foreground",
           )}
         >
-          היסטוריה ({history.length})
+          {t("request_history")} ({history.length})
         </button>
       </div>
 
@@ -161,7 +166,7 @@ export default function RequestsPage() {
           {pending.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                אין בקשות ממתינות
+                {t("no_pending_requests")}
               </CardContent>
             </Card>
           ) : (
@@ -187,7 +192,8 @@ export default function RequestsPage() {
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>
-                      {formatDateHe(req.startDate)} — {formatDateHe(req.endDate)}
+                      {formatDateHe(req.startDate)} —{" "}
+                      {formatDateHe(req.endDate)}
                     </span>
                     <Badge variant="outline">
                       {daysBetween(req.startDate, req.endDate)} ימים
@@ -197,7 +203,7 @@ export default function RequestsPage() {
                   {/* Reason */}
                   {req.reason && (
                     <p className="text-sm text-muted-foreground">
-                      סיבה: {req.reason}
+                      {t("reason")}: {req.reason}
                     </p>
                   )}
 
@@ -205,12 +211,14 @@ export default function RequestsPage() {
                   <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
                     <div className="flex items-center gap-2 text-sm font-medium text-amber-800 mb-1">
                       <AlertTriangle className="h-4 w-4" />
-                      ניתוח השפעה
+                      {t("impact_analysis")}
                     </div>
                     <p className="text-xs text-amber-700">
-                      אישור בקשה זו יפחית אחות אחת מ-{formatDateHe(req.startDate)} עד{" "}
-                      {formatDateHe(req.endDate)} ({daysBetween(req.startDate, req.endDate)} ימים).
-                      בדקו שאין חוסר באחיות בימים אלו.
+                      אישור בקשה זו יפחית אחות אחת מ-
+                      {formatDateHe(req.startDate)} עד{" "}
+                      {formatDateHe(req.endDate)} (
+                      {daysBetween(req.startDate, req.endDate)} ימים). בדקו שאין
+                      חוסר באחיות בימים אלו.
                     </p>
                   </div>
 
@@ -220,10 +228,10 @@ export default function RequestsPage() {
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <div className="flex-1">
                       <label className="text-xs text-muted-foreground mb-1 block">
-                        הערת מנהלת
+                        {t("manager_note")}
                       </label>
                       <Input
-                        placeholder="הערה (אופציונלי)..."
+                        placeholder={t("note_optional")}
                         value={notes[req.id] ?? ""}
                         onChange={(e) =>
                           setNotes((prev) => ({
@@ -246,7 +254,7 @@ export default function RequestsPage() {
                         ) : (
                           <>
                             <X className="h-4 w-4 me-1" />
-                            דחייה
+                            {t("reject")}
                           </>
                         )}
                       </Button>
@@ -260,7 +268,7 @@ export default function RequestsPage() {
                         ) : (
                           <>
                             <Check className="h-4 w-4 me-1" />
-                            אישור
+                            {t("approve")}
                           </>
                         )}
                       </Button>
@@ -279,7 +287,7 @@ export default function RequestsPage() {
           {history.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                אין היסטוריית בקשות
+                {t("no_requests_history")}
               </CardContent>
             </Card>
           ) : (
@@ -291,7 +299,8 @@ export default function RequestsPage() {
                       <span>{TYPE_ICONS[req.type]}</span>
                       <span className="font-medium">{req.nurse?.name}</span>
                       <span className="text-sm text-muted-foreground">
-                        {formatDateHe(req.startDate)} — {formatDateHe(req.endDate)}
+                        {formatDateHe(req.startDate)} —{" "}
+                        {formatDateHe(req.endDate)}
                       </span>
                     </div>
                     <StatusBadge
@@ -300,7 +309,7 @@ export default function RequestsPage() {
                   </div>
                   {req.managerNote && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      הערה: {req.managerNote}
+                      {t("notes")}: {req.managerNote}
                     </p>
                   )}
                 </CardContent>

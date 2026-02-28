@@ -21,6 +21,7 @@ import type {
   ScheduleWithAssignments,
   ScheduleAssignment,
 } from "@/types/schedule";
+import { useTranslation } from "@/i18n/use-translation";
 
 // ── Types ──
 
@@ -48,26 +49,6 @@ type ManagerProfile = {
   nurseProfileId: string;
   contractHours: number;
   managementHours: number;
-};
-
-const DAY_LABELS: Record<string, string> = {
-  SUN: "ראשון",
-  MON: "שני",
-  TUE: "שלישי",
-  WED: "רביעי",
-  THU: "חמישי",
-  FRI: "שישי",
-  SAT: "שבת",
-};
-
-const DAY_LABELS_SHORT: Record<string, string> = {
-  SUN: "א׳",
-  MON: "ב׳",
-  TUE: "ג׳",
-  WED: "ד׳",
-  THU: "ה׳",
-  FRI: "ו׳",
-  SAT: "ש׳",
 };
 
 // ── Derive unfilled gaps ──
@@ -157,6 +138,26 @@ function autoSuggest(
 // ── Main Component ──
 
 export function SelfAssignClient() {
+  const { t } = useTranslation();
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun"),
+    MON: t("mon"),
+    TUE: t("tue"),
+    WED: t("wed"),
+    THU: t("thu"),
+    FRI: t("fri"),
+    SAT: t("sat"),
+  };
+  const DAY_LABELS_SHORT: Record<string, string> = {
+    SUN: t("sun_short"),
+    MON: t("mon_short"),
+    TUE: t("tue_short"),
+    WED: t("wed_short"),
+    THU: t("thu_short"),
+    FRI: t("fri_short"),
+    SAT: t("sat_short"),
+  };
+
   const [weekStart, setWeekStart] = useState(() => getWeekStart());
   const [schedule, setSchedule] = useState<ScheduleWithAssignments | null>(
     null,
@@ -342,7 +343,7 @@ export function SelfAssignClient() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error ?? "שגיאה בשמירת שיבוצים");
+        throw new Error(data?.error ?? t("self_assign_error"));
       }
 
       setSaved(true);
@@ -355,7 +356,7 @@ export function SelfAssignClient() {
         setSchedule(await schedRes.json());
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בשמירת שיבוצים");
+      setError(err instanceof Error ? err.message : t("self_assign_error"));
     } finally {
       setSaving(false);
     }
@@ -367,7 +368,7 @@ export function SelfAssignClient() {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="me-2 text-muted-foreground">טוען נתונים...</span>
+        <span className="me-2 text-muted-foreground">{t("loading_data")}</span>
       </div>
     );
   }
@@ -378,11 +379,13 @@ export function SelfAssignClient() {
         <WeekNavigator weekStart={weekStart} onWeekChange={setWeekStart} />
         <Card>
           <CardContent className="flex flex-col items-center gap-4 py-16">
-            <p className="text-muted-foreground">אין לו״ז — יש ליצור תחילה</p>
+            <p className="text-muted-foreground">
+              {t("no_schedule_generate_first")}
+            </p>
             <Link href="/manager/schedule/generate">
               <Button>
                 <CalendarPlus className="h-4 w-4 me-2" />
-                יצירת לו״ז
+                {t("generate_schedule")}
               </Button>
             </Link>
           </CardContent>
@@ -409,7 +412,7 @@ export function SelfAssignClient() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">משבצות פנויות</CardTitle>
+              <CardTitle className="text-base">{t("unfilled_slots")}</CardTitle>
               <Button
                 variant="outline"
                 size="sm"
@@ -417,14 +420,14 @@ export function SelfAssignClient() {
                 disabled={gaps.length === 0}
               >
                 <Wand2 className="h-4 w-4 me-2" />
-                הצעה אוטומטית
+                {t("auto_suggest")}
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             {gaps.length === 0 ? (
               <p className="text-center text-sm text-muted-foreground py-8">
-                אין משבצות פנויות לשבוע זה
+                {t("no_gaps")}
               </p>
             ) : (
               <div className="space-y-2">
@@ -462,7 +465,8 @@ export function SelfAssignClient() {
                           </span>
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5">
-                          {gap.shiftStart}–{gap.shiftEnd} ({gap.hours} שע׳)
+                          {gap.shiftStart}–{gap.shiftEnd} ({gap.hours}{" "}
+                          {t("hours_short")})
                         </div>
                       </div>
                     </label>
@@ -478,24 +482,28 @@ export function SelfAssignClient() {
           {/* Hours budget card */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">השבוע שלך</CardTitle>
+              <CardTitle className="text-base">{t("your_week")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-md bg-muted p-3">
-                  <div className="text-muted-foreground">שעות חוזה</div>
+                  <div className="text-muted-foreground">
+                    {t("contract_hours")}
+                  </div>
                   <div className="text-lg font-bold">
                     {managerProfile?.contractHours ?? 0}
                   </div>
                 </div>
                 <div className="rounded-md bg-muted p-3">
-                  <div className="text-muted-foreground">שעות ניהול</div>
+                  <div className="text-muted-foreground">
+                    {t("management_hours")}
+                  </div>
                   <div className="text-lg font-bold">
                     {managerProfile?.managementHours ?? 0}
                   </div>
                 </div>
                 <div className="rounded-md bg-blue-50 p-3">
-                  <div className="text-blue-700">שעות זמינות</div>
+                  <div className="text-blue-700">{t("available_hours")}</div>
                   <div className="text-lg font-bold text-blue-700">
                     {availableHours}
                   </div>
@@ -519,7 +527,7 @@ export function SelfAssignClient() {
                           : "text-amber-700",
                     )}
                   >
-                    נותרו
+                    {t("remaining_label")}
                   </div>
                   <div
                     className={cn(
@@ -539,8 +547,13 @@ export function SelfAssignClient() {
               {/* Progress bar */}
               <div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                  <span>מוקצה: {totalAssignedHours.toFixed(1)} שע׳</span>
-                  <span>זמין: {availableHours} שע׳</span>
+                  <span>
+                    {t("allocated_label")} {totalAssignedHours.toFixed(1)}{" "}
+                    {t("hours_short")}
+                  </span>
+                  <span>
+                    {t("available_label")} {availableHours} {t("hours_short")}
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
                   <div
@@ -560,7 +573,9 @@ export function SelfAssignClient() {
           {/* Day-by-day view */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">שיבוצים לפי יום</CardTitle>
+              <CardTitle className="text-sm">
+                {t("assignments_by_day")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1.5">
               {DAY_ORDER.map((day) => {
@@ -623,7 +638,7 @@ export function SelfAssignClient() {
                       <span className="text-end">
                         {displayName}{" "}
                         <span className="text-muted-foreground">
-                          {displayTime} ({displayHours} שע׳)
+                          {displayTime} ({displayHours} {t("hours_short")})
                         </span>
                       </span>
                     ) : (
@@ -645,19 +660,19 @@ export function SelfAssignClient() {
             {saved && (
               <div className="flex items-center justify-center gap-2 text-sm text-green-700">
                 <CheckCircle2 className="h-4 w-4" />
-                השיבוצים נשמרו בהצלחה
+                {t("self_assign_saved")}
               </div>
             )}
             <Button onClick={handleSave} disabled={saving} className="w-full">
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin me-2" />
-                  שומר שיבוצים...
+                  {t("saving_assignments")}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 me-2" />
-                  שמירה וסיום
+                  {t("save_done")}
                 </>
               )}
             </Button>

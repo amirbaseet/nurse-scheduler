@@ -22,16 +22,7 @@ import {
 import { cn, DAY_ORDER } from "@/lib/utils";
 import type { ScheduleAssignment } from "@/types/schedule";
 import { ScheduleCell } from "./schedule-cell";
-
-const DAY_LABELS: Record<string, string> = {
-  SUN: "א׳",
-  MON: "ב׳",
-  TUE: "ג׳",
-  WED: "ד׳",
-  THU: "ה׳",
-  FRI: "ו׳",
-  SAT: "ש׳",
-};
+import { useTranslation } from "@/i18n/use-translation";
 
 type NurseInfo = {
   id: string;
@@ -84,7 +75,7 @@ function isDraggable(assignment: ScheduleAssignment | undefined): boolean {
   return !assignment.isOff && !assignment.isFixed;
 }
 
-// ── Draggable + Droppable cell wrapper ──
+// -- Draggable + Droppable cell wrapper --
 
 function DndCell({
   assignment,
@@ -129,7 +120,7 @@ function DndCell({
   );
 }
 
-// ── Main Grid ──
+// -- Main Grid --
 
 export function ScheduleGrid({
   assignments,
@@ -142,6 +133,18 @@ export function ScheduleGrid({
   onCellClick: (assignment: ScheduleAssignment) => void;
   onSwap: (sourceId: string, targetId: string) => void;
 }) {
+  const { t } = useTranslation();
+
+  const DAY_LABELS: Record<string, string> = {
+    SUN: t("sun_short"),
+    MON: t("mon_short"),
+    TUE: t("tue_short"),
+    WED: t("wed_short"),
+    THU: t("thu_short"),
+    FRI: t("fri_short"),
+    SAT: t("sat_short"),
+  };
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeAssignment, setActiveAssignment] =
     useState<ScheduleAssignment | null>(null);
@@ -192,14 +195,14 @@ export function ScheduleGrid({
           <TableHeader>
             <TableRow>
               <TableHead className="sticky start-0 z-10 bg-background min-w-[140px]">
-                אחות
+                {t("role_nurse")}
               </TableHead>
               {DAY_ORDER.map((day) => (
                 <TableHead key={day} className="text-center min-w-[100px]">
                   {DAY_LABELS[day]}
                 </TableHead>
               ))}
-              <TableHead className="text-center min-w-[60px]">סה״כ</TableHead>
+              <TableHead className="text-center min-w-[60px]">{t("total_hours_label")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -208,7 +211,7 @@ export function ScheduleGrid({
                 <TableCell className="sticky start-0 z-10 bg-background">
                   <div className="font-medium">{nurse.name}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    {nurse.contractHours} שע׳
+                    {nurse.contractHours} {t("hours_short")}
                   </div>
                 </TableCell>
                 {DAY_ORDER.map((day) => {
@@ -235,7 +238,7 @@ export function ScheduleGrid({
                   colSpan={9}
                   className="text-center text-muted-foreground py-8"
                 >
-                  אין נתוני לו״ז
+                  {t("no_schedule_data")}
                 </TableCell>
               </TableRow>
             )}
@@ -243,7 +246,7 @@ export function ScheduleGrid({
         </Table>
       </div>
 
-      {/* Drag overlay — ghost cell following cursor */}
+      {/* Drag overlay -- ghost cell following cursor */}
       <DragOverlay>
         {activeAssignment ? (
           <div className="opacity-80 shadow-xl rounded">

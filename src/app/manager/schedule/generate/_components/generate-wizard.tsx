@@ -9,21 +9,22 @@ import type { GenerateResponse } from "@/types/schedule";
 import { StepSelectWeek } from "./step-select-week";
 import { StepReviewConfig } from "./step-review-config";
 import { StepReviewEdit } from "./step-review-edit";
-
-const STEPS = [
-  { num: 1, label: "בחירת שבוע" },
-  { num: 2, label: "סקירת הגדרות" },
-  { num: 3, label: "בדיקה ועריכה" },
-  { num: 4, label: "פורסם" },
-] as const;
+import { useTranslation } from "@/i18n/use-translation";
 
 export function GenerateWizard() {
+  const { t } = useTranslation();
+
+  const STEPS = [
+    { num: 1, label: t("step_select_week") },
+    { num: 2, label: t("step_review_config") },
+    { num: 3, label: t("step_review_edit") },
+    { num: 4, label: t("step_published") },
+  ] as const;
   const [step, setStep] = useState(1);
-  const [weekStart, setWeekStart] = useState<Date>(
-    getWeekStart(new Date()),
+  const [weekStart, setWeekStart] = useState<Date>(getWeekStart(new Date()));
+  const [generateResult, setGenerateResult] = useState<GenerateResponse | null>(
+    null,
   );
-  const [generateResult, setGenerateResult] =
-    useState<GenerateResponse | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [activeNurseCount, setActiveNurseCount] = useState(0);
@@ -38,13 +39,13 @@ export function GenerateWizard() {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "שגיאה ביצירת הלו״ז");
+        throw new Error(err.error || t("generate_error"));
       }
       const data: GenerateResponse = await res.json();
       setGenerateResult(data);
       setStep(3);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "שגיאה ביצירת הלו״ז");
+      alert(error instanceof Error ? error.message : t("generate_error"));
     } finally {
       setIsGenerating(false);
     }
@@ -60,11 +61,11 @@ export function GenerateWizard() {
       );
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "שגיאה בפרסום");
+        throw new Error(err.error || t("publish_error"));
       }
       setStep(4);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "שגיאה בפרסום");
+      alert(error instanceof Error ? error.message : t("publish_error"));
     } finally {
       setIsPublishing(false);
     }
@@ -147,14 +148,16 @@ export function GenerateWizard() {
             <div className="mx-auto mb-2">
               <CheckCircle2 className="h-16 w-16 text-emerald-500" />
             </div>
-            <CardTitle className="text-xl">הלו״ז פורסם בהצלחה!</CardTitle>
+            <CardTitle className="text-xl">
+              {t("schedule_published_msg")}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              {activeNurseCount} אחיות יקבלו התראה
+              {activeNurseCount} {t("nurses_notified")}
             </p>
             <Button asChild>
-              <a href="/manager/schedule">צפייה בלו״ז</a>
+              <a href="/manager/schedule">{t("view_schedule")}</a>
             </Button>
           </CardContent>
         </Card>
