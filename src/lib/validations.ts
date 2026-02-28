@@ -9,6 +9,10 @@ const ShiftPrefEnum = z.enum(["MORNING", "AFTERNOON", "ANYTIME"]);
 const EmploymentEnum = z.enum(["FULL_TIME", "PART_TIME", "TEMPORARY"]);
 const GenderPrefEnum = z.enum(["FEMALE_ONLY", "FEMALE_PREFERRED", "ANY"]);
 const ProgramTypeEnum = z.enum(["PURE_PROGRAM", "CLINIC_ADDON"]);
+const RequestTypeEnum = z.enum(["VACATION", "SICK", "PERSONAL", "OFF_DAY"]);
+const PriorityEnum = z.enum(["LOW", "NORMAL", "URGENT"]);
+const GenderEnum = z.enum(["MALE", "FEMALE"]);
+const RoleEnum = z.enum(["MANAGER", "NURSE"]);
 
 // ═══════════════════════════════════════════
 // Schedule
@@ -33,7 +37,10 @@ export const assignScheduleSchema = z.object({
 // ═══════════════════════════════════════════
 
 export const updateNurseSchema = z.object({
-  contractHours: z.number().positive("שעות חוזה חייבות להיות חיוביות").optional(),
+  contractHours: z
+    .number()
+    .positive("שעות חוזה חייבות להיות חיוביות")
+    .optional(),
   shiftPreference: ShiftPrefEnum.optional(),
   canWorkFriday: z.boolean().optional(),
   canWorkSaturday: z.boolean().optional(),
@@ -94,6 +101,85 @@ export const assignProgramSchema = z.object({
   weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
   day: DayOfWeekEnum,
   patientCount: z.number().int().min(0).optional(),
-  shiftStart: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-  shiftEnd: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  shiftStart: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/)
+    .optional(),
+  shiftEnd: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/)
+    .optional(),
+});
+
+// ═══════════════════════════════════════════
+// Requests
+// ═══════════════════════════════════════════
+
+export const createRequestSchema = z.object({
+  type: RequestTypeEnum,
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
+  reason: z.string().optional(),
+});
+
+export const respondRequestSchema = z.object({
+  managerNote: z.string().optional(),
+});
+
+// ═══════════════════════════════════════════
+// Preferences
+// ═══════════════════════════════════════════
+
+export const submitPreferenceSchema = z.object({
+  weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
+  shiftPreference: ShiftPrefEnum.optional(),
+  preferredDaysOff: z.array(DayOfWeekEnum).optional(),
+  notes: z.string().optional(),
+});
+
+// ═══════════════════════════════════════════
+// Tasks
+// ═══════════════════════════════════════════
+
+export const createTaskSchema = z.object({
+  title: z.string().min(1, "כותרת נדרשת"),
+  description: z.string().optional(),
+  assignedToId: z.string().optional(),
+  isForAll: z.boolean(),
+  dueDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  priority: PriorityEnum,
+});
+
+// ═══════════════════════════════════════════
+// Announcements
+// ═══════════════════════════════════════════
+
+export const createAnnouncementSchema = z.object({
+  title: z.string().min(1, "כותרת נדרשת"),
+  body: z.string().min(1, "תוכן נדרש"),
+  priority: PriorityEnum,
+  targetAll: z.boolean(),
+  targetNurseIds: z.array(z.string()).optional(),
+  expiresAt: z.string().optional(),
+});
+
+// ═══════════════════════════════════════════
+// Users
+// ═══════════════════════════════════════════
+
+export const createUserSchema = z.object({
+  name: z.string().min(1, "שם נדרש"),
+  nameAr: z.string().optional(),
+  role: RoleEnum,
+  pin: z.string().regex(/^(\d{4}|\d{6})$/, "PIN חייב להיות 4 או 6 ספרות"),
+  gender: GenderEnum,
+  contractHours: z.number().positive("שעות חוזה חייבות להיות חיוביות"),
+  phone: z.string().optional(),
+});
+
+export const changePinSchema = z.object({
+  newPin: z.string().regex(/^(\d{4}|\d{6})$/, "PIN חייב להיות 4 או 6 ספרות"),
 });
