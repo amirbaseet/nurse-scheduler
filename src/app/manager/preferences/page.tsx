@@ -121,11 +121,11 @@ export default function ManagerPreferencesPage() {
                     {pref.shiftPreference && (
                       <Badge
                         className={
-                          SHIFT_STYLES[pref.shiftPreference] ??
+                          SHIFT_STYLES[pref.shiftPreference.toLowerCase()] ??
                           SHIFT_STYLES.anytime
                         }
                       >
-                        {t(pref.shiftPreference)}
+                        {t(pref.shiftPreference.toLowerCase())}
                       </Badge>
                     )}
                   </div>

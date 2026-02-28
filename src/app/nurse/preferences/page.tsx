@@ -20,7 +20,11 @@ type WeeklyPreference = {
 };
 
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
-const SHIFT_OPTIONS = ["morning", "afternoon", "anytime"] as const;
+const SHIFT_OPTIONS = [
+  { value: "MORNING", label: "morning" },
+  { value: "AFTERNOON", label: "afternoon" },
+  { value: "ANYTIME", label: "anytime" },
+] as const;
 
 function formatDateHe(dateStr: string) {
   const d = new Date(dateStr);
@@ -42,8 +46,8 @@ export default function NursePreferencesPage() {
   const [successMsg, setSuccessMsg] = useState("");
   const [existing, setExisting] = useState<WeeklyPreference | null>(null);
 
-  // Form state
-  const [shiftPref, setShiftPref] = useState<string>("anytime");
+  // Form state — values are uppercase to match API enums
+  const [shiftPref, setShiftPref] = useState<string>("ANYTIME");
   const [daysOff, setDaysOff] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
 
@@ -55,11 +59,11 @@ export default function NursePreferencesPage() {
       .then((data: WeeklyPreference | null) => {
         setExisting(data);
         if (data) {
-          setShiftPref(data.shiftPreference ?? "anytime");
+          setShiftPref(data.shiftPreference ?? "ANYTIME");
           setDaysOff(parseJsonArray(data.preferredDaysOff));
           setNotes(data.notes ?? "");
         } else {
-          setShiftPref("anytime");
+          setShiftPref("ANYTIME");
           setDaysOff([]);
           setNotes("");
         }
@@ -158,13 +162,13 @@ export default function NursePreferencesPage() {
               <div className="flex gap-2">
                 {SHIFT_OPTIONS.map((opt) => (
                   <Button
-                    key={opt}
-                    variant={shiftPref === opt ? "default" : "outline"}
+                    key={opt.value}
+                    variant={shiftPref === opt.value ? "default" : "outline"}
                     size="sm"
                     className="flex-1"
-                    onClick={() => setShiftPref(opt)}
+                    onClick={() => setShiftPref(opt.value)}
                   >
-                    {t(opt)}
+                    {t(opt.label)}
                   </Button>
                 ))}
               </div>
@@ -212,9 +216,7 @@ export default function NursePreferencesPage() {
               disabled={submitting}
               onClick={handleSubmit}
             >
-              {submitting && (
-                <Loader2 className="h-4 w-4 animate-spin me-1" />
-              )}
+              {submitting && <Loader2 className="h-4 w-4 animate-spin me-1" />}
               {t("submit")}
             </Button>
 
