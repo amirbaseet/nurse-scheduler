@@ -1,18 +1,18 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { verifyJwt } from "@/lib/auth";
+import { LoginForm } from "./_components/login-form";
 
-export default function Home() {
-  const token = cookies().get("token");
+export default async function Home() {
+  const token = cookies().get("token")?.value;
   if (token) {
-    redirect("/manager");
+    try {
+      const payload = await verifyJwt(token);
+      redirect(payload.role === "MANAGER" ? "/manager" : "/nurse");
+    } catch {
+      // Invalid token — fall through to login
+    }
   }
 
-  return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold">NurseScheduler Pro</h1>
-        <p className="mt-2 text-muted-foreground">Login page coming soon</p>
-      </div>
-    </main>
-  );
+  return <LoginForm />;
 }
