@@ -1,0 +1,662 @@
+{
+  "כירורגיה": {
+    "name_heb": "כירורגיה",
+    "name_en": "Surgery",
+    "total_shifts": 216,
+    "unique_nurses": 11,
+    "qualified_nurses": [
+      "אינאס גאעוני",
+      "אנוואר אדעיס",
+      "גמילה שקיראת",
+      "הדיל סוריך",
+      "היא חליל",
+      "כתיבה בסיט",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "סאנדי צאיג",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed"
+    ],
+    "day_distribution": {
+      "ראשון": 52,
+      "שני": 63,
+      "רביעי": 88,
+      "שלישי": 13
+    },
+    "avg_shift_hours": 7.1,
+    "min_shift_hours": 3.0,
+    "max_shift_hours": 11.0,
+    "weeks_active": 51
+  },
+  "עיניים": {
+    "name_heb": "עיניים",
+    "name_en": "Ophthalmology",
+    "total_shifts": 404,
+    "unique_nurses": 11,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "הדיל סוריך",
+      "היא חליל",
+      "כתיבה בסיט",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "נסרין משני",
+      "נסרין עלי",
+      "עלאא אבו סנינה",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "day_distribution": {
+      "ראשון": 104,
+      "רביעי": 53,
+      "שלישי": 83,
+      "שני": 63,
+      "חמישי": 71,
+      "שבת": 29,
+      "שישי": 1
+    },
+    "avg_shift_hours": 6.3,
+    "min_shift_hours": 3.0,
+    "max_shift_hours": 11.0,
+    "weeks_active": 51
+  },
+  "מקצועית": {
+    "name_heb": "מקצועית",
+    "name_en": "Professional/Specialty",
+    "total_shifts": 197,
+    "unique_nurses": 4,
+    "qualified_nurses": [
+      "כתיבה בסיט",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "רוואא משני"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Sat"
+    ],
+    "day_distribution": {
+      "שני": 44,
+      "שלישי": 46,
+      "חמישי": 40,
+      "ראשון": 30,
+      "רביעי": 17,
+      "שבת": 20
+    },
+    "avg_shift_hours": 7.7,
+    "min_shift_hours": 5.0,
+    "max_shift_hours": 11.0,
+    "weeks_active": 51
+  },
+  "זוליר": {
+    "name_heb": "זוליר",
+    "name_en": "Xolair Injection",
+    "total_shifts": 51,
+    "unique_nurses": 6,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "גמילה שקיראת",
+      "כתיבה בסיט",
+      "נידאל ניגם",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Wed"
+    ],
+    "day_distribution": {
+      "רביעי": 51
+    },
+    "avg_shift_hours": 7.7,
+    "min_shift_hours": 4.0,
+    "max_shift_hours": 11.5,
+    "weeks_active": 50
+  },
+  "העמסת סוכר": {
+    "name_heb": "העמסת סוכר",
+    "name_en": "Glucose Loading Test",
+    "total_shifts": 194,
+    "unique_nurses": 8,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "גמילה שקיראת",
+      "הדיל סוריך",
+      "היא חליל",
+      "נגלא שוויקי",
+      "סאנדי צאיג",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Tue"
+    ],
+    "day_distribution": {
+      "ראשון": 94,
+      "שלישי": 100
+    },
+    "avg_shift_hours": 6.3,
+    "min_shift_hours": 3.5,
+    "max_shift_hours": 7.0,
+    "weeks_active": 50
+  },
+  "סכרת": {
+    "name_heb": "סכרת",
+    "name_en": "Diabetes",
+    "total_shifts": 526,
+    "unique_nurses": 7,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "הדיל סוריך",
+      "היא חליל",
+      "כתיבה בסיט",
+      "רבחייה בראגיתי",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Sat"
+    ],
+    "day_distribution": {
+      "ראשון": 70,
+      "שני": 112,
+      "שלישי": 92,
+      "רביעי": 101,
+      "חמישי": 106,
+      "שבת": 45
+    },
+    "avg_shift_hours": 6.7,
+    "min_shift_hours": 1.0,
+    "max_shift_hours": 11.0,
+    "weeks_active": 51
+  },
+  "א.א.ג": {
+    "name_heb": "א.א.ג",
+    "name_en": "ENT",
+    "total_shifts": 205,
+    "unique_nurses": 12,
+    "qualified_nurses": [
+      "אינאס גאעוני",
+      "אנוואר אדעיס",
+      "גמילה שקיראת",
+      "הדיל סוריך",
+      "היא חליל",
+      "כתיבה בסיט",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "נסרין משני",
+      "רבחייה בראגיתי",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "day_distribution": {
+      "רביעי": 46,
+      "שני": 46,
+      "שלישי": 39,
+      "ראשון": 48,
+      "חמישי": 26
+    },
+    "avg_shift_hours": 7.0,
+    "min_shift_hours": 3.0,
+    "max_shift_hours": 9.5,
+    "weeks_active": 51
+  },
+  "תעסוקתית": {
+    "name_heb": "תעסוקתית",
+    "name_en": "Occupational Therapy",
+    "total_shifts": 97,
+    "unique_nurses": 1,
+    "qualified_nurses": [
+      "אינאס גאעוני"
+    ],
+    "typical_days": [
+      "Sun",
+      "Wed"
+    ],
+    "day_distribution": {
+      "ראשון": 49,
+      "רביעי": 48
+    },
+    "avg_shift_hours": 0,
+    "min_shift_hours": 0,
+    "max_shift_hours": 0,
+    "weeks_active": 50
+  },
+  "שד": {
+    "name_heb": "שד",
+    "name_en": "Breast Clinic",
+    "total_shifts": 216,
+    "unique_nurses": 9,
+    "qualified_nurses": [
+      "אינאס גאעוני",
+      "אנוואר אדעיס",
+      "גמילה שקיראת",
+      "הדיל סוריך",
+      "היא חליל",
+      "כתיבה בסיט",
+      "נגלא שוויקי",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "day_distribution": {
+      "שני": 53,
+      "שלישי": 46,
+      "חמישי": 113,
+      "ראשון": 3,
+      "רביעי": 1
+    },
+    "avg_shift_hours": 6.7,
+    "min_shift_hours": 3.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 51
+  },
+  "מנטו": {
+    "name_heb": "מנטו",
+    "name_en": "Mantoux/TB Test",
+    "total_shifts": 70,
+    "unique_nurses": 1,
+    "qualified_nurses": [
+      "אינאס גאעוני"
+    ],
+    "typical_days": [
+      "Mon",
+      "Tue",
+      "Thu"
+    ],
+    "day_distribution": {
+      "שלישי": 3,
+      "חמישי": 37,
+      "שני": 30
+    },
+    "avg_shift_hours": 7.2,
+    "min_shift_hours": 6.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 46
+  },
+  "אי ספיקת לב": {
+    "name_heb": "אי ספיקת לב",
+    "name_en": "Heart Failure",
+    "total_shifts": 191,
+    "unique_nurses": 5,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "הדיל סוריך",
+      "נידאל ניגם",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "day_distribution": {
+      "שלישי": 26,
+      "רביעי": 90,
+      "ראשון": 10,
+      "חמישי": 41,
+      "שני": 24
+    },
+    "avg_shift_hours": 6.1,
+    "min_shift_hours": 4.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 50
+  },
+  "א.ק.ג": {
+    "name_heb": "א.ק.ג",
+    "name_en": "ECG",
+    "total_shifts": 117,
+    "unique_nurses": 8,
+    "qualified_nurses": [
+      "אינאס גאעוני",
+      "אנוואר אדעיס",
+      "גמילה שקיראת",
+      "הדיל סוריך",
+      "נגלא שוויקי",
+      "סאנדי צאיג",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "day_distribution": {
+      "רביעי": 8,
+      "שני": 20,
+      "חמישי": 43,
+      "שלישי": 46
+    },
+    "avg_shift_hours": 6.2,
+    "min_shift_hours": 1.5,
+    "max_shift_hours": 7.0,
+    "weeks_active": 47
+  },
+  "אורטופידיה": {
+    "name_heb": "אורטופידיה",
+    "name_en": "Orthopedics",
+    "total_shifts": 379,
+    "unique_nurses": 12,
+    "qualified_nurses": [
+      "אינאס גאעוני",
+      "אנוואר אדעיס",
+      "גמילה שקיראת",
+      "הדיל סוריך",
+      "כתיבה בסיט",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "סאנדי צאיג",
+      "עלאא אבו סנינה",
+      "רבחייה בראגיתי",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "day_distribution": {
+      "רביעי": 84,
+      "ראשון": 49,
+      "שבת": 43,
+      "שני": 87,
+      "שישי": 22,
+      "חמישי": 60,
+      "שלישי": 34
+    },
+    "avg_shift_hours": 7.3,
+    "min_shift_hours": 3.5,
+    "max_shift_hours": 11.5,
+    "weeks_active": 51
+  },
+  "אורטופיד ילדים": {
+    "name_heb": "אורטופיד ילדים",
+    "name_en": "Pediatric Orthopedics",
+    "total_shifts": 34,
+    "unique_nurses": 1,
+    "qualified_nurses": [
+      "עלאא אבו סנינה"
+    ],
+    "typical_days": [
+      "Tue"
+    ],
+    "day_distribution": {
+      "שלישי": 34
+    },
+    "avg_shift_hours": 5.7,
+    "min_shift_hours": 5.0,
+    "max_shift_hours": 7.0,
+    "weeks_active": 34
+  },
+  "פלאסטיקה": {
+    "name_heb": "פלאסטיקה",
+    "name_en": "Plastic Surgery",
+    "total_shifts": 35,
+    "unique_nurses": 7,
+    "qualified_nurses": [
+      "אינאס גאעוני",
+      "אנוואר אדעיס",
+      "הדיל סוריך",
+      "כתיבה בסיט",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Mon",
+      "Tue"
+    ],
+    "day_distribution": {
+      "שני": 34,
+      "שלישי": 1
+    },
+    "avg_shift_hours": 6.9,
+    "min_shift_hours": 4.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 34
+  },
+  "עיניים ילדים": {
+    "name_heb": "עיניים ילדים",
+    "name_en": "Pediatric Ophthalmology",
+    "total_shifts": 71,
+    "unique_nurses": 6,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "הדיל סוריך",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Wed"
+    ],
+    "day_distribution": {
+      "רביעי": 25,
+      "ראשון": 46
+    },
+    "avg_shift_hours": 6.8,
+    "min_shift_hours": 4.0,
+    "max_shift_hours": 11.5,
+    "weeks_active": 38
+  },
+  "שטראוס": {
+    "name_heb": "שטראוס",
+    "name_en": "Strauss",
+    "total_shifts": 5,
+    "unique_nurses": 3,
+    "qualified_nurses": [
+      "הדיל סוריך",
+      "כתיבה בסיט",
+      "רוואא משני"
+    ],
+    "typical_days": [
+      "Mon"
+    ],
+    "day_distribution": {
+      "שני": 5
+    },
+    "avg_shift_hours": 6.4,
+    "min_shift_hours": 6.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 3
+  },
+  "Avastin": {
+    "name_heb": "Avastin",
+    "name_en": "Avastin Eye Injection",
+    "total_shifts": 31,
+    "unique_nurses": 3,
+    "qualified_nurses": [
+      "היא חליל",
+      "כתיבה בסיט",
+      "נידאל ניגם"
+    ],
+    "typical_days": [
+      "Wed",
+      "Sat"
+    ],
+    "day_distribution": {
+      "רביעי": 21,
+      "שבת": 10
+    },
+    "avg_shift_hours": 8.6,
+    "min_shift_hours": 4.0,
+    "max_shift_hours": 11.5,
+    "weeks_active": 14
+  },
+  "סקלרותרפיה": {
+    "name_heb": "סקלרותרפיה",
+    "name_en": "Sclerotherapy",
+    "total_shifts": 10,
+    "unique_nurses": 2,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "רוואא משני"
+    ],
+    "typical_days": [
+      "Sat"
+    ],
+    "day_distribution": {
+      "שבת": 10
+    },
+    "avg_shift_hours": 4.6,
+    "min_shift_hours": 4.0,
+    "max_shift_hours": 5.0,
+    "weeks_active": 6
+  },
+  "מ.ש": {
+    "name_heb": "מ.ש",
+    "name_en": "Urinary Tract/Catheter",
+    "total_shifts": 62,
+    "unique_nurses": 2,
+    "qualified_nurses": [
+      "אינאס גאעוני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "day_distribution": {
+      "שני": 23,
+      "שלישי": 24,
+      "רביעי": 2,
+      "ראשון": 9,
+      "חמישי": 4
+    },
+    "avg_shift_hours": 6.5,
+    "min_shift_hours": 6.0,
+    "max_shift_hours": 7.0,
+    "weeks_active": 21
+  },
+  "חיסון": {
+    "name_heb": "חיסון",
+    "name_en": "Vaccination",
+    "total_shifts": 50,
+    "unique_nurses": 8,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "הדיל סוריך",
+      "היא חליל",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "רבחייה בראגיתי",
+      "רוואא משני",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ],
+    "day_distribution": {
+      "שני": 11,
+      "שלישי": 9,
+      "רביעי": 10,
+      "ראשון": 11,
+      "חמישי": 9
+    },
+    "avg_shift_hours": 6.3,
+    "min_shift_hours": 3.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 11
+  },
+  "Type 1 Diabetes": {
+    "name_heb": "Type 1 Diabetes",
+    "name_en": "Type 1 Diabetes",
+    "total_shifts": 6,
+    "unique_nurses": 1,
+    "qualified_nurses": [
+      "רבחייה בראגיתי"
+    ],
+    "typical_days": [
+      "Sun",
+      "Mon",
+      "Wed"
+    ],
+    "day_distribution": {
+      "ראשון": 4,
+      "שני": 1,
+      "רביעי": 1
+    },
+    "avg_shift_hours": 8.0,
+    "min_shift_hours": 8.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 6
+  },
+  "כף יד": {
+    "name_heb": "כף יד",
+    "name_en": "Hand Clinic",
+    "total_shifts": 5,
+    "unique_nurses": 4,
+    "qualified_nurses": [
+      "אנוואר אדעיס",
+      "נגלא שוויקי",
+      "נידאל ניגם",
+      "רוואן אבו סרור"
+    ],
+    "typical_days": [
+      "Mon"
+    ],
+    "day_distribution": {
+      "שני": 5
+    },
+    "avg_shift_hours": 6.4,
+    "min_shift_hours": 5.0,
+    "max_shift_hours": 8.0,
+    "weeks_active": 5
+  }
+}
