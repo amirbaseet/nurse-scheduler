@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { generateScheduleSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
+import { dbToAlgorithmConfig, algorithmToDbAssignments } from "@/algorithm/converters";
+import { generateWeeklySchedule } from "@/algorithm/index";
 
 export async function POST(request: Request) {
   try {
@@ -19,28 +21,140 @@ export async function POST(request: Request) {
       );
     }
 
-    // STUB: Algorithm will be implemented in Phase 6.
-    // For now, create an empty GENERATED schedule.
+    // Compute weekEnd (Saturday end of week)
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    // ── Load all config from DB ──
+
+    const [nurseProfiles, clinicDefaults, clinicOverrides, timeOff, fixedAssignments, programs, preferences] =
+      await Promise.all([
+        db.nurseProfile.findMany({
+          where: { user: { isActive: true } },
+          include: {
+            user: true,
+            blockedClinics: true,
+          },
+        }),
+
+        db.clinicDefaultConfig.findMany({
+          where: { isActive: true },
+          include: {
+            clinic: {
+              select: {
+                genderPref: true,
+                canBeSecondary: true,
+                secondaryHours: true,
+                secondaryNursesNeeded: true,
+              },
+            },
+          },
+        }),
+
+        db.clinicWeeklyConfig.findMany({
+          where: { weekStart },
+          include: {
+            clinic: {
+              select: {
+                genderPref: true,
+                canBeSecondary: true,
+                secondaryHours: true,
+                secondaryNursesNeeded: true,
+              },
+            },
+          },
+        }),
+
+        db.timeOffRequest.findMany({
+          where: {
+            status: "APPROVED",
+            startDate: { lte: weekEnd },
+            endDate: { gte: weekStart },
+          },
+        }),
+
+        db.fixedAssignment.findMany({
+          where: {
+            OR: [
+              { weekStart: new Date("1970-01-01T00:00:00.000Z") }, // permanent
+              { weekStart },                                       // this week only
+            ],
+          },
+          include: {
+            clinic: {
+              select: {
+                defaultConfigs: {
+                  select: { day: true, shiftStart: true, shiftEnd: true },
+                },
+              },
+            },
+          },
+        }),
+
+        db.programAssignment.findMany({
+          where: { weekStart },
+          include: {
+            program: {
+              select: { name: true, type: true, defaultHours: true },
+            },
+          },
+        }),
+
+        db.weeklyPreference.findMany({
+          where: { weekStart },
+        }),
+      ]);
+
+    // ── Convert DB → Algorithm types ──
+
+    const config = dbToAlgorithmConfig(
+      nurseProfiles,
+      clinicDefaults,
+      clinicOverrides,
+      timeOff,
+      fixedAssignments,
+      programs,
+      preferences
+    );
+
+    // ── Run algorithm ──
+
+    const result = generateWeeklySchedule(weekStart, config);
+
+    // ── Save results ──
+
     const schedule = await db.weeklySchedule.upsert({
       where: { weekStart },
       create: {
         weekStart,
         status: "GENERATED",
-        qualityScore: 0,
+        qualityScore: result.qualityScore,
         generatedAt: new Date(),
       },
       update: {
         status: "GENERATED",
-        qualityScore: 0,
+        qualityScore: result.qualityScore,
         generatedAt: new Date(),
       },
     });
 
+    // Replace all assignments in a transaction
+    const dbAssignments = algorithmToDbAssignments(result.assignments, schedule.id);
+
+    await db.$transaction([
+      db.scheduleAssignment.deleteMany({
+        where: { scheduleId: schedule.id },
+      }),
+      db.scheduleAssignment.createMany({
+        data: dbAssignments,
+      }),
+    ]);
+
     return NextResponse.json({
       schedule,
-      warnings: ["Algorithm stub — no assignments generated yet (Phase 6)"],
-      qualityScore: 0,
-      managerGaps: [],
+      warnings: result.warnings,
+      qualityScore: result.qualityScore,
+      managerGaps: result.managerGaps,
     });
   } catch (error) {
     return handleApiError(error);
