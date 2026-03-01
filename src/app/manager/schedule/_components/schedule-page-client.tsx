@@ -8,7 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { WeekNavigator } from "@/components/week-navigator";
 import { StatusBadge } from "@/components/status-badge";
 import { getWeekStart, formatDate } from "@/lib/utils";
-import type { ScheduleWithAssignments, ScheduleAssignment } from "@/types/schedule";
+import type {
+  ScheduleWithAssignments,
+  ScheduleAssignment,
+} from "@/types/schedule";
 import { ScheduleGrid } from "./schedule-grid";
 import { EditAssignmentDialog } from "./edit-assignment-dialog";
 
@@ -26,7 +29,9 @@ type ClinicOption = {
 
 export function SchedulePageClient() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart());
-  const [schedule, setSchedule] = useState<ScheduleWithAssignments | null>(null);
+  const [schedule, setSchedule] = useState<ScheduleWithAssignments | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
 
@@ -67,7 +72,7 @@ export function SchedulePageClient() {
           );
         }
       })
-      .catch(console.error);
+      .catch(() => {});
   }, []);
 
   // Fetch schedule on week change
@@ -124,10 +129,18 @@ export function SchedulePageClient() {
       // Optimistic update: swap nurseIds locally
       const updatedAssignments = schedule.assignments.map((a) => {
         if (a.id === sourceId) {
-          return { ...a, nurseId: targetAssignment.nurseId, nurse: targetAssignment.nurse };
+          return {
+            ...a,
+            nurseId: targetAssignment.nurseId,
+            nurse: targetAssignment.nurse,
+          };
         }
         if (a.id === targetId) {
-          return { ...a, nurseId: sourceAssignment.nurseId, nurse: sourceAssignment.nurse };
+          return {
+            ...a,
+            nurseId: sourceAssignment.nurseId,
+            nurse: sourceAssignment.nurse,
+          };
         }
         return a;
       });

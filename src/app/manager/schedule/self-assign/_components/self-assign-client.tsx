@@ -188,7 +188,7 @@ export function SelfAssignClient() {
           });
         }
       })
-      .catch(console.error);
+      .catch(() => {});
   }, []);
 
   // Fetch schedule + clinic config on week change

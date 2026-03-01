@@ -22,7 +22,10 @@ export async function authGuard(role?: Role) {
  */
 export function handleApiError(error: unknown): NextResponse {
   if (error instanceof AuthError) {
-    return NextResponse.json({ error: error.message }, { status: error.status });
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.status },
+    );
   }
 
   // Zod validation error
@@ -33,14 +36,17 @@ export function handleApiError(error: unknown): NextResponse {
   ) {
     const issues = (error as { issues: Array<{ message: string }> }).issues;
     return NextResponse.json(
-      { error: "נתונים לא תקינים", details: issues.map((i) => i.message).join(", ") },
-      { status: 400 }
+      {
+        error: "נתונים לא תקינים",
+        details: issues.map((i) => i.message).join(", "),
+      },
+      { status: 400 },
     );
   }
 
-  console.error("Unhandled API error:", error);
-  return NextResponse.json(
-    { error: "שגיאת שרת פנימית" },
-    { status: 500 }
+  console.error(
+    "Unhandled API error:",
+    error instanceof Error ? error.message : "Unknown error",
   );
+  return NextResponse.json({ error: "שגיאת שרת פנימית" }, { status: 500 });
 }
