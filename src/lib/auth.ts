@@ -25,20 +25,18 @@ export class AuthError extends Error {
 // JWT helpers (jose — works in Edge runtime)
 // ═══════════════════════════════════════════
 
-// Validate JWT_SECRET eagerly at module load (fails fast instead of during a request)
-const JWT_SECRET_RAW = process.env.JWT_SECRET;
-if (!JWT_SECRET_RAW && process.env.NODE_ENV !== "test") {
-  throw new Error(
-    "JWT_SECRET environment variable is not set. " +
-      "Add it to .env before starting the server.",
-  );
-}
-
+// Lazy secret access — checked on first request, not at build time.
+// (Next.js pre-renders API routes during `next build`, so module-level
+// throws would break the Docker build where JWT_SECRET isn't set yet.)
 function getSecret() {
-  if (!JWT_SECRET_RAW) {
-    throw new Error("JWT_SECRET environment variable is not set");
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error(
+      "JWT_SECRET environment variable is not set. " +
+        "Add it to .env before starting the server.",
+    );
   }
-  return new TextEncoder().encode(JWT_SECRET_RAW);
+  return new TextEncoder().encode(secret);
 }
 
 export async function signJwt(payload: JwtPayload): Promise<string> {
