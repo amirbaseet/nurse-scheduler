@@ -183,7 +183,7 @@ export function DefaultScheduleTab({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>יום</TableHead>
+                    <TableHead>{t("day_label")}</TableHead>
                     <TableHead>{t("active")}</TableHead>
                     <TableHead>{t("shift_start")}</TableHead>
                     <TableHead>{t("shift_end")}</TableHead>

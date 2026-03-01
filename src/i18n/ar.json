@@ -304,5 +304,19 @@
   "remaining_label": "المتبقي",
   "allocated_label": "المعين:",
   "available_label": "متاح:",
-  "assignments_by_day": "التعيينات حسب اليوم"
+  "assignments_by_day": "التعيينات حسب اليوم",
+  "day_label": "يوم",
+  "assign": "تعيين",
+  "patients": "مرضى",
+  "assign_to_program_desc": "تعيين ممرضة لبرنامج هذا الأسبوع",
+  "nurse_label": "ممرضة",
+  "days": "أيام",
+  "impact_approve_prefix": "الموافقة على هذا الطلب ستقلل ممرضة واحدة من",
+  "impact_check_suffix": "تحققوا من عدم وجود نقص في الممرضات في هذه الأيام.",
+  "create_task_desc": "أضف مهمة جديدة للممرضات",
+  "priority_label": "أولوية",
+  "create": "إنشاء",
+  "create_announcement_desc": "أرسل إعلاناً للممرضات",
+  "you_label": "أنت",
+  "loading": "جاري التحميل..."
 }

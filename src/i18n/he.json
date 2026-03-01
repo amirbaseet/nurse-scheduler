@@ -304,5 +304,19 @@
   "remaining_label": "נותרו",
   "allocated_label": "מוקצה:",
   "available_label": "זמין:",
-  "assignments_by_day": "שיבוצים לפי יום"
+  "assignments_by_day": "שיבוצים לפי יום",
+  "day_label": "יום",
+  "assign": "שיבוץ",
+  "patients": "מטופלים",
+  "assign_to_program_desc": "שיבוץ אחות לתוכנית בשבוע הנוכחי",
+  "nurse_label": "אחות",
+  "days": "ימים",
+  "impact_approve_prefix": "אישור בקשה זו יפחית אחות אחת מ-",
+  "impact_check_suffix": "בדקו שאין חוסר באחיות בימים אלו.",
+  "create_task_desc": "הוסף משימה חדשה לאחיות",
+  "priority_label": "עדיפות",
+  "create": "יצירה",
+  "create_announcement_desc": "שלח הודעה לאחיות",
+  "you_label": "את",
+  "loading": "טוען..."
 }

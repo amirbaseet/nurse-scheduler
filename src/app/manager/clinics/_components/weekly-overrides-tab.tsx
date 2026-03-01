@@ -180,7 +180,7 @@ export function WeeklyOverridesTab({
       )}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">טוען...</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : overrides.length === 0 ? (
         <div className="rounded-md border border-dashed p-8 text-center text-muted-foreground">
           {t("no_overrides")}
@@ -189,8 +189,8 @@ export function WeeklyOverridesTab({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>מרפאה</TableHead>
-              <TableHead>יום</TableHead>
+              <TableHead>{t("clinic_label")}</TableHead>
+              <TableHead>{t("day_label")}</TableHead>
               <TableHead>{t("shift_start")}</TableHead>
               <TableHead>{t("shift_end")}</TableHead>
               <TableHead>{t("nurses")}</TableHead>
@@ -233,7 +233,7 @@ export function WeeklyOverridesTab({
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-2">
-              <Label>מרפאה</Label>
+              <Label>{t("clinic_label")}</Label>
               <Select
                 value={newOverride.clinicId}
                 onValueChange={(val) =>
@@ -254,7 +254,7 @@ export function WeeklyOverridesTab({
             </div>
 
             <div className="grid gap-2">
-              <Label>יום</Label>
+              <Label>{t("day_label")}</Label>
               <Select
                 value={newOverride.day}
                 onValueChange={(val) =>

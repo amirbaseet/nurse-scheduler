@@ -235,7 +235,7 @@ export default function TasksPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t("create_task")}</DialogTitle>
-            <DialogDescription>הוסף משימה חדשה לאחיות</DialogDescription>
+            <DialogDescription>{t("create_task_desc")}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
@@ -282,7 +282,7 @@ export default function TasksPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5">
-                <Label>עדיפות</Label>
+                <Label>{t("priority_label")}</Label>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger>
                     <SelectValue />
@@ -323,7 +323,7 @@ export default function TasksPage() {
               ) : (
                 <Plus className="h-4 w-4 me-2" />
               )}
-              יצירה
+              {t("create")}
             </Button>
           </DialogFooter>
         </DialogContent>

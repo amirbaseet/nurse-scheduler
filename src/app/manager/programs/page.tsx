@@ -210,7 +210,9 @@ export default function ProgramsPage() {
                           </span>
                         )}
                         {prog.linkedClinicCode && (
-                          <span>מרפאה: {prog.linkedClinicCode}</span>
+                          <span>
+                            {t("clinic_label")}: {prog.linkedClinicCode}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -221,7 +223,7 @@ export default function ProgramsPage() {
                     onClick={() => openAssignDialog(prog.id)}
                   >
                     <Plus className="h-3 w-3 me-1" />
-                    שיבוץ
+                    {t("assign")}
                   </Button>
                 </div>
 
@@ -246,7 +248,7 @@ export default function ProgramsPage() {
                         )}
                         {a.patientCount != null && (
                           <span className="text-xs">
-                            ({a.patientCount} מטופלים)
+                            ({a.patientCount} {t("patients")})
                           </span>
                         )}
                       </div>
@@ -269,14 +271,12 @@ export default function ProgramsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t("assign_nurse_to_day")}</DialogTitle>
-            <DialogDescription>
-              שיבוץ אחות לתוכנית בשבוע הנוכחי
-            </DialogDescription>
+            <DialogDescription>{t("assign_to_program_desc")}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
             <div className="grid gap-1.5">
-              <Label>תוכנית</Label>
+              <Label>{t("program")}</Label>
               <Select
                 value={assignProgramId}
                 onValueChange={setAssignProgramId}
@@ -295,7 +295,7 @@ export default function ProgramsPage() {
             </div>
 
             <div className="grid gap-1.5">
-              <Label>אחות</Label>
+              <Label>{t("nurse_label")}</Label>
               <Select value={assignNurseId} onValueChange={setAssignNurseId}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("select_nurse")} />
@@ -311,7 +311,7 @@ export default function ProgramsPage() {
             </div>
 
             <div className="grid gap-1.5">
-              <Label>יום</Label>
+              <Label>{t("day_label")}</Label>
               <Select value={assignDay} onValueChange={setAssignDay}>
                 <SelectTrigger>
                   <SelectValue />
@@ -328,7 +328,7 @@ export default function ProgramsPage() {
 
             <div className="grid grid-cols-3 gap-3">
               <div className="grid gap-1.5">
-                <Label>מטופלים</Label>
+                <Label>{t("patients")}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -373,7 +373,7 @@ export default function ProgramsPage() {
               ) : (
                 <Plus className="h-4 w-4 me-2" />
               )}
-              שיבוץ
+              {t("assign")}
             </Button>
           </DialogFooter>
         </DialogContent>

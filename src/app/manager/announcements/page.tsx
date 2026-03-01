@@ -124,7 +124,7 @@ export default function AnnouncementsPage() {
         setAnnouncements((prev) => [
           {
             ...created,
-            author: { id: created.authorId, name: "את" },
+            author: { id: created.authorId, name: t("you_label") },
             isRead: true,
           },
           ...prev,
@@ -231,7 +231,9 @@ export default function AnnouncementsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t("create_announcement")}</DialogTitle>
-            <DialogDescription>שלח הודעה לאחיות</DialogDescription>
+            <DialogDescription>
+              {t("create_announcement_desc")}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
@@ -256,7 +258,7 @@ export default function AnnouncementsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5">
-                <Label>עדיפות</Label>
+                <Label>{t("priority_label")}</Label>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger>
                     <SelectValue />
@@ -325,7 +327,7 @@ export default function AnnouncementsPage() {
               ) : (
                 <Plus className="h-4 w-4 me-2" />
               )}
-              יצירה
+              {t("create")}
             </Button>
           </DialogFooter>
         </DialogContent>

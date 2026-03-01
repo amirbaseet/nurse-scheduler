@@ -196,7 +196,7 @@ export default function RequestsPage() {
                       {formatDateHe(req.endDate)}
                     </span>
                     <Badge variant="outline">
-                      {daysBetween(req.startDate, req.endDate)} ימים
+                      {daysBetween(req.startDate, req.endDate)} {t("days")}
                     </Badge>
                   </div>
 
@@ -214,11 +214,11 @@ export default function RequestsPage() {
                       {t("impact_analysis")}
                     </div>
                     <p className="text-xs text-amber-700">
-                      אישור בקשה זו יפחית אחות אחת מ-
-                      {formatDateHe(req.startDate)} עד{" "}
+                      {t("impact_approve_prefix")}
+                      {formatDateHe(req.startDate)} {t("until_connector")}{" "}
                       {formatDateHe(req.endDate)} (
-                      {daysBetween(req.startDate, req.endDate)} ימים). בדקו שאין
-                      חוסר באחיות בימים אלו.
+                      {daysBetween(req.startDate, req.endDate)} {t("days")}).{" "}
+                      {t("impact_check_suffix")}
                     </p>
                   </div>
 
