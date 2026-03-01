@@ -2,7 +2,7 @@
   {
     "primary": "diabetes",
     "secondary": "ent",
-    "count": 72
+    "count": 76
   },
   {
     "primary": "orthopedics",
@@ -12,7 +12,7 @@
   {
     "primary": "surgery",
     "secondary": "ent",
-    "count": 55
+    "count": 58
   },
   {
     "primary": "breast",
@@ -22,62 +22,62 @@
   {
     "primary": "heart_failure",
     "secondary": "ecg",
-    "count": 29
+    "count": 30
   },
   {
     "primary": "breast",
     "secondary": "ecg",
-    "count": 27
+    "count": 30
   },
   {
     "primary": "surgery",
     "secondary": "orthopedics",
-    "count": 18
-  },
-  {
-    "primary": "orthopedics",
-    "secondary": "ent",
-    "count": 16
+    "count": 21
   },
   {
     "primary": "orthopedics",
     "secondary": "type1_diabetes",
+    "count": 19
+  },
+  {
+    "primary": "surgery",
+    "secondary": "type1_diabetes",
+    "count": 19
+  },
+  {
+    "primary": "orthopedics",
+    "secondary": "ent",
+    "count": 17
+  },
+  {
+    "primary": "diabetes",
+    "secondary": "vaccination",
     "count": 16
   },
   {
     "primary": "xolair",
     "secondary": "orthopedics",
+    "count": 15
+  },
+  {
+    "primary": "breast",
+    "secondary": "type1_diabetes",
+    "count": 15
+  },
+  {
+    "primary": "breast",
+    "secondary": "ent",
     "count": 14
   },
   {
-    "primary": "diabetes",
-    "secondary": "vaccination",
-    "count": 13
-  },
-  {
     "primary": "surgery",
-    "secondary": "type1_diabetes",
-    "count": 12
+    "secondary": "hand_clinic",
+    "count": 10
   },
   {
     "primary": "urinary_catheter",
     "secondary": "mantoux",
     "count": 10
-  },
-  {
-    "primary": "breast",
-    "secondary": "type1_diabetes",
-    "count": 10
-  },
-  {
-    "primary": "surgery",
-    "secondary": "hand_clinic",
-    "count": 9
-  },
-  {
-    "primary": "breast",
-    "secondary": "ent",
-    "count": 9
   },
   {
     "primary": "heart_failure",
@@ -87,6 +87,16 @@
   {
     "primary": "plastic_surgery",
     "secondary": "orthopedics",
+    "count": 8
+  },
+  {
+    "primary": "plastic_surgery",
+    "secondary": "surgery",
+    "count": 8
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "ecg",
     "count": 8
   },
   {
@@ -100,16 +110,6 @@
     "count": 7
   },
   {
-    "primary": "plastic_surgery",
-    "secondary": "surgery",
-    "count": 7
-  },
-  {
-    "primary": "urinary_catheter",
-    "secondary": "ecg",
-    "count": 7
-  },
-  {
     "primary": "surgery",
     "secondary": "avastin",
     "count": 6
@@ -130,28 +130,38 @@
     "count": 5
   },
   {
+    "primary": "sugar_load",
+    "secondary": "vaccination",
+    "count": 5
+  },
+  {
+    "primary": "heart_failure",
+    "secondary": "breast",
+    "count": 4
+  },
+  {
+    "primary": "sugar_load",
+    "secondary": "ecg",
+    "count": 4
+  },
+  {
+    "primary": "sugar_load",
+    "secondary": "ent",
+    "count": 4
+  },
+  {
     "primary": "professional",
     "secondary": "avastin",
     "count": 4
   },
   {
+    "primary": "urinary_catheter",
+    "secondary": "pediatric_ophthalmology",
+    "count": 4
+  },
+  {
     "primary": "plastic_surgery",
     "secondary": "heart_failure",
-    "count": 3
-  },
-  {
-    "primary": "heart_failure",
-    "secondary": "breast",
-    "count": 3
-  },
-  {
-    "primary": "sugar_load",
-    "secondary": "ecg",
-    "count": 3
-  },
-  {
-    "primary": "sugar_load",
-    "secondary": "ent",
     "count": 3
   },
   {
@@ -162,6 +172,21 @@
   {
     "primary": "orthopedics",
     "secondary": "surgery",
+    "count": 3
+  },
+  {
+    "primary": "plastic_surgery",
+    "secondary": "urinary_catheter",
+    "count": 3
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "surgery",
+    "count": 3
+  },
+  {
+    "primary": "xolair",
+    "secondary": "vaccination",
     "count": 3
   },
   {
@@ -200,6 +225,11 @@
     "count": 2
   },
   {
+    "primary": "diabetes",
+    "secondary": "ecg",
+    "count": 2
+  },
+  {
     "primary": "ecg",
     "secondary": "surgery",
     "count": 2
@@ -210,18 +240,8 @@
     "count": 2
   },
   {
-    "primary": "plastic_surgery",
-    "secondary": "urinary_catheter",
-    "count": 2
-  },
-  {
     "primary": "type1_diabetes",
     "secondary": "urinary_catheter",
-    "count": 2
-  },
-  {
-    "primary": "urinary_catheter",
-    "secondary": "surgery",
     "count": 2
   },
   {
@@ -230,8 +250,13 @@
     "count": 2
   },
   {
-    "primary": "xolair",
+    "primary": "urinary_catheter",
     "secondary": "vaccination",
+    "count": 2
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "type1_diabetes",
     "count": 2
   },
   {
@@ -262,6 +287,16 @@
   {
     "primary": "heart_failure",
     "secondary": "plastic_surgery",
+    "count": 1
+  },
+  {
+    "primary": "surgery",
+    "secondary": "ecg",
+    "count": 1
+  },
+  {
+    "primary": "ecg",
+    "secondary": "hand_clinic",
     "count": 1
   },
   {
@@ -280,6 +315,11 @@
     "count": 1
   },
   {
+    "primary": "breast",
+    "secondary": "surgery",
+    "count": 1
+  },
+  {
     "primary": "diabetes",
     "secondary": "avastin",
     "count": 1
@@ -292,6 +332,11 @@
   {
     "primary": "pediatric_ophthalmology",
     "secondary": "type1_diabetes",
+    "count": 1
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "orthopedics",
     "count": 1
   },
   {
@@ -310,11 +355,6 @@
     "count": 1
   },
   {
-    "primary": "sugar_load",
-    "secondary": "vaccination",
-    "count": 1
-  },
-  {
     "primary": "orthopedics",
     "secondary": "hand_clinic",
     "count": 1
@@ -345,6 +385,11 @@
     "count": 1
   },
   {
+    "primary": "urinary_catheter",
+    "secondary": "ent",
+    "count": 1
+  },
+  {
     "primary": "orthopedics",
     "secondary": "professional",
     "count": 1
@@ -355,8 +400,23 @@
     "count": 1
   },
   {
+    "primary": "breast",
+    "secondary": "orthopedics",
+    "count": 1
+  },
+  {
     "primary": "plastic_surgery",
     "secondary": "type1_diabetes",
+    "count": 1
+  },
+  {
+    "primary": "diabetes",
+    "secondary": "hand_clinic",
+    "count": 1
+  },
+  {
+    "primary": "urinary_catheter",
+    "secondary": "breast",
     "count": 1
   }
 ]

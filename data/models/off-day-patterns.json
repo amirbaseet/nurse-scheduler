@@ -1,5 +1,5 @@
 {
-  "cmm7kqnhy0005uimx80kci2wu": {
+  "cmm7nqc400005uie6jgd9ee2q": {
     "SUN": 0.039,
     "MON": 0.059,
     "TUE": 0.12,
@@ -8,7 +8,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnjd0008uimxc2g7sveu": {
+  "cmm7nqc5f0008uie68w1z60ng": {
     "SUN": 0.118,
     "MON": 0.063,
     "TUE": 0.095,
@@ -17,7 +17,7 @@
     "FRI": 0,
     "SAT": 1
   },
-  "cmm7kqnkr000buimx1zy7pnif": {
+  "cmm7nqc6u000buie67vdqow0k": {
     "SUN": 0.196,
     "MON": 0.04,
     "TUE": 0.12,
@@ -26,7 +26,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnm6000euimx5j3pf8r7": {
+  "cmm7nqc8a000euie6622si583": {
     "SUN": 0.118,
     "MON": 0.08,
     "TUE": 0.14,
@@ -35,7 +35,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnnk000huimxzad0lkie": {
+  "cmm7nqc9o000huie6p1wartwg": {
     "SUN": 0.18,
     "MON": 0.08,
     "TUE": 0.1,
@@ -44,7 +44,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnoz000kuimxuz9uipdj": {
+  "cmm7nqcb2000kuie6764r3rea": {
     "SUN": 0.039,
     "MON": 0.02,
     "TUE": 0.1,
@@ -53,7 +53,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnqd000nuimxrq31o89q": {
+  "cmm7nqcch000nuie6yqxax2q9": {
     "SUN": 0.167,
     "MON": 0,
     "TUE": 0.048,
@@ -62,7 +62,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnrr000quimxxn59qcky": {
+  "cmm7nqcdx000quie6pyaobwz0": {
     "SUN": 0.098,
     "MON": 0.08,
     "TUE": 0.082,
@@ -71,7 +71,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnt6000tuimxozrepoze": {
+  "cmm7nqcfd000tuie6xg0e1gsd": {
     "SUN": 0,
     "MON": 0,
     "TUE": 0,
@@ -80,7 +80,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnuk000wuimxsf0fqjey": {
+  "cmm7nqcgr000wuie6s2h62bei": {
     "SUN": 0,
     "MON": 0,
     "TUE": 0,
@@ -89,7 +89,7 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnvy000zuimxqmj17101": {
+  "cmm7nqci5000zuie66xdbjt4o": {
     "SUN": 0.021,
     "MON": 0.021,
     "TUE": 0.021,
@@ -98,12 +98,39 @@
     "FRI": 0,
     "SAT": 0
   },
-  "cmm7kqnxe0012uimxeljih9va": {
+  "cmm7nqcjk0012uie6zxlasjgd": {
     "SUN": 0,
     "MON": 0.044,
     "TUE": 0,
     "WED": 0,
     "THU": 0.049,
+    "FRI": 0,
+    "SAT": 0
+  },
+  "cmm7nqckz0015uie6ye463yyh": {
+    "SUN": 0,
+    "MON": 0,
+    "TUE": 0,
+    "WED": 0,
+    "THU": 0,
+    "FRI": 0,
+    "SAT": 0
+  },
+  "cmm7nqcmd0018uie61cqitzy4": {
+    "SUN": 0.139,
+    "MON": 0.056,
+    "TUE": 0.081,
+    "WED": 0.027,
+    "THU": 0.152,
+    "FRI": 0,
+    "SAT": 0
+  },
+  "cmm7nqcnv001buie6l95wrfxg": {
+    "SUN": 0.162,
+    "MON": 0.135,
+    "TUE": 0.028,
+    "WED": 0.027,
+    "THU": 0.182,
     "FRI": 0,
     "SAT": 0
   }
