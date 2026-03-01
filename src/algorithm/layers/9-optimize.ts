@@ -8,6 +8,10 @@ import type {
   Cell,
 } from "../types";
 import { calculateQualityScore } from "../scoring";
+import { getProb } from "../../learning/models";
+
+/** Don't swap a nurse away from a clinic with this much historical affinity. */
+const SWAP_PROTECTION_THRESHOLD = 0.4;
 
 const DAYS: DayOfWeek[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const ITERATIONS = 10_000;
@@ -73,6 +77,22 @@ export function layer9_optimize(
     if (cell1.isFixed || cell2.isFixed) {
       temperature *= COOLING_RATE;
       continue;
+    }
+
+    // Protect high-affinity assignments from being swapped
+    if (cell1.primaryClinicId) {
+      const affinity1 = getProb(nurseId1, cell1.primaryClinicId, day);
+      if (affinity1 > SWAP_PROTECTION_THRESHOLD) {
+        temperature *= COOLING_RATE;
+        continue;
+      }
+    }
+    if (cell2.primaryClinicId) {
+      const affinity2 = getProb(nurseId2, cell2.primaryClinicId, day);
+      if (affinity2 > SWAP_PROTECTION_THRESHOLD) {
+        temperature *= COOLING_RATE;
+        continue;
+      }
     }
 
     const nurse1 = nurseMap.get(nurseId1)!;

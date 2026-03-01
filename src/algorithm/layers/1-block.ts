@@ -6,6 +6,7 @@ import type {
   DayOfWeek,
   Warning,
 } from "../types";
+import { loadModels } from "../../learning/models";
 
 const DAY_INDEX: Record<DayOfWeek, number> = {
   SUN: 0,
@@ -101,6 +102,62 @@ export function layer1_block(
         cell.blockReason = "preferred_off";
         continue;
       }
+    }
+  }
+
+  // 6. Historical off-day patterns: block days where nurse is historically off
+  //    (P > 0.60) but only if they still have enough days to fill their hours.
+  applyHistoricalOffDays(grid, nurses, days);
+}
+
+/** Minimum off-day probability to trigger a historical block.
+ *  Only block days where the nurse is off MORE than 60% of the time.
+ *  At 0.15 (old value), nurses who work a day 80% of the time got blocked. */
+const HISTORICAL_OFF_THRESHOLD = 0.6;
+
+function applyHistoricalOffDays(
+  grid: Grid,
+  nurses: AlgoNurse[],
+  days: DayOfWeek[],
+): void {
+  const models = loadModels();
+  if (!models) return;
+
+  for (const nurse of nurses) {
+    const dayMap = grid.get(nurse.id);
+    if (!dayMap) continue;
+
+    const nurseOffPatterns = models.offDayPatterns[nurse.id];
+    if (!nurseOffPatterns) continue;
+
+    // Count how many days are still available
+    let availableDays = 0;
+    for (const day of days) {
+      const cell = dayMap.get(day);
+      if (cell && cell.status === "AVAILABLE") availableDays++;
+    }
+
+    // Minimum days needed to fill contract hours (assume ~7h/day average shift)
+    const minDaysNeeded = Math.ceil(nurse.contractHours / 7);
+
+    // Sort available days by off-probability descending — block highest first
+    const blockCandidates = days
+      .filter((day) => {
+        const cell = dayMap.get(day);
+        if (!cell || cell.status !== "AVAILABLE") return false;
+        const offProb = nurseOffPatterns[day] ?? 0;
+        return offProb > HISTORICAL_OFF_THRESHOLD;
+      })
+      .sort((a, b) => (nurseOffPatterns[b] ?? 0) - (nurseOffPatterns[a] ?? 0));
+
+    for (const day of blockCandidates) {
+      // Guard: don't block if it would leave too few days for contract hours
+      if (availableDays <= minDaysNeeded) break;
+
+      const cell = dayMap.get(day)!;
+      cell.status = "BLOCKED";
+      cell.blockReason = "historical_off";
+      availableDays--;
     }
   }
 }

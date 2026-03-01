@@ -6,17 +6,18 @@ import type {
   PreferenceEntry,
   DayOfWeek,
 } from "./types";
-import { getProb } from "../learning/models";
+import { getProb, getDayAffinity } from "../learning/models";
 import type { AdjustmentMap } from "../learning/corrections";
 import { applyAdjustment } from "../learning/corrections";
 
 /**
  * Score a candidate nurse for a clinic slot.
- * Returns 0-900 via RAW ADDITION (no multiplied weights).
+ * Returns 0-1300 via RAW ADDITION (no multiplied weights).
  *
- * S_pref (0-350) + S_budget (0-250) + S_hist (0-150) + S_fair (0-150)
+ * S_hist (0-400) + S_pref (0-300) + S_budget (0-200) + S_fair (0-100)
+ * + S_specialist (0-200) + S_dayAffinity (0-200)
  *
- * The caller may add S_lookahead (±100) separately for a total range of 0-1000.
+ * The caller may add S_lookahead (±100) separately for a total range of 0-1400.
  */
 export function calculateScore(
   nurse: AlgoNurse,
@@ -26,20 +27,27 @@ export function calculateScore(
   preferences: PreferenceEntry[],
   adjustments?: AdjustmentMap,
 ): number {
-  const sPref = calcPreferenceScore(nurse, slot, preferences);
-  const sBudget = calcBudgetScore(nurse, budgets);
   const sHist = calcHistoricalScore(
     nurse.id,
     slot.clinicId,
     slot.day,
     adjustments,
   );
+  const sPref = calcPreferenceScore(nurse, slot, preferences);
+  const sBudget = calcBudgetScore(nurse, budgets);
   const sFair = calcFairnessScore(nurse, grid);
+  const sSpecialist = calcSpecialistBonus(
+    nurse.id,
+    slot.clinicId,
+    slot.day,
+    adjustments,
+  );
+  const sDayAffinity = calcDayAffinityScore(nurse.id, slot.clinicId, slot.day);
 
-  return sPref + sBudget + sHist + sFair;
+  return sHist + sPref + sBudget + sFair + sSpecialist + sDayAffinity;
 }
 
-// ── S_historical (0-150) ──
+// ── S_historical (0-400) ──
 
 function calcHistoricalScore(
   nurseId: string,
@@ -51,10 +59,52 @@ function calcHistoricalScore(
   if (adjustments) {
     probability = applyAdjustment(probability, nurseId, clinicId, adjustments);
   }
-  return Math.round(probability * 150);
+  return Math.round(probability * 400);
 }
 
-// ── S_preference (0-350) ──
+// ── S_specialist (0-200) ──
+// Bonus for near-exclusive nurse-clinic pairings (P > 0.85)
+
+function calcSpecialistBonus(
+  nurseId: string,
+  clinicId: string,
+  day: string,
+  adjustments?: AdjustmentMap,
+): number {
+  let probability = getProb(nurseId, clinicId, day);
+  if (adjustments) {
+    probability = applyAdjustment(probability, nurseId, clinicId, adjustments);
+  }
+  return probability > 0.85 ? 200 : 0;
+}
+
+// ── S_dayAffinity (0-200) ──
+// Bonus when this clinic is the nurse's top-ranked clinic for this specific day.
+// Uses the probability matrix inverted: (nurse, day) → ranked clinic list.
+
+function calcDayAffinityScore(
+  nurseId: string,
+  clinicId: string,
+  day: string,
+): number {
+  const ranked = getDayAffinity(nurseId, day);
+  if (ranked.length === 0) return 0;
+
+  // Check if this clinic is #1 or #2 in the nurse's day ranking
+  const rank = ranked.findIndex((r) => r.clinicId === clinicId);
+  if (rank === -1) return 0;
+
+  const prob = ranked[rank].prob;
+
+  if (rank === 0 && prob > 0.5) return 200; // Strong #1 choice
+  if (rank === 0 && prob > 0.3) return 150; // Moderate #1 choice
+  if (rank === 0) return 100; // Weak #1 but still top
+  if (rank === 1) return 80; // #2 choice
+  if (rank === 2) return 30; // #3 choice
+  return 0;
+}
+
+// ── S_preference (0-300) ──
 
 function calcPreferenceScore(
   nurse: AlgoNurse,
@@ -67,37 +117,37 @@ function calcPreferenceScore(
 
   let score: number;
   if (pref === shiftType) {
-    score = 350; // perfect match
+    score = 300; // perfect match
   } else if (pref === "ANYTIME") {
-    score = 250; // flexible
+    score = 200; // flexible
   } else {
-    score = 50; // mismatch
+    score = 30; // mismatch
   }
 
   // Penalty for working on a wished day-off
   if (isPreferredDayOff(nurse, slot.day, preferences)) {
-    score = Math.max(0, score - 100);
+    score = Math.max(0, score - 80);
   }
 
   return score;
 }
 
-// ── S_budget (0-250) ──
+// ── S_budget (0-200) ──
 
 function calcBudgetScore(nurse: AlgoNurse, budgets: Budgets): number {
   const remaining = budgets.get(nurse.id) ?? 0;
   const ratio = Math.max(0, Math.min(1, remaining / nurse.contractHours));
-  return Math.round(ratio * 250);
+  return Math.round(ratio * 200);
 }
 
-// ── S_fairness (0-150) ──
+// ── S_fairness (0-100) ──
 
 function calcFairnessScore(nurse: AlgoNurse, grid: Grid): number {
   const assigned = countAssignedDays(grid, nurse.id);
   const maxAssignable = nurse.maxDaysPerWeek;
-  if (maxAssignable <= 0) return 150;
+  if (maxAssignable <= 0) return 100;
   const fairnessRatio = 1 - assigned / maxAssignable;
-  return Math.round(Math.max(0, Math.min(1, fairnessRatio)) * 150);
+  return Math.round(Math.max(0, Math.min(1, fairnessRatio)) * 100);
 }
 
 // ── Helpers (exported for testing) ──

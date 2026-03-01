@@ -50,6 +50,7 @@ export async function POST(request: Request) {
         include: {
           clinic: {
             select: {
+              code: true,
               genderPref: true,
               canBeSecondary: true,
               secondaryHours: true,
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
         include: {
           clinic: {
             select: {
+              code: true,
               genderPref: true,
               canBeSecondary: true,
               secondaryHours: true,
@@ -113,7 +115,7 @@ export async function POST(request: Request) {
       }),
 
       db.clinic.findMany({
-        select: { id: true, name: true },
+        select: { id: true, name: true, code: true },
       }),
     ]);
 

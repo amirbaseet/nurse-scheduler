@@ -1,9 +1,16 @@
 import type { Grid, AlgoNurse, ClinicSlot, Budgets } from "./types";
+import { getProb } from "../learning/models";
+
+/** Don't swap a nurse away from a clinic they have strong historical affinity for. */
+const BACKTRACK_PROTECTION_THRESHOLD = 0.4;
 
 /**
  * Backtracking: when a slot has 0 candidates, try to recover by
  * swapping an already-assigned nurse into the failed slot and
  * finding a replacement for their original slot.
+ *
+ * Protects high-affinity assignments (P > 0.4) from being swapped,
+ * preserving historically accurate pairings.
  *
  * Returns true if a swap was made, false if recovery failed.
  */
@@ -19,6 +26,16 @@ export function tryBacktrack(
   for (const [assignedNurseId, dayMap] of Array.from(grid)) {
     const cell = dayMap.get(failedSlot.day);
     if (!cell || cell.status !== "ASSIGNED" || cell.isFixed) continue;
+
+    // Protect high-affinity assignments from being swapped
+    if (cell.primaryClinicId) {
+      const affinity = getProb(
+        assignedNurseId,
+        cell.primaryClinicId,
+        failedSlot.day,
+      );
+      if (affinity > BACKTRACK_PROTECTION_THRESHOLD) continue;
+    }
 
     const assignedNurse = nurseMap.get(assignedNurseId);
     if (!assignedNurse) continue;

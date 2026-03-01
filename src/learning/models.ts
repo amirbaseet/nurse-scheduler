@@ -99,6 +99,68 @@ export function getProb(
   return models.probabilityMatrix[nurseId]?.[clinicId]?.[day] ?? 0;
 }
 
+/**
+ * Find all nurse-clinic-day pairings above a probability threshold.
+ * Used by Layer 4 to auto-assign specialist nurses (P > 0.85).
+ */
+export function getHighConfidenceAssignments(threshold = 0.85): Array<{
+  nurseId: string;
+  clinicId: string;
+  day: string;
+  probability: number;
+}> {
+  const models = loadModels();
+  if (!models) return [];
+
+  const results: Array<{
+    nurseId: string;
+    clinicId: string;
+    day: string;
+    probability: number;
+  }> = [];
+
+  for (const [nurseId, clinicMap] of Object.entries(models.probabilityMatrix)) {
+    for (const [clinicId, dayMap] of Object.entries(clinicMap)) {
+      for (const [day, prob] of Object.entries(dayMap)) {
+        if (prob >= threshold) {
+          results.push({ nurseId, clinicId, day, probability: prob });
+        }
+      }
+    }
+  }
+
+  // Sort by probability descending for deterministic assignment order
+  results.sort((a, b) => b.probability - a.probability);
+  return results;
+}
+
+/**
+ * Get the ranked list of clinics for a nurse on a specific day,
+ * sorted by probability descending.
+ * Returns [{clinicId, prob}] — top affinities first.
+ */
+export function getDayAffinity(
+  nurseId: string,
+  day: string,
+): Array<{ clinicId: string; prob: number }> {
+  const models = loadModels();
+  if (!models) return [];
+
+  const clinicMap = models.probabilityMatrix[nurseId];
+  if (!clinicMap) return [];
+
+  const ranked: Array<{ clinicId: string; prob: number }> = [];
+  for (const [clinicId, dayMap] of Object.entries(clinicMap)) {
+    const prob = dayMap[day] ?? 0;
+    if (prob > 0) {
+      ranked.push({ clinicId, prob });
+    }
+  }
+
+  ranked.sort((a, b) => b.prob - a.prob);
+  return ranked;
+}
+
 /** Reset cached models (for testing or after regeneration). */
 export function resetCache(): void {
   cached = null;

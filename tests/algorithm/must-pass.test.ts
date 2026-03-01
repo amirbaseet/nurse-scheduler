@@ -35,7 +35,11 @@ describe("MUST-PASS — Category 1: Basic Constraints", () => {
 
   it("1.1 nurse on approved vacation → NOT assigned during vacation", () => {
     const nurse = makeNurse({ id: "n1", userId: "u1", contractHours: 36 });
-    const slot = makeClinicSlot({ clinicId: "c1", day: "MON", nursesNeeded: 1 });
+    const slot = makeClinicSlot({
+      clinicId: "c1",
+      day: "MON",
+      nursesNeeded: 1,
+    });
 
     const config = makeConfig({
       nurses: [nurse],
@@ -102,9 +106,7 @@ describe("MUST-PASS — Category 1: Basic Constraints", () => {
     // One clinic filled
     const monAssigned = result.assignments.filter(
       (a) =>
-        a.nurseId === "n1" &&
-        a.day === "MON" &&
-        a.primaryClinicId !== null,
+        a.nurseId === "n1" && a.day === "MON" && a.primaryClinicId !== null,
     );
     expect(monAssigned).toHaveLength(1);
 
@@ -123,9 +125,9 @@ describe("MUST-PASS — Category 1: Basic Constraints", () => {
       contractHours: 21,
       maxDaysPerWeek: 3,
     });
-    const clinics = (
-      ["SUN", "MON", "TUE", "WED", "THU"] as DayOfWeek[]
-    ).map((day, i) => makeClinicSlot({ clinicId: `c${i}`, day }));
+    const clinics = (["SUN", "MON", "TUE", "WED", "THU"] as DayOfWeek[]).map(
+      (day, i) => makeClinicSlot({ clinicId: `c${i}`, day }),
+    );
 
     const config = makeConfig({ nurses: [nurse], clinics });
     const result = generateWeeklySchedule(WEEK_START, config);
@@ -154,8 +156,7 @@ describe("MUST-PASS — Category 1: Basic Constraints", () => {
     // Every slot: either filled or appears in managerGaps
     for (const slot of clinics) {
       const filled = result.assignments.some(
-        (a) =>
-          a.primaryClinicId === slot.clinicId && a.day === slot.day,
+        (a) => a.primaryClinicId === slot.clinicId && a.day === slot.day,
       );
       const gapped = result.managerGaps.some(
         (g) => g.clinicId === slot.clinicId && g.day === slot.day,
@@ -224,9 +225,7 @@ describe("MUST-PASS — Category 2: Gender Rules", () => {
     expect(filled).toBeUndefined();
 
     expect(
-      result.warnings.some(
-        (w) => w.level === "error" && w.clinicId === "c1",
-      ),
+      result.warnings.some((w) => w.level === "error" && w.clinicId === "c1"),
     ).toBe(true);
   });
 
@@ -320,8 +319,7 @@ describe("MUST-PASS — Category 3: Fixed Assignments", () => {
 
     expect(
       result.warnings.some(
-        (w) =>
-          w.message.includes("skipped") || w.message.includes("blocked"),
+        (w) => w.message.includes("skipped") || w.message.includes("blocked"),
       ),
     ).toBe(true);
   });
@@ -453,6 +451,7 @@ describe("MUST-PASS — Category 5: Config Merge", () => {
     nursesNeeded: 2,
     isActive: true,
     clinic: {
+      code: "test_clinic",
       genderPref: "ANY",
       canBeSecondary: false,
       secondaryHours: null,
@@ -529,9 +528,7 @@ describe("MUST-PASS — Category 6: Edge Cases", () => {
     );
     expect(monFilled).toHaveLength(0);
     expect(
-      result.managerGaps.some(
-        (g) => g.day === "MON" && g.clinicId === "c1",
-      ),
+      result.managerGaps.some((g) => g.day === "MON" && g.clinicId === "c1"),
     ).toBe(true);
   });
 
@@ -553,9 +550,9 @@ describe("MUST-PASS — Category 6: Edge Cases", () => {
       contractHours: 8,
       maxDaysPerWeek: 2,
     });
-    const clinics = (
-      ["SUN", "MON", "TUE", "WED", "THU"] as DayOfWeek[]
-    ).map((day, i) => makeClinicSlot({ clinicId: `c${i}`, day }));
+    const clinics = (["SUN", "MON", "TUE", "WED", "THU"] as DayOfWeek[]).map(
+      (day, i) => makeClinicSlot({ clinicId: `c${i}`, day }),
+    );
 
     const config = makeConfig({ nurses: [nurse], clinics });
     const result = generateWeeklySchedule(WEEK_START, config);

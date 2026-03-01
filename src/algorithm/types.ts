@@ -17,7 +17,8 @@ export type BlockReason =
   | "no_saturday"
   | "max_days"
   | "recurring_off"
-  | "preferred_off";
+  | "preferred_off"
+  | "historical_off";
 
 export interface Cell {
   status: CellStatus;
@@ -40,6 +41,7 @@ export type Grid = Map<string, Map<DayOfWeek, Cell>>;
 
 export interface ClinicSlot {
   clinicId: string;
+  clinicCode?: string;
   day: DayOfWeek;
   shiftStart: string;
   shiftEnd: string;

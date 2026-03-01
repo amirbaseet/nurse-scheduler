@@ -62,9 +62,9 @@ describe("SHOULD-PASS — Scoring", () => {
       [],
     );
 
-    // Morning match: S_pref=350, Afternoon mismatch: S_pref=50 → difference of 300
+    // Morning match: S_pref=300, Afternoon mismatch: S_pref=30 → difference of 270
     expect(morningScore).toBeGreaterThan(afternoonScore);
-    expect(morningScore - afternoonScore).toBe(300);
+    expect(morningScore - afternoonScore).toBe(270);
   });
 
   it("S.2 under-budget nurse scores higher than over-budget nurse", () => {
@@ -85,8 +85,8 @@ describe("SHOULD-PASS — Scoring", () => {
 
     expect(score1).toBeGreaterThan(score2);
 
-    // S_budget: 0.8*250=200 vs 0.1*250=25
-    expect(score1 - score2).toBe(175);
+    // S_budget: 0.8*200=160 vs 0.1*200=20
+    expect(score1 - score2).toBe(140);
   });
 
   it("S.3 nurse preferring day off → score reduced by 100 for that day", () => {
@@ -103,7 +103,7 @@ describe("SHOULD-PASS — Scoring", () => {
     const scoreWithout = calculateScore(nurse, slot, grid, budgets, []);
 
     expect(scoreWithPref).toBeLessThan(scoreWithout);
-    expect(scoreWithout - scoreWithPref).toBe(100);
+    expect(scoreWithout - scoreWithPref).toBe(80);
   });
 });
 

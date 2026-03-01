@@ -549,6 +549,18 @@ const FIXED_ASSIGNMENTS: FixedData[] = [
     clinicCode: "orthopedics",
     days: ["SUN", "MON", "TUE", "WED", "THU", "SAT"],
   },
+  // אינאס גאעוני → תעסוקתית (96%) — Sun, Wed
+  {
+    nurseName: "אינאס גאעוני",
+    clinicCode: "occupational_therapy",
+    days: ["SUN", "WED"],
+  },
+  // עלאא אבו סנינה → אורטופיד ילדים (100%) — Tue only, exclusive
+  {
+    nurseName: "עלאא אבו סנינה",
+    clinicCode: "pediatric_ophthalmology",
+    days: ["TUE"],
+  },
 ];
 
 // ═══════════════════════════════════════════

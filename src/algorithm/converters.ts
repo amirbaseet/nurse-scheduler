@@ -41,6 +41,7 @@ type ClinicDefaultConfigRow = {
   nursesNeeded: number;
   isActive: boolean;
   clinic: {
+    code: string;
     genderPref: string;
     canBeSecondary: boolean;
     secondaryHours: number | null;
@@ -56,6 +57,7 @@ type ClinicWeeklyConfigRow = {
   nursesNeeded: number;
   isActive: boolean;
   clinic: {
+    code: string;
     genderPref: string;
     canBeSecondary: boolean;
     secondaryHours: number | null;
@@ -134,6 +136,7 @@ export function mergeClinicConfigs(
     if (effective.isActive) {
       result.push({
         clinicId: effective.clinicId,
+        clinicCode: effective.clinic.code,
         day: effective.day as DayOfWeek,
         shiftStart: effective.shiftStart,
         shiftEnd: effective.shiftEnd,
@@ -154,6 +157,7 @@ export function mergeClinicConfigs(
     if (o.isActive) {
       result.push({
         clinicId: o.clinicId,
+        clinicCode: o.clinic.code,
         day: o.day as DayOfWeek,
         shiftStart: o.shiftStart,
         shiftEnd: o.shiftEnd,

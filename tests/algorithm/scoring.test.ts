@@ -47,10 +47,10 @@ describe("Scoring — calculateScore", () => {
       [],
     );
 
-    // Morning nurse gets 350 (match) vs afternoon nurse gets 50 (mismatch)
+    // Morning nurse gets 300 (match) vs afternoon nurse gets 30 (mismatch)
     expect(scoreMorning).toBeGreaterThan(scoreAfternoon);
-    // Difference should be exactly 300 (350 - 50), all else being equal
-    expect(scoreMorning - scoreAfternoon).toBe(300);
+    // Difference should be exactly 270 (300 - 30), all else being equal
+    expect(scoreMorning - scoreAfternoon).toBe(270);
   });
 
   it("ANYTIME preference scores between match and mismatch", () => {
@@ -147,8 +147,8 @@ describe("Scoring — calculateScore", () => {
     const withPref = calculateScore(nurse, slot, grid, budgets, prefs);
     const withoutPref = calculateScore(nurse, slot, grid, budgets, []);
 
-    // Should be 100 less due to day-off penalty
-    expect(withoutPref - withPref).toBe(100);
+    // Should be 80 less due to day-off penalty
+    expect(withoutPref - withPref).toBe(80);
   });
 
   it("total score is raw addition of sub-scores (no weight multiplication)", () => {
@@ -166,8 +166,8 @@ describe("Scoring — calculateScore", () => {
 
     const score = calculateScore(nurse, slot, grid, budgets, []);
 
-    // S_pref=350 (perfect match) + S_budget=250 (full budget) + S_hist=0 (no historical data for test IDs) + S_fair=150 (0 assigned days)
-    expect(score).toBe(350 + 250 + 0 + 150);
+    // S_hist=0 + S_pref=300 + S_budget=200 + S_fair=100 + S_specialist=0 + S_dayAffinity=0
+    expect(score).toBe(0 + 300 + 200 + 100 + 0 + 0);
   });
 });
 

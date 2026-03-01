@@ -2,6 +2,7 @@ import type { Grid, AlgoNurse, ClinicSlot, Budgets, Warning } from "../types";
 import type { AdjustmentMap } from "../../learning/corrections";
 import { calculateScore } from "../scoring";
 import { getCandidates, countFilledForSlot } from "../difficulty-queue";
+import { getProb, getDayAffinity } from "../../learning/models";
 
 /**
  * Layer 3: Fill gender-restricted clinics.
@@ -79,7 +80,11 @@ export function layer3_gender(
   }
 }
 
-/** Score all candidates and return the one with the highest score. */
+/**
+ * Score all candidates and return the one with the highest score.
+ * Penalizes nurses who have strong affinity for a DIFFERENT clinic on this day,
+ * so we don't steal them from their historically correct assignment.
+ */
 function pickBest(
   candidates: AlgoNurse[],
   slot: ClinicSlot,
@@ -88,10 +93,22 @@ function pickBest(
   adjustments?: AdjustmentMap,
 ): AlgoNurse {
   let bestNurse = candidates[0];
-  let bestScore = -1;
+  let bestScore = -Infinity;
 
   for (const nurse of candidates) {
-    const score = calculateScore(nurse, slot, grid, budgets, [], adjustments);
+    let score = calculateScore(nurse, slot, grid, budgets, [], adjustments);
+
+    // Penalize if this nurse's top clinic for this day is something else
+    const ranked = getDayAffinity(nurse.id, slot.day);
+    if (ranked.length > 0 && ranked[0].clinicId !== slot.clinicId) {
+      // Nurse has a stronger affinity for another clinic — penalize proportionally
+      score -= Math.round(ranked[0].prob * 400);
+    }
+
+    // Bonus if nurse actually has affinity for THIS clinic
+    const thisProb = getProb(nurse.id, slot.clinicId, slot.day);
+    score += Math.round(thisProb * 200);
+
     if (score > bestScore) {
       bestScore = score;
       bestNurse = nurse;
