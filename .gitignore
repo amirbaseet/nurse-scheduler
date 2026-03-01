@@ -49,3 +49,14 @@ test-results/
 
 # vercel
 .vercel
+
+# playwright MCP
+.playwright-mcp/
+
+# screenshots & spreadsheets (local testing artifacts)
+*.png
+*.xlsx
+!data/**/*.xlsx
+
+# archived data (local only)
+archived/
