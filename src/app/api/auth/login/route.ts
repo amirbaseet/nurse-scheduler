@@ -3,69 +3,14 @@ import { db } from "@/lib/db";
 import { verifyPin } from "@/lib/pin";
 import { signJwt } from "@/lib/auth";
 
-// ═══════════════════════════════════════════
-// In-memory rate limiting (per IP)
-// TODO(prod): Replace with Redis/Upstash when deploying to production.
-// This Map resets on every deployment/restart. Acceptable for dev/staging
-// because sameSite=strict cookies + PIN prefix narrowing already limit
-// brute-force surface. For production, use @upstash/ratelimit.
-// ═══════════════════════════════════════════
-
-const failedAttempts = new Map<
-  string,
-  { count: number; lastAttempt: number }
->();
 const MAX_ATTEMPTS = 3;
-const LOCKOUT_MS = 5 * 60 * 1000; // 5 minutes
-
-function getClientIp(request: Request): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    request.headers.get("cf-connecting-ip") ||
-    "unknown"
-  );
-}
-
-function isLockedOut(ip: string): boolean {
-  const record = failedAttempts.get(ip);
-  if (!record || record.count < MAX_ATTEMPTS) return false;
-  if (Date.now() - record.lastAttempt > LOCKOUT_MS) {
-    failedAttempts.delete(ip);
-    return false;
-  }
-  return true;
-}
-
-function recordFailure(ip: string): void {
-  const record = failedAttempts.get(ip);
-  if (record && Date.now() - record.lastAttempt < LOCKOUT_MS) {
-    record.count++;
-    record.lastAttempt = Date.now();
-  } else {
-    failedAttempts.set(ip, { count: 1, lastAttempt: Date.now() });
-  }
-}
-
-function resetFailures(ip: string): void {
-  failedAttempts.delete(ip);
-}
+const LOCKOUT_MINUTES = 5;
 
 // ═══════════════════════════════════════════
 // POST /api/auth/login
 // ═══════════════════════════════════════════
 
 export async function POST(request: Request) {
-  const ip = getClientIp(request);
-
-  // 1. Rate limit check
-  if (isLockedOut(ip)) {
-    return NextResponse.json(
-      { error: "נחסמת ל-5 דקות עקב ניסיונות כושלים" },
-      { status: 429 },
-    );
-  }
-
   // Parse body
   const body = await request.json().catch(() => null);
   if (!body?.pin || typeof body.pin !== "string") {
@@ -82,15 +27,42 @@ export async function POST(request: Request) {
     );
   }
 
-  // 2. Fast filter by pinPrefix (first 2 digits)
+  // 1. Fast filter by pinPrefix (first 2 digits)
   const prefix = pin.substring(0, 2);
   const candidates = await db.user.findMany({
     where: { pinPrefix: prefix, isActive: true },
   });
 
+  // 2. Check if ALL candidates are locked out (per-user DB-backed rate limiting)
+  const now = new Date();
+  const allLocked =
+    candidates.length > 0 &&
+    candidates.every(
+      (c) =>
+        c.failedAttempts >= MAX_ATTEMPTS &&
+        c.lockedUntil &&
+        c.lockedUntil > now,
+    );
+
+  if (allLocked) {
+    return NextResponse.json(
+      { error: "נחסמת ל-5 דקות עקב ניסיונות כושלים" },
+      { status: 429 },
+    );
+  }
+
   // 3. Verify PIN — bcrypt on all matching candidates (constant-time: no early exit)
   let matchedUser = null;
   for (const candidate of candidates) {
+    // Skip locked-out candidates
+    if (
+      candidate.failedAttempts >= MAX_ATTEMPTS &&
+      candidate.lockedUntil &&
+      candidate.lockedUntil > now
+    ) {
+      continue;
+    }
+
     const isMatch = await verifyPin(pin, candidate.pinHash);
     if (isMatch && !matchedUser) {
       matchedUser = candidate;
@@ -106,18 +78,38 @@ export async function POST(request: Request) {
     );
   }
 
-  // 4. No match
+  // 4. No match — increment failedAttempts on all non-locked candidates
   if (!matchedUser) {
-    recordFailure(ip);
+    const lockoutTime = new Date(now.getTime() + LOCKOUT_MINUTES * 60 * 1000);
+    await Promise.all(
+      candidates
+        .filter(
+          (c) =>
+            !(
+              c.failedAttempts >= MAX_ATTEMPTS &&
+              c.lockedUntil &&
+              c.lockedUntil > now
+            ),
+        )
+        .map((c) =>
+          db.user.update({
+            where: { id: c.id },
+            data: {
+              failedAttempts: c.failedAttempts + 1,
+              lockedUntil:
+                c.failedAttempts + 1 >= MAX_ATTEMPTS ? lockoutTime : null,
+            },
+          }),
+        ),
+    );
     return NextResponse.json({ error: "קוד PIN שגוי" }, { status: 401 });
   }
 
-  // 5. Match — update lastLogin, issue JWT, set cookie
-  resetFailures(ip);
+  // 5. Match — reset failures, update lastLogin, issue JWT, set cookie
 
   await db.user.update({
     where: { id: matchedUser.id },
-    data: { lastLogin: new Date(), failedAttempts: 0 },
+    data: { lastLogin: new Date(), failedAttempts: 0, lockedUntil: null },
   });
 
   const token = await signJwt({

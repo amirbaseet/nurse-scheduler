@@ -198,6 +198,73 @@ async function main() {
     );
   }
 
+  // ── Merge live DB assignments (PUBLISHED schedules) ──
+  const dbSchedules = await db.weeklySchedule.findMany({
+    where: { status: "PUBLISHED" },
+    select: { id: true },
+  });
+
+  if (dbSchedules.length > 0) {
+    const dbAssignments = await db.scheduleAssignment.findMany({
+      where: {
+        scheduleId: { in: dbSchedules.map((s) => s.id) },
+        isOff: false,
+        primaryClinicId: { not: null },
+      },
+      select: {
+        nurseId: true,
+        day: true,
+        primaryClinicId: true,
+        secondaryClinicId: true,
+        scheduleId: true,
+      },
+    });
+
+    // Group by scheduleId to count distinct weeks per nurse
+    const weeksByNurse = new Map<string, Set<string>>();
+    for (const a of dbAssignments) {
+      if (!weeksByNurse.has(a.nurseId)) weeksByNurse.set(a.nurseId, new Set());
+      weeksByNurse.get(a.nurseId)!.add(a.scheduleId);
+    }
+
+    for (const a of dbAssignments) {
+      const nurseId = a.nurseId;
+      const day = a.day;
+      const clinicId = a.primaryClinicId!;
+
+      if (!counts[nurseId]) counts[nurseId] = {};
+      if (!counts[nurseId][clinicId]) counts[nurseId][clinicId] = {};
+      counts[nurseId][clinicId][day] =
+        (counts[nurseId][clinicId][day] ?? 0) + 1;
+
+      if (!nurseWeeksWorked[nurseId]) nurseWeeksWorked[nurseId] = {};
+      nurseWeeksWorked[nurseId][day] =
+        (nurseWeeksWorked[nurseId][day] ?? 0) + 1;
+
+      // Track dual-clinic combos from live data
+      if (a.secondaryClinicId) {
+        const pCode =
+          dbClinics.find((c) => c.id === clinicId)?.code ?? clinicId;
+        const sCode =
+          dbClinics.find((c) => c.id === a.secondaryClinicId)?.code ??
+          a.secondaryClinicId;
+        const key = `${pCode}|${sCode}`;
+        comboCounts[key] = (comboCounts[key] ?? 0) + 1;
+      }
+    }
+
+    // Update nurseWeeksSeen with DB weeks
+    for (const [nurseId, weeks] of Array.from(weeksByNurse)) {
+      nurseWeeksSeen[nurseId] = (nurseWeeksSeen[nurseId] ?? 0) + weeks.size;
+    }
+
+    console.log(
+      `DB schedules: ${dbSchedules.length} published weeks, ${dbAssignments.length} assignments merged`,
+    );
+  } else {
+    console.log("DB schedules: 0 published weeks (using historical data only)");
+  }
+
   // ── Build probability matrix ──
   const probabilityMatrix: Record<
     string,
@@ -265,7 +332,11 @@ async function main() {
     .sort((a, b) => b.count - a.count);
 
   // ── Meta ──
-  const meta = { totalWeeks, generatedAt: new Date().toISOString() };
+  const combinedWeeks = totalWeeks + dbSchedules.length;
+  const meta = {
+    totalWeeks: combinedWeeks,
+    generatedAt: new Date().toISOString(),
+  };
 
   // Write all files
   writeFileSync(
@@ -288,7 +359,7 @@ async function main() {
 
   console.log(`\n✅ All models regenerated in ${MODELS_DIR}/`);
   console.log(
-    `   ${Object.keys(probabilityMatrix).length} nurses, ${totalWeeks} weeks`,
+    `   ${Object.keys(probabilityMatrix).length} nurses, ${combinedWeeks} weeks (${totalWeeks} historical + ${dbSchedules.length} live)`,
   );
 
   // Spot checks
