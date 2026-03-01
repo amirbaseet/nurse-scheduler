@@ -17,7 +17,10 @@ const LOCKOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 function getClientIp(request: Request): string {
   return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    request.headers.get("cf-connecting-ip") ||
+    "unknown"
   );
 }
 
@@ -56,17 +59,14 @@ export async function POST(request: Request) {
   if (isLockedOut(ip)) {
     return NextResponse.json(
       { error: "נחסמת ל-5 דקות עקב ניסיונות כושלים" },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
   // Parse body
   const body = await request.json().catch(() => null);
   if (!body?.pin || typeof body.pin !== "string") {
-    return NextResponse.json(
-      { error: "יש להזין קוד PIN" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "יש להזין קוד PIN" }, { status: 400 });
   }
 
   const { pin } = body;
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   if (!/^\d{4}$/.test(pin) && !/^\d{6}$/.test(pin)) {
     return NextResponse.json(
       { error: "קוד PIN חייב להיות 4 או 6 ספרות" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -85,23 +85,28 @@ export async function POST(request: Request) {
     where: { pinPrefix: prefix, isActive: true },
   });
 
-  // 3. Verify PIN — bcrypt only on 1-2 matching candidates
+  // 3. Verify PIN — bcrypt on all matching candidates (constant-time: no early exit)
   let matchedUser = null;
   for (const candidate of candidates) {
     const isMatch = await verifyPin(pin, candidate.pinHash);
-    if (isMatch) {
+    if (isMatch && !matchedUser) {
       matchedUser = candidate;
-      break;
+      // Don't break — verify remaining candidates to prevent timing attacks
     }
+  }
+
+  // If no candidates at all, do a dummy bcrypt to keep response time consistent
+  if (candidates.length === 0) {
+    await verifyPin(
+      pin,
+      "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012",
+    );
   }
 
   // 4. No match
   if (!matchedUser) {
     recordFailure(ip);
-    return NextResponse.json(
-      { error: "קוד PIN שגוי" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "קוד PIN שגוי" }, { status: 401 });
   }
 
   // 5. Match — update lastLogin, issue JWT, set cookie

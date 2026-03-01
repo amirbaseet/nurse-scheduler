@@ -29,7 +29,7 @@ export const assignScheduleSchema = z.object({
   secondaryClinicId: z.string().nullable().optional(),
   shiftStart: z.string().optional(),
   shiftEnd: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().max(1000).optional(),
 });
 
 // ═══════════════════════════════════════════
@@ -58,7 +58,7 @@ export const updateBlockedClinicsSchema = z.object({
 // ═══════════════════════════════════════════
 
 export const updateClinicSchema = z.object({
-  name: z.string().min(1).optional(),
+  name: z.string().min(1).max(255).optional(),
   genderPref: GenderPrefEnum.optional(),
   canBeSecondary: z.boolean().optional(),
   secondaryHours: z.number().optional(),
@@ -89,7 +89,7 @@ export const copyClinicConfigSchema = z.object({
 // ═══════════════════════════════════════════
 
 export const updateProgramSchema = z.object({
-  name: z.string().min(1).optional(),
+  name: z.string().min(1).max(255).optional(),
   type: ProgramTypeEnum.optional(),
   linkedClinicCode: z.string().nullable().optional(),
   defaultHours: z.number().positive().nullable().optional(),
@@ -119,11 +119,11 @@ export const createRequestSchema = z.object({
   type: RequestTypeEnum,
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
-  reason: z.string().optional(),
+  reason: z.string().max(1000).optional(),
 });
 
 export const respondRequestSchema = z.object({
-  managerNote: z.string().optional(),
+  managerNote: z.string().max(1000).optional(),
 });
 
 // ═══════════════════════════════════════════
@@ -134,7 +134,7 @@ export const submitPreferenceSchema = z.object({
   weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
   shiftPreference: ShiftPrefEnum.optional(),
   preferredDaysOff: z.array(DayOfWeekEnum).optional(),
-  notes: z.string().optional(),
+  notes: z.string().max(1000).optional(),
 });
 
 // ═══════════════════════════════════════════
@@ -142,8 +142,8 @@ export const submitPreferenceSchema = z.object({
 // ═══════════════════════════════════════════
 
 export const createTaskSchema = z.object({
-  title: z.string().min(1, "כותרת נדרשת"),
-  description: z.string().optional(),
+  title: z.string().min(1, "כותרת נדרשת").max(255),
+  description: z.string().max(5000).optional(),
   assignedToId: z.string().optional(),
   isForAll: z.boolean(),
   dueDate: z
@@ -158,8 +158,8 @@ export const createTaskSchema = z.object({
 // ═══════════════════════════════════════════
 
 export const createAnnouncementSchema = z.object({
-  title: z.string().min(1, "כותרת נדרשת"),
-  body: z.string().min(1, "תוכן נדרש"),
+  title: z.string().min(1, "כותרת נדרשת").max(255),
+  body: z.string().min(1, "תוכן נדרש").max(5000),
   priority: PriorityEnum,
   targetAll: z.boolean(),
   targetNurseIds: z.array(z.string()).optional(),
@@ -171,8 +171,8 @@ export const createAnnouncementSchema = z.object({
 // ═══════════════════════════════════════════
 
 export const createUserSchema = z.object({
-  name: z.string().min(1, "שם נדרש"),
-  nameAr: z.string().optional(),
+  name: z.string().min(1, "שם נדרש").max(255),
+  nameAr: z.string().max(255).optional(),
   role: RoleEnum,
   pin: z.string().regex(/^(\d{4}|\d{6})$/, "PIN חייב להיות 4 או 6 ספרות"),
   gender: GenderEnum,

@@ -5,7 +5,7 @@ import { updateBlockedClinicsSchema } from "@/lib/validations";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     await authGuard("MANAGER");
@@ -19,10 +19,21 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "אחות לא נמצאה" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "אחות לא נמצאה" }, { status: 404 });
+    }
+
+    // Validate all clinic IDs exist
+    if (clinicIds.length > 0) {
+      const clinics = await db.clinic.findMany({
+        where: { id: { in: clinicIds } },
+        select: { id: true },
+      });
+      if (clinics.length !== clinicIds.length) {
+        return NextResponse.json(
+          { error: "אחת או יותר מהמרפאות לא נמצאו" },
+          { status: 400 },
+        );
+      }
     }
 
     // Replace all blocked clinics in a transaction

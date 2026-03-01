@@ -25,12 +25,20 @@ export class AuthError extends Error {
 // JWT helpers (jose — works in Edge runtime)
 // ═══════════════════════════════════════════
 
+// Validate JWT_SECRET eagerly at module load (fails fast instead of during a request)
+const JWT_SECRET_RAW = process.env.JWT_SECRET;
+if (!JWT_SECRET_RAW && process.env.NODE_ENV !== "test") {
+  throw new Error(
+    "JWT_SECRET environment variable is not set. " +
+      "Add it to .env before starting the server.",
+  );
+}
+
 function getSecret() {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
+  if (!JWT_SECRET_RAW) {
     throw new Error("JWT_SECRET environment variable is not set");
   }
-  return new TextEncoder().encode(secret);
+  return new TextEncoder().encode(JWT_SECRET_RAW);
 }
 
 export async function signJwt(payload: JwtPayload): Promise<string> {
@@ -92,10 +100,7 @@ export async function requireAuth() {
  * Check that a user has the required role.
  * Throws AuthError 403 if not.
  */
-export function requireRole(
-  user: { role: string },
-  role: "MANAGER" | "NURSE"
-) {
+export function requireRole(user: { role: string }, role: "MANAGER" | "NURSE") {
   if (user.role !== role) {
     throw new AuthError("אין הרשאה מספקת", 403);
   }

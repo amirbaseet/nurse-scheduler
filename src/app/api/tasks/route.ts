@@ -30,8 +30,21 @@ export async function POST(request: Request) {
     if (!input.isForAll && !input.assignedToId) {
       return NextResponse.json(
         { error: "יש לבחור אחות או לסמן כמשימה לכולן" },
-        { status: 400 }
+        { status: 400 },
       );
+    }
+
+    // Validate assignee exists and is an active nurse
+    if (input.assignedToId) {
+      const assignee = await db.user.findUnique({
+        where: { id: input.assignedToId },
+      });
+      if (!assignee || assignee.role !== "NURSE" || !assignee.isActive) {
+        return NextResponse.json(
+          { error: "אחות לא נמצאה או לא פעילה" },
+          { status: 400 },
+        );
+      }
     }
 
     const dueDate = input.dueDate ? parseWeekParam(input.dueDate) : undefined;

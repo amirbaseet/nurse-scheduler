@@ -2,28 +2,17 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { createAnnouncementSchema } from "@/lib/validations";
-import { toJsonArray } from "@/lib/json-arrays";
+import { parseJsonArray, toJsonArray } from "@/lib/json-arrays";
 
 export async function GET() {
   try {
     const user = await authGuard();
 
-    const announcements = await db.announcement.findMany({
+    // Fetch non-expired announcements, then filter targeting in memory
+    // (SQLite stores targetNurseIds as JSON string — `contains` does LIKE match which is unsafe)
+    const allAnnouncements = await db.announcement.findMany({
       where: {
-        AND: [
-          {
-            OR: [
-              { targetAll: true },
-              { targetNurseIds: { contains: user.id } },
-            ],
-          },
-          {
-            OR: [
-              { expiresAt: null },
-              { expiresAt: { gt: new Date() } },
-            ],
-          },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
       include: {
         author: true,
@@ -32,8 +21,13 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
+    // Filter: targetAll OR user.id is in the parsed JSON array
+    const targeted = allAnnouncements.filter(
+      (a) => a.targetAll || parseJsonArray(a.targetNurseIds).includes(user.id),
+    );
+
     // Add computed isRead field
-    const withReadStatus = announcements.map(({ reads, ...rest }) => ({
+    const withReadStatus = targeted.map(({ reads, ...rest }) => ({
       ...rest,
       isRead: reads.length > 0,
     }));
@@ -50,6 +44,20 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const input = createAnnouncementSchema.parse(body);
+
+    // Validate target nurse IDs exist
+    if (input.targetNurseIds && input.targetNurseIds.length > 0) {
+      const nurses = await db.user.findMany({
+        where: { id: { in: input.targetNurseIds } },
+        select: { id: true },
+      });
+      if (nurses.length !== input.targetNurseIds.length) {
+        return NextResponse.json(
+          { error: "אחת או יותר מהאחיות לא נמצאו" },
+          { status: 400 },
+        );
+      }
+    }
 
     const announcement = await db.announcement.create({
       data: {
