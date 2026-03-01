@@ -42,7 +42,7 @@ describe("Layer 8 — Off Days", () => {
     expect(getCell(grid, "n1", "TUE").status).toBe("OFF");
   });
 
-  it("does not change BLOCKED cells", () => {
+  it("converts BLOCKED cells to OFF", () => {
     const nurse = makeNurse({ id: "n1" });
     const grid = makeGrid([nurse]);
 
@@ -52,8 +52,8 @@ describe("Layer 8 — Off Days", () => {
 
     layer8_offDays(grid, [nurse]);
 
-    expect(getCell(grid, "n1", "FRI").status).toBe("BLOCKED");
-    expect(getCell(grid, "n1", "FRI").blockReason).toBe("no_friday");
+    expect(getCell(grid, "n1", "FRI").status).toBe("OFF");
+    expect(getCell(grid, "n1", "FRI").hours).toBe(0);
   });
 
   it("handles mixed statuses across multiple nurses", () => {
@@ -71,7 +71,7 @@ describe("Layer 8 — Off Days", () => {
     layer8_offDays(grid, [nurse1, nurse2]);
 
     expect(getCell(grid, "n1", "SUN").status).toBe("ASSIGNED");
-    expect(getCell(grid, "n1", "MON").status).toBe("BLOCKED");
+    expect(getCell(grid, "n1", "MON").status).toBe("OFF");
     expect(getCell(grid, "n1", "TUE").status).toBe("OFF");
     expect(getCell(grid, "n1", "WED").status).toBe("OFF");
 

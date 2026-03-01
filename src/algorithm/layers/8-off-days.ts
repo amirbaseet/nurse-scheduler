@@ -15,7 +15,7 @@ export function layer8_offDays(grid: Grid, nurses: AlgoNurse[]): void {
       const cell = dayMap.get(day);
       if (!cell) continue;
 
-      if (cell.status === "AVAILABLE") {
+      if (cell.status === "AVAILABLE" || cell.status === "BLOCKED") {
         cell.status = "OFF";
         cell.hours = 0;
       }
