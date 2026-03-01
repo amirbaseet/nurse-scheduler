@@ -53,6 +53,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/.env.seed ./.env.seed
 
+# Copy learning models (probability matrices used by algorithm at runtime)
+COPY --from=builder /app/data/models ./data/models
+
 # Copy entrypoint script
 COPY docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh

@@ -2,8 +2,7 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    ports:
-      - "${DB_PORT:-5432}:5432"
+    # Port NOT exposed externally — only accessible by app via internal network
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
@@ -12,9 +11,16 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nurse_app} -d ${POSTGRES_DB:-nurse_scheduler}"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
 
   app:
     build: .
@@ -30,6 +36,19 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.production}
       NODE_ENV: production
       SEED_ON_STARTUP: ${SEED_ON_STARTUP:-false}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1024M
 
 volumes:
   pgdata:
