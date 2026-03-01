@@ -66,5 +66,5 @@ export async function middleware(request: NextRequest) {
 
 // Only protect these paths — login page and auth endpoints stay open
 export const config = {
-  matcher: ["/nurse/:path*", "/manager/:path*", "/api/((?!auth/).*)"],
+  matcher: ["/nurse/:path*", "/manager/:path*", "/api/((?!auth/|health).*)"],
 };
