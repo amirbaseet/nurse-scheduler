@@ -59,6 +59,7 @@ export const updateBlockedClinicsSchema = z.object({
 
 export const updateClinicSchema = z.object({
   name: z.string().min(1).max(255).optional(),
+  nameAr: z.string().max(255).optional(),
   genderPref: GenderPrefEnum.optional(),
   canBeSecondary: z.boolean().optional(),
   secondaryHours: z.number().optional(),

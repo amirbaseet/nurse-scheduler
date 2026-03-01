@@ -36,6 +36,7 @@ export function EditClinicDialog({
   const { t } = useTranslation();
 
   const [name, setName] = useState("");
+  const [nameAr, setNameAr] = useState("");
   const [genderPref, setGenderPref] = useState("ANY");
   const [canBeSecondary, setCanBeSecondary] = useState(false);
   const [secondaryHours, setSecondaryHours] = useState("0");
@@ -48,6 +49,7 @@ export function EditClinicDialog({
   useEffect(() => {
     if (clinic) {
       setName(clinic.name);
+      setNameAr(clinic.nameAr ?? "");
       setGenderPref(clinic.genderPref);
       setCanBeSecondary(clinic.canBeSecondary);
       setSecondaryHours(String(clinic.secondaryHours ?? 0));
@@ -68,6 +70,7 @@ export function EditClinicDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
+          nameAr: nameAr.trim() || undefined,
           genderPref,
           canBeSecondary,
           secondaryHours: canBeSecondary
@@ -87,9 +90,7 @@ export function EditClinicDialog({
 
       onSaved();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : t("clinic_update_error"),
-      );
+      setError(err instanceof Error ? err.message : t("clinic_update_error"));
     } finally {
       setSaving(false);
     }
@@ -104,12 +105,25 @@ export function EditClinicDialog({
         </DialogHeader>
 
         <div className="grid gap-4 py-2">
-          {/* Name */}
+          {/* Clinic Code (read-only) */}
           <div className="grid gap-1.5">
-            <Label>{t("name")}</Label>
+            <Label>{t("clinic_code")}</Label>
+            <Input value={clinic?.code ?? ""} disabled dir="ltr" />
+          </div>
+
+          {/* Name (Hebrew) */}
+          <div className="grid gap-1.5">
+            <Label>{t("name_hebrew")}</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+
+          {/* Name (Arabic) */}
+          <div className="grid gap-1.5">
+            <Label>{t("name_arabic")}</Label>
             <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={nameAr}
+              onChange={(e) => setNameAr(e.target.value)}
+              placeholder={t("name_arabic")}
             />
           </div>
 
@@ -121,9 +135,7 @@ export function EditClinicDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="FEMALE_ONLY">
-                  {t("female_only")}
-                </SelectItem>
+                <SelectItem value="FEMALE_ONLY">{t("female_only")}</SelectItem>
                 <SelectItem value="FEMALE_PREFERRED">
                   {t("female_preferred")}
                 </SelectItem>
@@ -186,10 +198,7 @@ export function EditClinicDialog({
           <Button variant="outline" onClick={onClose} disabled={saving}>
             {t("cancel")}
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving || !name.trim()}
-          >
+          <Button onClick={handleSave} disabled={saving || !name.trim()}>
             {saving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin me-2" />
