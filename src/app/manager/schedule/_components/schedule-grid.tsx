@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -11,15 +11,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { cn, DAY_ORDER } from "@/lib/utils";
+import { cn, DAY_ORDER, formatDayDate } from "@/lib/utils";
 import type { ScheduleAssignment } from "@/types/schedule";
 import { ScheduleCell } from "./schedule-cell";
 import { useTranslation } from "@/i18n/use-translation";
@@ -38,6 +30,7 @@ type NurseRow = {
   shiftPref: "MORNING" | "AFTERNOON" | "ANYTIME";
   days: Map<string, ScheduleAssignment>;
   totalHours: number;
+  notes: string[];
 };
 
 function buildGrid(
@@ -56,12 +49,16 @@ function buildGrid(
         shiftPref: info?.shiftPref ?? "ANYTIME",
         days: new Map(),
         totalHours: 0,
+        notes: [],
       });
     }
     const row = rowMap.get(a.nurseId)!;
     row.days.set(a.day, a);
     if (!a.isOff) {
       row.totalHours += a.hours;
+    }
+    if (a.notes && !row.notes.includes(a.notes)) {
+      row.notes.push(a.notes);
     }
   }
 
@@ -75,9 +72,8 @@ function isDraggable(assignment: ScheduleAssignment | undefined): boolean {
   return !assignment.isOff && !assignment.isFixed;
 }
 
-// -- Draggable + Droppable cell wrapper --
-
-function DndCell({
+// --- Draggable + Droppable clinic-row cell (drag + drop) ---
+function DndClinicCell({
   assignment,
   nurseShiftPref,
   onClick,
@@ -91,7 +87,11 @@ function DndCell({
   const canDrag = isDraggable(assignment);
   const id = assignment?.id ?? "";
 
-  const { attributes, listeners, setNodeRef: setDragRef } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+  } = useDraggable({
     id,
     disabled: !canDrag,
   });
@@ -108,42 +108,89 @@ function DndCell({
         setDropRef(node);
       }}
       {...(canDrag ? { ...listeners, ...attributes } : {})}
-      className={cn(isOver && activeId && activeId !== id && "ring-2 ring-primary rounded")}
+      className={cn(
+        isOver && activeId && activeId !== id && "ring-2 ring-primary rounded",
+      )}
     >
       <ScheduleCell
         assignment={assignment ?? null}
         nurseShiftPref={nurseShiftPref}
         onClick={onClick}
         isDragging={activeId === id}
+        variant="clinic"
       />
     </div>
   );
 }
 
-// -- Main Grid --
+// --- Droppable-only hours-row cell ---
+function DndHoursCell({
+  assignment,
+  nurseShiftPref,
+  onClick,
+  activeId,
+}: {
+  assignment: ScheduleAssignment | undefined;
+  nurseShiftPref?: "MORNING" | "AFTERNOON" | "ANYTIME";
+  onClick: () => void;
+  activeId: string | null;
+}) {
+  const id = assignment?.id ? `${assignment.id}-hours` : "";
+  const baseId = assignment?.id ?? "";
+
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id,
+    disabled: !assignment || assignment.isOff || assignment.isFixed,
+  });
+
+  return (
+    <div
+      ref={setDropRef}
+      className={cn(
+        isOver &&
+          activeId &&
+          activeId !== baseId &&
+          "ring-2 ring-primary rounded",
+      )}
+    >
+      <ScheduleCell
+        assignment={assignment ?? null}
+        nurseShiftPref={nurseShiftPref}
+        onClick={onClick}
+        isDragging={activeId === baseId}
+        variant="hours"
+      />
+    </div>
+  );
+}
+
+// --- Full day name keys ---
+const DAY_FULL_KEYS: Record<string, string> = {
+  SUN: "sun_full",
+  MON: "mon_full",
+  TUE: "tue_full",
+  WED: "wed_full",
+  THU: "thu_full",
+  FRI: "fri_full",
+  SAT: "sat_full",
+};
+
+// --- Main Grid ---
 
 export function ScheduleGrid({
   assignments,
   nurseMap,
+  weekStart,
   onCellClick,
   onSwap,
 }: {
   assignments: ScheduleAssignment[];
   nurseMap: Map<string, NurseInfo>;
+  weekStart: Date;
   onCellClick: (assignment: ScheduleAssignment) => void;
   onSwap: (sourceId: string, targetId: string) => void;
 }) {
   const { t } = useTranslation();
-
-  const DAY_LABELS: Record<string, string> = {
-    SUN: t("sun_short"),
-    MON: t("mon_short"),
-    TUE: t("tue_short"),
-    WED: t("wed_short"),
-    THU: t("thu_short"),
-    FRI: t("fri_short"),
-    SAT: t("sat_short"),
-  };
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeAssignment, setActiveAssignment] =
@@ -155,7 +202,6 @@ export function ScheduleGrid({
 
   const grid = buildGrid(assignments, nurseMap);
 
-  // Find assignment by id for drag overlay
   const findAssignment = (id: string) =>
     assignments.find((a) => a.id === id) ?? null;
 
@@ -173,9 +219,11 @@ export function ScheduleGrid({
     if (!over || active.id === over.id) return;
 
     const sourceId = String(active.id);
-    const targetId = String(over.id);
+    // Strip -hours suffix from drop target
+    const targetId = String(over.id).replace(/-hours$/, "");
 
-    // Validate both are swappable
+    if (sourceId === targetId) return;
+
     const source = findAssignment(sourceId);
     const target = findAssignment(targetId);
     if (!source || !target) return;
@@ -191,66 +239,152 @@ export function ScheduleGrid({
       onDragEnd={handleDragEnd}
     >
       <div className="overflow-x-auto rounded-lg border bg-background">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="sticky start-0 z-10 bg-background min-w-[140px]">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            {/* Row 1: Day names */}
+            <tr className="border-b bg-muted/50">
+              <th
+                rowSpan={2}
+                className="sticky start-0 z-10 bg-muted/50 min-w-[120px] border-e px-2 py-1.5 text-start font-semibold"
+              >
                 {t("role_nurse")}
-              </TableHead>
+              </th>
+              <th
+                rowSpan={2}
+                className="min-w-[80px] border-e px-2 py-1.5 text-center font-semibold"
+              >
+                {/* label column header intentionally blank */}
+              </th>
               {DAY_ORDER.map((day) => (
-                <TableHead key={day} className="text-center min-w-[100px]">
-                  {DAY_LABELS[day]}
-                </TableHead>
+                <th
+                  key={day}
+                  className="min-w-[130px] border-e px-2 py-1 text-center font-semibold"
+                >
+                  {t(DAY_FULL_KEYS[day])}
+                </th>
               ))}
-              <TableHead className="text-center min-w-[60px]">{t("total_hours_label")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {grid.map((nurse) => (
-              <TableRow key={nurse.nurseId}>
-                <TableCell className="sticky start-0 z-10 bg-background">
-                  <div className="font-medium">{nurse.name}</div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {nurse.contractHours} {t("hours_short")}
-                  </div>
-                </TableCell>
-                {DAY_ORDER.map((day) => {
-                  const a = nurse.days.get(day);
-                  return (
-                    <TableCell key={day} className="p-1">
-                      <DndCell
-                        assignment={a}
-                        nurseShiftPref={nurse.shiftPref}
-                        onClick={() => a && onCellClick(a)}
-                        activeId={activeId}
-                      />
-                    </TableCell>
-                  );
-                })}
-                <TableCell className="text-center font-medium tabular-nums">
-                  {nurse.totalHours.toFixed(1)}
-                </TableCell>
-              </TableRow>
-            ))}
+              <th
+                rowSpan={2}
+                className="min-w-[100px] border-e px-2 py-1.5 text-center font-semibold"
+              >
+                {t("notes")}
+              </th>
+              <th
+                rowSpan={2}
+                className="min-w-[60px] px-2 py-1.5 text-center font-semibold"
+              >
+                {t("total_hours_label")}
+              </th>
+            </tr>
+            {/* Row 2: Dates */}
+            <tr className="border-b bg-muted/30">
+              {DAY_ORDER.map((day, i) => (
+                <th
+                  key={`${day}-date`}
+                  className="border-e px-2 py-1 text-center text-xs font-normal text-muted-foreground"
+                >
+                  {formatDayDate(weekStart, i)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {grid.map((nurse, nurseIdx) => {
+              const isAlternate = nurseIdx % 2 === 1;
+              const bgClass = isAlternate ? "bg-muted/20" : "";
+              const notesText = nurse.notes.join(", ");
+
+              return (
+                <Fragment key={nurse.nurseId}>
+                  {/* Clinic row */}
+                  <tr className={cn("border-b-0", bgClass)}>
+                    <td
+                      rowSpan={2}
+                      className={cn(
+                        "sticky start-0 z-10 border-e px-2 py-1 align-middle",
+                        bgClass || "bg-background",
+                      )}
+                    >
+                      <div className="font-medium text-sm">{nurse.name}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {nurse.contractHours} {t("hours_short")}
+                      </div>
+                    </td>
+                    <td className="border-e px-1 py-0.5 text-center text-xs text-muted-foreground whitespace-nowrap">
+                      {t("clinic_doctor_label")}
+                    </td>
+                    {DAY_ORDER.map((day) => {
+                      const a = nurse.days.get(day);
+                      return (
+                        <td key={day} className="border-e px-0.5 py-0.5">
+                          <DndClinicCell
+                            assignment={a}
+                            nurseShiftPref={nurse.shiftPref}
+                            onClick={() => a && onCellClick(a)}
+                            activeId={activeId}
+                          />
+                        </td>
+                      );
+                    })}
+                    <td
+                      rowSpan={2}
+                      className="border-e px-1 py-0.5 text-xs text-muted-foreground align-middle max-w-[120px]"
+                    >
+                      {notesText && (
+                        <span className="line-clamp-2" title={notesText}>
+                          {notesText}
+                        </span>
+                      )}
+                    </td>
+                    <td
+                      rowSpan={2}
+                      className="px-2 py-0.5 text-center font-medium tabular-nums align-middle"
+                    >
+                      {nurse.totalHours.toFixed(1)}
+                    </td>
+                  </tr>
+                  {/* Hours row */}
+                  <tr className={cn("border-b-2", bgClass)}>
+                    <td className="border-e px-1 py-0.5 text-center text-xs text-muted-foreground whitespace-nowrap">
+                      {t("hour_label")}
+                    </td>
+                    {DAY_ORDER.map((day) => {
+                      const a = nurse.days.get(day);
+                      return (
+                        <td key={day} className="border-e px-0.5 py-0.5">
+                          <DndHoursCell
+                            assignment={a}
+                            nurseShiftPref={nurse.shiftPref}
+                            onClick={() => a && onCellClick(a)}
+                            activeId={activeId}
+                          />
+                        </td>
+                      );
+                    })}
+                    {/* notes + total handled by rowSpan from clinic row */}
+                  </tr>
+                </Fragment>
+              );
+            })}
             {grid.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={9}
+              <tr>
+                <td
+                  colSpan={11}
                   className="text-center text-muted-foreground py-8"
                 >
                   {t("no_schedule_data")}
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       {/* Drag overlay -- ghost cell following cursor */}
       <DragOverlay>
         {activeAssignment ? (
           <div className="opacity-80 shadow-xl rounded">
-            <ScheduleCell assignment={activeAssignment} />
+            <ScheduleCell assignment={activeAssignment} variant="combined" />
           </div>
         ) : null}
       </DragOverlay>

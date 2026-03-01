@@ -340,5 +340,16 @@
   "clinic_update_error": "שגיאה בעדכון מרפאה",
   "clinic_create_error": "שגיאה בהוספת מרפאה",
   "gender_pref_label": "העדפת מין",
-  "code_already_exists": "קוד מרפאה כבר קיים"
+  "code_already_exists": "קוד מרפאה כבר קיים",
+  "clinic_doctor_label": "מרפאה/רופא",
+  "hour_label": "שעה",
+  "schedule_title": "סידור עבודה שבועי",
+  "vacation_short": "חופש",
+  "sun_full": "ראשון (א)",
+  "mon_full": "שני (ב)",
+  "tue_full": "שלישי (ג)",
+  "wed_full": "רביעי (ד)",
+  "thu_full": "חמישי (ה)",
+  "fri_full": "ששי (ו)",
+  "sat_full": "שבת (ש)"
 }

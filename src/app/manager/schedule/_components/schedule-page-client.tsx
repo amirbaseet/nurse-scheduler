@@ -275,6 +275,7 @@ export function SchedulePageClient() {
         <ScheduleGrid
           assignments={schedule.assignments}
           nurseMap={nurseMap}
+          weekStart={weekStart}
           onCellClick={handleCellClick}
           onSwap={handleSwap}
         />

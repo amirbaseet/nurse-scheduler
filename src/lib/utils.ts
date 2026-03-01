@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { startOfWeek, parseISO, format } from "date-fns";
+import { startOfWeek, parseISO, format, addDays } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -51,6 +51,14 @@ export function parseWeekParam(week: string): Date | null {
  */
 export function formatDate(date: Date): string {
   return format(date, "yyyy-MM-dd");
+}
+
+/**
+ * Format a day's date as DD.MM.YYYY, offset from a week start date.
+ */
+export function formatDayDate(weekStart: Date, dayIndex: number): string {
+  const date = addDays(weekStart, dayIndex);
+  return format(date, "dd.MM.yyyy");
 }
 
 /**

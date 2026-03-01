@@ -340,5 +340,16 @@
   "clinic_update_error": "خطأ في تحديث العيادة",
   "clinic_create_error": "خطأ في إضافة العيادة",
   "gender_pref_label": "تفضيل الجنس",
-  "code_already_exists": "رمز العيادة موجود بالفعل"
+  "code_already_exists": "رمز العيادة موجود بالفعل",
+  "clinic_doctor_label": "العيادة/الطبيب",
+  "hour_label": "الساعة",
+  "schedule_title": "جدول عمل أسبوعي",
+  "vacation_short": "إجازة",
+  "sun_full": "الأحد",
+  "mon_full": "الإثنين",
+  "tue_full": "الثلاثاء",
+  "wed_full": "الأربعاء",
+  "thu_full": "الخميس",
+  "fri_full": "الجمعة",
+  "sat_full": "السبت"
 }
