@@ -16,7 +16,8 @@ export type BlockReason =
   | "no_friday"
   | "no_saturday"
   | "max_days"
-  | "recurring_off";
+  | "recurring_off"
+  | "preferred_off";
 
 export interface Cell {
   status: CellStatus;

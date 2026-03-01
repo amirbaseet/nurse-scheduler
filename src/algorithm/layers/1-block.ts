@@ -1,4 +1,11 @@
-import type { Grid, AlgoNurse, TimeOffEntry, DayOfWeek, Warning } from "../types";
+import type {
+  Grid,
+  AlgoNurse,
+  TimeOffEntry,
+  PreferenceEntry,
+  DayOfWeek,
+  Warning,
+} from "../types";
 
 const DAY_INDEX: Record<DayOfWeek, number> = {
   SUN: 0,
@@ -41,9 +48,11 @@ export function layer1_block(
   days: DayOfWeek[],
   weekStart: Date,
   warnings: Warning[],
+  preferences: PreferenceEntry[] = [],
 ): void {
   for (const nurse of nurses) {
     const nurseTimeOff = timeOff.filter((t) => t.nurseUserId === nurse.userId);
+    const nursePref = preferences.find((p) => p.nurseUserId === nurse.userId);
     const dayMap = grid.get(nurse.id);
     if (!dayMap) continue;
 
@@ -83,6 +92,13 @@ export function layer1_block(
       if (day === "SAT" && !nurse.canWorkSaturday) {
         cell.status = "BLOCKED";
         cell.blockReason = "no_saturday";
+        continue;
+      }
+
+      // 5. Weekly preferred day off (nurse requested this day off)
+      if (nursePref?.preferredDaysOff.includes(day)) {
+        cell.status = "BLOCKED";
+        cell.blockReason = "preferred_off";
         continue;
       }
     }
