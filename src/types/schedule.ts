@@ -11,6 +11,7 @@ export type ScheduleWarning = {
   message: string;
   nurseId?: string;
   clinicId?: string;
+  clinicName?: string;
   day?: string;
 };
 

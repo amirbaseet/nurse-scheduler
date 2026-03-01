@@ -12,10 +12,5 @@ async function getClinics(): Promise<ClinicWithDefaults[]> {
 export default async function ClinicsPage() {
   const clinics = await getClinics();
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">מרפאות</h1>
-      <ClinicsConfig clinics={clinics} />
-    </div>
-  );
+  return <ClinicsConfig clinics={clinics} />;
 }

@@ -3,7 +3,10 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { generateScheduleSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
-import { dbToAlgorithmConfig, algorithmToDbAssignments } from "@/algorithm/converters";
+import {
+  dbToAlgorithmConfig,
+  algorithmToDbAssignments,
+} from "@/algorithm/converters";
 import { generateWeeklySchedule } from "@/algorithm/index";
 
 export async function POST(request: Request) {
@@ -15,10 +18,7 @@ export async function POST(request: Request) {
     const weekStart = parseWeekParam(weekStr);
 
     if (!weekStart) {
-      return NextResponse.json(
-        { error: "תאריך לא תקין" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "תאריך לא תקין" }, { status: 400 });
     }
 
     // Compute weekEnd (Saturday end of week)
@@ -27,83 +27,95 @@ export async function POST(request: Request) {
 
     // ── Load all config from DB ──
 
-    const [nurseProfiles, clinicDefaults, clinicOverrides, timeOff, fixedAssignments, programs, preferences] =
-      await Promise.all([
-        db.nurseProfile.findMany({
-          where: { user: { isActive: true } },
-          include: {
-            user: true,
-            blockedClinics: true,
-          },
-        }),
+    const [
+      nurseProfiles,
+      clinicDefaults,
+      clinicOverrides,
+      timeOff,
+      fixedAssignments,
+      programs,
+      preferences,
+      allClinics,
+    ] = await Promise.all([
+      db.nurseProfile.findMany({
+        where: { user: { isActive: true } },
+        include: {
+          user: true,
+          blockedClinics: true,
+        },
+      }),
 
-        db.clinicDefaultConfig.findMany({
-          where: { isActive: true },
-          include: {
-            clinic: {
-              select: {
-                genderPref: true,
-                canBeSecondary: true,
-                secondaryHours: true,
-                secondaryNursesNeeded: true,
+      db.clinicDefaultConfig.findMany({
+        where: { isActive: true },
+        include: {
+          clinic: {
+            select: {
+              genderPref: true,
+              canBeSecondary: true,
+              secondaryHours: true,
+              secondaryNursesNeeded: true,
+            },
+          },
+        },
+      }),
+
+      db.clinicWeeklyConfig.findMany({
+        where: { weekStart },
+        include: {
+          clinic: {
+            select: {
+              genderPref: true,
+              canBeSecondary: true,
+              secondaryHours: true,
+              secondaryNursesNeeded: true,
+            },
+          },
+        },
+      }),
+
+      db.timeOffRequest.findMany({
+        where: {
+          status: "APPROVED",
+          startDate: { lte: weekEnd },
+          endDate: { gte: weekStart },
+        },
+      }),
+
+      db.fixedAssignment.findMany({
+        where: {
+          OR: [
+            { weekStart: new Date("1970-01-01T00:00:00.000Z") }, // permanent
+            { weekStart }, // this week only
+          ],
+        },
+        include: {
+          clinic: {
+            select: {
+              defaultConfigs: {
+                select: { day: true, shiftStart: true, shiftEnd: true },
               },
             },
           },
-        }),
+        },
+      }),
 
-        db.clinicWeeklyConfig.findMany({
-          where: { weekStart },
-          include: {
-            clinic: {
-              select: {
-                genderPref: true,
-                canBeSecondary: true,
-                secondaryHours: true,
-                secondaryNursesNeeded: true,
-              },
-            },
+      db.programAssignment.findMany({
+        where: { weekStart },
+        include: {
+          program: {
+            select: { name: true, type: true, defaultHours: true },
           },
-        }),
+        },
+      }),
 
-        db.timeOffRequest.findMany({
-          where: {
-            status: "APPROVED",
-            startDate: { lte: weekEnd },
-            endDate: { gte: weekStart },
-          },
-        }),
+      db.weeklyPreference.findMany({
+        where: { weekStart },
+      }),
 
-        db.fixedAssignment.findMany({
-          where: {
-            OR: [
-              { weekStart: new Date("1970-01-01T00:00:00.000Z") }, // permanent
-              { weekStart },                                       // this week only
-            ],
-          },
-          include: {
-            clinic: {
-              select: {
-                defaultConfigs: {
-                  select: { day: true, shiftStart: true, shiftEnd: true },
-                },
-              },
-            },
-          },
-        }),
-
-        db.programAssignment.findMany({
-          where: { weekStart },
-          include: {
-            program: {
-              select: { name: true, type: true, defaultHours: true },
-            },
-          },
-        }),
-
-        db.weeklyPreference.findMany({
-          where: { weekStart },
-        }),
-      ]);
+      db.clinic.findMany({
+        select: { id: true, name: true },
+      }),
+    ]);
 
     // ── Convert DB → Algorithm types ──
 
@@ -114,7 +126,7 @@ export async function POST(request: Request) {
       timeOff,
       fixedAssignments,
       programs,
-      preferences
+      preferences,
     );
 
     // ── Run algorithm ──
@@ -139,7 +151,10 @@ export async function POST(request: Request) {
     });
 
     // Replace all assignments in a transaction
-    const dbAssignments = algorithmToDbAssignments(result.assignments, schedule.id);
+    const dbAssignments = algorithmToDbAssignments(
+      result.assignments,
+      schedule.id,
+    );
 
     await db.$transaction([
       db.scheduleAssignment.deleteMany({
@@ -150,11 +165,27 @@ export async function POST(request: Request) {
       }),
     ]);
 
+    // ── Enrich clinic names in gaps & warnings ──
+
+    const clinicNameMap = new Map(allClinics.map((c) => [c.id, c.name]));
+
+    const enrichedGaps = result.managerGaps.map((gap) => ({
+      ...gap,
+      clinicName: clinicNameMap.get(gap.clinicId) ?? gap.clinicId,
+    }));
+
+    const enrichedWarnings = result.warnings.map((w) => ({
+      ...w,
+      clinicName: w.clinicId
+        ? (clinicNameMap.get(w.clinicId) ?? undefined)
+        : undefined,
+    }));
+
     return NextResponse.json({
       schedule,
-      warnings: result.warnings,
+      warnings: enrichedWarnings,
       qualityScore: result.qualityScore,
-      managerGaps: result.managerGaps,
+      managerGaps: enrichedGaps,
     });
   } catch (error) {
     return handleApiError(error);

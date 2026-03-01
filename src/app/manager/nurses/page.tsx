@@ -25,10 +25,5 @@ async function getNurses(): Promise<SerializedNurse[]> {
 export default async function NursesPage() {
   const nurses = await getNurses();
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">אחיות</h1>
-      <NursesTable nurses={nurses} />
-    </div>
-  );
+  return <NursesTable nurses={nurses} />;
 }

@@ -28,63 +28,67 @@ export function NursesTable({ nurses }: { nurses: SerializedNurse[] }) {
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t("name")}</TableHead>
-          <TableHead>{t("contract_hours")}</TableHead>
-          <TableHead>{t("shift_preference")}</TableHead>
-          <TableHead>{t("fri")}</TableHead>
-          <TableHead>{t("sat")}</TableHead>
-          <TableHead>{t("max_days_short")}</TableHead>
-          <TableHead>{t("fixed_assignments")}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {nurses.map((nurse) => {
-          const permanentFixed = nurse.fixedAssignments
-            .filter((fa) => fa.weekStart === PERMANENT_SENTINEL)
-            .map((fa) => fa.clinic.name);
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">{t("nurses")}</h1>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t("name")}</TableHead>
+            <TableHead>{t("contract_hours")}</TableHead>
+            <TableHead>{t("shift_preference")}</TableHead>
+            <TableHead>{t("fri")}</TableHead>
+            <TableHead>{t("sat")}</TableHead>
+            <TableHead>{t("max_days_short")}</TableHead>
+            <TableHead>{t("fixed_assignments")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {nurses.map((nurse) => {
+            const permanentFixed = nurse.fixedAssignments
+              .filter((fa) => fa.weekStart === PERMANENT_SENTINEL)
+              .map((fa) => fa.clinic.name);
 
-          return (
-            <TableRow
-              key={nurse.id}
-              className="cursor-pointer"
-              onClick={() => router.push(`/manager/nurses/${nurse.id}`)}
-            >
-              <TableCell className="font-medium">{nurse.user.name}</TableCell>
-              <TableCell>{nurse.contractHours}</TableCell>
-              <TableCell>
-                <Badge variant="outline">
-                  {SHIFT_LABELS[nurse.shiftPreference] ?? nurse.shiftPreference}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {nurse.canWorkFriday ? (
-                  <Check className="h-4 w-4 text-green-600" />
-                ) : (
-                  <X className="h-4 w-4 text-muted-foreground" />
-                )}
-              </TableCell>
-              <TableCell>
-                {nurse.canWorkSaturday ? (
-                  <Check className="h-4 w-4 text-green-600" />
-                ) : (
-                  <X className="h-4 w-4 text-muted-foreground" />
-                )}
-              </TableCell>
-              <TableCell>{nurse.maxDaysPerWeek}</TableCell>
-              <TableCell>
-                {permanentFixed.length > 0 ? (
-                  <span className="text-sm">{permanentFixed.join(", ")}</span>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+            return (
+              <TableRow
+                key={nurse.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/manager/nurses/${nurse.id}`)}
+              >
+                <TableCell className="font-medium">{nurse.user.name}</TableCell>
+                <TableCell>{nurse.contractHours}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {SHIFT_LABELS[nurse.shiftPreference] ??
+                      nurse.shiftPreference}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {nurse.canWorkFriday ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {nurse.canWorkSaturday ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </TableCell>
+                <TableCell>{nurse.maxDaysPerWeek}</TableCell>
+                <TableCell>
+                  {permanentFixed.length > 0 ? (
+                    <span className="text-sm">{permanentFixed.join(", ")}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

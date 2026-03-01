@@ -3,6 +3,7 @@
 import { Lock, StickyNote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ScheduleAssignment } from "@/types/schedule";
+import { useTranslation } from "@/i18n/use-translation";
 
 type ShiftPref = "MORNING" | "AFTERNOON" | "ANYTIME";
 
@@ -51,6 +52,8 @@ export function ScheduleCell({
     );
   }
 
+  const { t } = useTranslation();
+
   if (assignment.isOff) {
     return (
       <div
@@ -59,7 +62,7 @@ export function ScheduleCell({
           getCellStyle(assignment),
         )}
       >
-        חופש
+        {t("off_day")}
       </div>
     );
   }

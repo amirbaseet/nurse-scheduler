@@ -195,46 +195,19 @@ export function StepReviewEdit({
           </CardContent>
         </Card>
 
-        {/* Warnings */}
+        {/* Warnings — grouped by day */}
         {sortedWarnings.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">
-                {t("warnings")} ({sortedWarnings.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {sortedWarnings.map((w, i) => (
-                <WarningRow key={i} warning={w} />
-              ))}
-            </CardContent>
-          </Card>
+          <WarningsGrouped warnings={sortedWarnings} dayLabels={DAY_LABELS} />
         )}
 
-        {/* Manager Gaps */}
+        {/* Manager Gaps — grouped by clinic */}
         {managerGaps.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">
-                {t("unfilled_gaps_label")} ({managerGaps.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {managerGaps.map((gap, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-medium">{gap.clinicName}</span>
-                    <span className="text-muted-foreground">
-                      {" "}
-                      — {DAY_LABELS[gap.day] ?? gap.day} — {gap.shiftStart}–
-                      {gap.shiftEnd} ({gap.hours} {t("hours_short")})
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <GapsGrouped
+            gaps={managerGaps}
+            dayLabels={DAY_LABELS}
+            hoursLabel={t("hours_short")}
+            title={t("unfilled_gaps_label")}
+          />
         )}
 
         <Separator />
@@ -309,11 +282,173 @@ function ScheduleCell({
   );
 }
 
-function WarningRow({ warning }: { warning: ScheduleWarning }) {
+function WarningsGrouped({
+  warnings,
+  dayLabels,
+}: {
+  warnings: ScheduleWarning[];
+  dayLabels: Record<string, string>;
+}) {
+  // Separate slot warnings (have day+clinic) from other warnings
+  const slotWarnings = warnings.filter((w) => w.day && w.clinicName);
+  const otherWarnings = warnings.filter((w) => !w.day || !w.clinicName);
+
+  // Group slot warnings by day
+  const byDay = new Map<string, string[]>();
+  for (const w of slotWarnings) {
+    const day = w.day!;
+    const existing = byDay.get(day) ?? [];
+    byDay.set(day, [...existing, w.clinicName!]);
+  }
+
+  // Sort days by DAY_ORDER
+  const dayOrder = DAY_ORDER as readonly string[];
+  const sortedDays = Array.from(byDay.entries()).sort(
+    (a, b) => dayOrder.indexOf(a[0]) - dayOrder.indexOf(b[0]),
+  );
+
   return (
-    <div className="flex items-start gap-2 text-sm">
-      {WARNING_ICONS[warning.level]}
-      <span>{warning.message}</span>
-    </div>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-red-500" />
+          <span>
+            {warnings.length} {warnings.length === 1 ? "warning" : "warnings"}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {sortedDays.map(([day, clinicNames]) => (
+          <div key={day}>
+            <div className="text-xs font-semibold text-muted-foreground mb-1">
+              {dayLabels[day] ?? day} ({clinicNames.length})
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {clinicNames.map((name: string, i: number) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-xs border-red-200 bg-red-50 text-red-700"
+                >
+                  {name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        ))}
+        {otherWarnings.map((w, i) => (
+          <div key={`other-${i}`} className="flex items-start gap-2 text-sm">
+            {WARNING_ICONS[w.level]}
+            <span>{w.message}</span>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function GapsGrouped({
+  gaps,
+  dayLabels,
+  hoursLabel,
+  title,
+}: {
+  gaps: Array<{
+    clinicId: string;
+    clinicName: string;
+    day: string;
+    shiftStart: string;
+    shiftEnd: string;
+    hours: number;
+  }>;
+  dayLabels: Record<string, string>;
+  hoursLabel: string;
+  title: string;
+}) {
+  // Group by clinic (clinicId + shift time for uniqueness)
+  const byClinic = new Map<
+    string,
+    {
+      clinicName: string;
+      shiftStart: string;
+      shiftEnd: string;
+      hours: number;
+      days: string[];
+      gapCount: number;
+    }
+  >();
+
+  for (const gap of gaps) {
+    const key = `${gap.clinicId}|${gap.shiftStart}|${gap.shiftEnd}`;
+    const existing = byClinic.get(key);
+    if (existing) {
+      // Deduplicate days (clinic may need 2+ nurses on same day)
+      const days = existing.days.includes(gap.day)
+        ? existing.days
+        : [...existing.days, gap.day];
+      byClinic.set(key, { ...existing, days, gapCount: existing.gapCount + 1 });
+    } else {
+      byClinic.set(key, {
+        clinicName: gap.clinicName,
+        shiftStart: gap.shiftStart,
+        shiftEnd: gap.shiftEnd,
+        hours: gap.hours,
+        days: [gap.day],
+        gapCount: 1,
+      });
+    }
+  }
+
+  // Sort days within each group by DAY_ORDER
+  const dayOrder = DAY_ORDER as readonly string[];
+  const sortedGroups = Array.from(byClinic.values()).map((group) => ({
+    ...group,
+    days: [...group.days].sort(
+      (a: string, b: string) => dayOrder.indexOf(a) - dayOrder.indexOf(b),
+    ),
+  }));
+
+  // Sort groups by number of unfilled days (most gaps first)
+  sortedGroups.sort((a, b) => b.days.length - a.days.length);
+
+  const totalHours = gaps.reduce((sum, g) => sum + g.hours, 0);
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <span>
+            {title} ({gaps.length})
+          </span>
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {totalHours} {hoursLabel}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {sortedGroups.map((group, i) => (
+          <div key={i} className="rounded-md border p-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-medium">{group.clinicName}</span>
+              <span className="text-[10px] text-muted-foreground">
+                {group.shiftStart}–{group.shiftEnd} ({group.hours} {hoursLabel})
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {group.days.map((day: string) => (
+                <Badge
+                  key={day}
+                  variant="outline"
+                  className="text-xs border-orange-200 bg-orange-50 text-orange-700"
+                >
+                  {dayLabels[day] ?? day}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
