@@ -351,5 +351,13 @@
   "wed_full": "רביעי (ד)",
   "thu_full": "חמישי (ה)",
   "fri_full": "ששי (ו)",
-  "sat_full": "שבת (ש)"
+  "sat_full": "שבת (ש)",
+  "unfilled_clinic_slots": "משבצות חסרות",
+  "nurses_with_remaining": "אחיות עם שעות פנויות",
+  "no_unfilled_slots": "כל המשבצות מאוישות",
+  "no_remaining_nurses": "כל האחיות מאוישות במלואן",
+  "needed_label": "נדרשות",
+  "assigned_label": "שובצו",
+  "gap_label": "חסרות",
+  "of_total": "מתוך"
 }

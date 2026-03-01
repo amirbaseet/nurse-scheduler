@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2, Download, CalendarPlus, Send } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,12 @@ import type {
 } from "@/types/schedule";
 import { ScheduleGrid } from "./schedule-grid";
 import { EditAssignmentDialog } from "./edit-assignment-dialog";
+import { ScheduleSummaryPanels } from "./schedule-summary-panels";
+import {
+  computeUnfilledSlots,
+  computeNurseRemaining,
+  type ClinicConfig,
+} from "./schedule-gaps";
 
 type NurseInfo = {
   id: string;
@@ -42,6 +48,9 @@ export function SchedulePageClient() {
   // Reference data (fetched once)
   const [nurseMap, setNurseMap] = useState<Map<string, NurseInfo>>(new Map());
   const [clinics, setClinics] = useState<ClinicOption[]>([]);
+
+  // Clinic configs for gap analysis (fetched per week)
+  const [clinicConfigs, setClinicConfigs] = useState<ClinicConfig[]>([]);
 
   // Edit dialog state
   const [editingAssignment, setEditingAssignment] =
@@ -79,13 +88,27 @@ export function SchedulePageClient() {
       .catch(() => {});
   }, []);
 
-  // Fetch schedule on week change
+  // Fetch schedule + clinic configs on week change
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/schedule/week/${formatDate(weekStart)}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setSchedule(data))
-      .catch(() => setSchedule(null))
+    const weekStr = formatDate(weekStart);
+
+    Promise.all([
+      fetch(`/api/schedule/week/${weekStr}`).then((r) =>
+        r.ok ? r.json() : null,
+      ),
+      fetch(`/api/clinics/config/${weekStr}`).then((r) =>
+        r.ok ? r.json() : [],
+      ),
+    ])
+      .then(([scheduleData, configData]) => {
+        setSchedule(scheduleData);
+        setClinicConfigs(configData);
+      })
+      .catch(() => {
+        setSchedule(null);
+        setClinicConfigs([]);
+      })
       .finally(() => setLoading(false));
   }, [weekStart]);
 
@@ -196,6 +219,19 @@ export function SchedulePageClient() {
     [schedule],
   );
 
+  // Derived gap analysis — recomputes when schedule or configs change
+  const unfilledSlots = useMemo(
+    () =>
+      schedule ? computeUnfilledSlots(clinicConfigs, schedule.assignments) : [],
+    [clinicConfigs, schedule],
+  );
+
+  const nurseRemaining = useMemo(
+    () =>
+      schedule ? computeNurseRemaining(nurseMap, schedule.assignments) : [],
+    [nurseMap, schedule],
+  );
+
   // After edit dialog saves
   const handleAssignmentSaved = useCallback(
     (updated: ScheduleAssignment) => {
@@ -272,13 +308,19 @@ export function SchedulePageClient() {
           </CardContent>
         </Card>
       ) : (
-        <ScheduleGrid
-          assignments={schedule.assignments}
-          nurseMap={nurseMap}
-          weekStart={weekStart}
-          onCellClick={handleCellClick}
-          onSwap={handleSwap}
-        />
+        <>
+          <ScheduleGrid
+            assignments={schedule.assignments}
+            nurseMap={nurseMap}
+            weekStart={weekStart}
+            onCellClick={handleCellClick}
+            onSwap={handleSwap}
+          />
+          <ScheduleSummaryPanels
+            unfilledSlots={unfilledSlots}
+            nurseRemaining={nurseRemaining}
+          />
+        </>
       )}
 
       {/* Edit dialog */}

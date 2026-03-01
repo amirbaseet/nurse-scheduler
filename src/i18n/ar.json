@@ -351,5 +351,13 @@
   "wed_full": "الأربعاء",
   "thu_full": "الخميس",
   "fri_full": "الجمعة",
-  "sat_full": "السبت"
+  "sat_full": "السبت",
+  "unfilled_clinic_slots": "فترات ناقصة",
+  "nurses_with_remaining": "ممرضات بساعات متبقية",
+  "no_unfilled_slots": "جميع الفترات مشغولة",
+  "no_remaining_nurses": "جميع الممرضات معينات بالكامل",
+  "needed_label": "المطلوب",
+  "assigned_label": "المعين",
+  "gap_label": "الناقص",
+  "of_total": "من"
 }
