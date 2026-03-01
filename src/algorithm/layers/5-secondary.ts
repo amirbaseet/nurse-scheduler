@@ -1,4 +1,4 @@
-import type { Grid, AlgoNurse, ClinicSlot, Budgets, DayOfWeek } from "../types";
+import type { Grid, AlgoNurse, ClinicSlot, DayOfWeek } from "../types";
 import { loadModels } from "../../learning/models";
 
 const DAYS: DayOfWeek[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -38,6 +38,7 @@ function buildComboLookup(clinics: ClinicSlot[]): Map<string, string[]> {
 
 /**
  * Layer 5: Stack secondary clinics on assigned nurses.
+ * Secondary clinics are worked WITHIN the same shift (no extra hours).
  * Prioritizes historically common primary+secondary combos.
  * Tracks demand per clinic per day to avoid over-assigning.
  * Max 1 secondary clinic per nurse per day.
@@ -46,7 +47,6 @@ export function layer5_secondary(
   grid: Grid,
   nurses: AlgoNurse[],
   clinics: ClinicSlot[],
-  budgets: Budgets,
 ): void {
   const secondaryClinics = clinics.filter((c) => c.canBeSecondary);
   const comboLookup = buildComboLookup(clinics);
@@ -67,7 +67,6 @@ export function layer5_secondary(
       if (!cell) continue;
       if (cell.status !== "ASSIGNED") continue;
       if (cell.secondaryClinicId) continue; // already has a secondary
-      if ((budgets.get(nurse.id) ?? 0) < 1) continue;
 
       const primaryId = cell.primaryClinicId;
 
@@ -83,7 +82,6 @@ export function layer5_secondary(
         preferredSecondaryIds,
         secondaryClinics,
         secondaryDemand,
-        budgets,
       );
 
       // Fall back to any valid secondary if no preferred combo matched
@@ -95,7 +93,6 @@ export function layer5_secondary(
           [],
           secondaryClinics,
           secondaryDemand,
-          budgets,
         );
       }
     }
@@ -106,11 +103,10 @@ export function layer5_secondary(
 function tryAssignSecondary(
   nurse: AlgoNurse,
   day: DayOfWeek,
-  cell: { secondaryClinicId?: string; hours: number },
+  cell: { secondaryClinicId?: string },
   preferredIds: string[],
   secondaryClinics: ClinicSlot[],
   secondaryDemand: Map<string, number>,
-  budgets: Budgets,
 ): boolean {
   const candidates =
     preferredIds.length > 0
@@ -127,13 +123,8 @@ function tryAssignSecondary(
     if (nurse.blockedClinicIds.includes(sec.clinicId)) continue;
     if (sec.genderPref === "FEMALE_ONLY" && nurse.gender !== "FEMALE") continue;
 
-    const secHours = sec.secondaryHours ?? 2;
-    if ((budgets.get(nurse.id) ?? 0) < secHours) continue;
-
-    // Assign secondary
+    // Assign secondary — within same shift, no extra hours or budget consumed
     cell.secondaryClinicId = sec.clinicId;
-    cell.hours += secHours;
-    budgets.set(nurse.id, (budgets.get(nurse.id) ?? 0) - secHours);
     secondaryDemand.set(key, remaining - 1);
     return true;
   }

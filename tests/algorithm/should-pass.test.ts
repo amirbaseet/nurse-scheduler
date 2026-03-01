@@ -114,7 +114,7 @@ describe("SHOULD-PASS — Scoring", () => {
 describe("SHOULD-PASS — Secondary Clinics", () => {
   beforeEach(() => resetNurseCounter());
 
-  it("S.4 secondary clinic stacked on primary → hours added correctly", () => {
+  it("S.4 secondary clinic stacked on primary → shift hours unchanged", () => {
     const nurse = makeNurse({ id: "n1", contractHours: 36 });
     const primary = makeClinicSlot({ clinicId: "c1", day: "MON" });
     const secondary = makeClinicSlot({
@@ -136,11 +136,12 @@ describe("SHOULD-PASS — Secondary Clinics", () => {
     );
     expect(mon?.primaryClinicId).toBe("c1");
     expect(mon?.secondaryClinicId).toBe("c2");
-    expect(mon?.hours).toBe(9); // 7 + 2
+    expect(mon?.hours).toBe(8); // 8h total shift (primary + secondary within same shift)
   });
 
-  it("S.5 no secondary if budget < secondaryHours", () => {
-    // contractHours=7: just enough for 1 primary (7h), no room for secondary (2h)
+  it("S.5 secondary assigned regardless of remaining budget", () => {
+    // contractHours=7: just enough for 1 primary (7h), budget exhausted
+    // but secondary is within the same shift so budget is irrelevant
     const nurse = makeNurse({ id: "n1", contractHours: 7 });
     const primary = makeClinicSlot({
       clinicId: "c1",
@@ -165,8 +166,8 @@ describe("SHOULD-PASS — Secondary Clinics", () => {
       (a) => a.nurseId === "n1" && a.day === "MON",
     );
     expect(mon?.primaryClinicId).toBe("c1");
-    expect(mon?.secondaryClinicId).toBeNull();
-    expect(mon?.hours).toBe(7);
+    expect(mon?.secondaryClinicId).toBe("c2"); // assigned despite 0 remaining budget
+    expect(mon?.hours).toBe(7); // shift hours unchanged
   });
 
   it("S.6 secondary demand exhausted → only 1 nurse gets secondary", () => {

@@ -95,7 +95,7 @@ export function generateWeeklySchedule(
     warnings,
     config.adjustments,
   );
-  layer5_secondary(grid, regularNurses, config.clinics, budgets);
+  layer5_secondary(grid, regularNurses, config.clinics);
   layer6_programs(grid, regularNurses, config.programs, budgets, warnings);
   layer7_gapFill(grid, regularNurses, budgets, warnings);
   layer8_offDays(grid, regularNurses);

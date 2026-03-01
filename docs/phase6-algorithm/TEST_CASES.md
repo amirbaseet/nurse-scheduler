@@ -68,8 +68,8 @@ S.3 Nurse preferring day off → S_pref reduced by 100 for that day
 
 ### Secondary Clinics (3 tests) — FIXED with demand tracking
 ```
-S.4 Secondary clinic stacked on primary → hours added correctly
-S.5 No secondary if budget < secondaryHours
+S.4 Secondary clinic stacked on primary → assigned, shift hours unchanged
+S.5 Secondary assigned regardless of remaining budget (within same shift)
 S.6 Secondary demand exhausted (secondaryNursesNeeded=1) → only 1 nurse gets it
 ```
 

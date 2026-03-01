@@ -619,7 +619,7 @@ describe("MUST-PASS — Category 6: Edge Cases", () => {
     );
     expect(mon?.primaryClinicId).toBe("c-primary");
     expect(mon?.secondaryClinicId).toBe("c-secondary");
-    expect(mon?.hours).toBe(9); // 7 primary + 2 secondary
+    expect(mon?.hours).toBe(8); // 8h total shift (primary + secondary within same shift)
   });
 });
 

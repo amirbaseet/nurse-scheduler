@@ -497,34 +497,30 @@ FUNCTION tryBacktrack(grid, failedSlot, nurses, budgets) → boolean:
 ## Layer 5: Secondary Clinics — FIXED (demand tracking)
 
 ```
-FUNCTION layer5_secondary(grid, nurses, clinics, budgets):
+FUNCTION layer5_secondary(grid, nurses, clinics):
+  // Secondary clinics are worked WITHIN the same shift — no extra hours, no budget consumed
   secondaryClinics = clinics.FILTER(c => c.clinic.canBeSecondary)
-  
+
   // Build demand tracker: how many nurses needed per secondary clinic per day
   secondaryDemand = {}  // key: "clinicId-day" → remaining needed
   FOR EACH sec IN secondaryClinics:
     secondaryDemand[sec.clinicId + "-" + sec.day] = sec.clinic.secondaryNursesNeeded || 1
-  
+
   FOR EACH nurse IN nurses:
     FOR EACH day IN days:
       cell = grid[nurse.id][day]
       IF cell.status != ASSIGNED: CONTINUE
       IF cell.secondaryClinicId: CONTINUE
-      IF budgets[nurse.id] < 1: CONTINUE
-      
+
       FOR EACH sec IN secondaryClinics:
         key = sec.clinicId + "-" + day
         IF (secondaryDemand[key] || 0) <= 0: CONTINUE    // demand filled
         IF sec.day != day: CONTINUE
         IF nurse.blockedClinicIds.INCLUDES(sec.clinicId): CONTINUE
         IF sec.clinic.genderPref == FEMALE_ONLY AND nurse.gender != FEMALE: CONTINUE
-        IF budgets[nurse.id] < (sec.clinic.secondaryHours || 2): CONTINUE
-        
-        // Assign secondary
+
+        // Assign secondary — within same shift, hours and budget unchanged
         cell.secondaryClinicId = sec.clinicId
-        secHours = sec.clinic.secondaryHours || 2
-        cell.hours += secHours
-        budgets[nurse.id] -= secHours
         secondaryDemand[key] -= 1
         BREAK  // max 1 secondary per day
 ```
