@@ -80,7 +80,7 @@ export function ScheduleCell({
         if (e.key === "Enter" || e.key === " ") onClick?.();
       }}
       className={cn(
-        "relative h-14 cursor-pointer rounded px-1.5 py-1 text-xs transition-shadow hover:shadow-md",
+        "relative min-h-14 cursor-pointer rounded px-1.5 py-1 text-xs transition-shadow hover:shadow-md",
         getCellStyle(assignment, nurseShiftPref),
         isDragging && "opacity-50 shadow-lg",
       )}
@@ -99,14 +99,12 @@ export function ScheduleCell({
       </div>
 
       {/* Shift time */}
-      {time && (
-        <div className="text-[10px] text-muted-foreground">{time}</div>
-      )}
+      {time && <div className="text-[10px] text-muted-foreground">{time}</div>}
 
       {/* Secondary clinic */}
       {secondaryName && (
         <div
-          className="truncate text-[10px] text-muted-foreground/70"
+          className="truncate text-[11px] font-medium text-blue-600"
           title={secondaryName}
         >
           + {secondaryName}

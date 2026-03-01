@@ -55,8 +55,8 @@ export function SchedulePageClient() {
           const nurses = await nRes.json();
           const map = new Map<string, NurseInfo>();
           for (const n of nurses) {
-            map.set(n.userId, {
-              id: n.userId,
+            map.set(n.id, {
+              id: n.id,
               name: n.user.name,
               contractHours: n.contractHours,
               shiftPref: n.shiftPreference ?? "ANYTIME",
