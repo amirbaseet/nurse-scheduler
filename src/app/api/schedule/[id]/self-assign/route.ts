@@ -10,7 +10,7 @@ const selfAssignSchema = z.object({
       day: z.enum(["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]),
       shiftStart: z.string().regex(/^\d{2}:\d{2}$/),
       shiftEnd: z.string().regex(/^\d{2}:\d{2}$/),
-      hours: z.number().positive(),
+      hours: z.number().positive().max(24),
     }),
   ),
 });
@@ -56,6 +56,17 @@ export async function POST(
         );
       }
       daySet.add(gap.day);
+    }
+
+    // Validate total hours don't exceed contract
+    const totalHours = gaps.reduce((sum, g) => sum + g.hours, 0);
+    if (totalHours > nurseProfile.contractHours) {
+      return NextResponse.json(
+        {
+          error: `סה״כ שעות (${totalHours}) חורג משעות החוזה (${nurseProfile.contractHours})`,
+        },
+        { status: 400 },
+      );
     }
 
     // Replace all manager self-assignments in a transaction

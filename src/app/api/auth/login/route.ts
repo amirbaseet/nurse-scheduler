@@ -5,7 +5,10 @@ import { signJwt } from "@/lib/auth";
 
 // ═══════════════════════════════════════════
 // In-memory rate limiting (per IP)
-// In production, use Redis or a proper rate limiter.
+// TODO(prod): Replace with Redis/Upstash when deploying to production.
+// This Map resets on every deployment/restart. Acceptable for dev/staging
+// because sameSite=strict cookies + PIN prefix narrowing already limit
+// brute-force surface. For production, use @upstash/ratelimit.
 // ═══════════════════════════════════════════
 
 const failedAttempts = new Map<
@@ -134,9 +137,12 @@ export async function POST(request: Request) {
     redirect,
   });
 
+  const isProduction = process.env.NODE_ENV === "production";
+  const isSecure = isProduction || process.env.VERCEL === "1";
+
   response.cookies.set("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure,
     sameSite: "strict",
     maxAge: 86400, // 24 hours
     path: "/",
