@@ -19,8 +19,8 @@ import { addWeeks } from "date-fns";
 type Assignment = {
   id: string;
   day: string;
-  shiftStart: string;
-  shiftEnd: string;
+  shiftStart: string | null;
+  shiftEnd: string | null;
   isOff: boolean;
   primaryClinic: { name: string } | null;
   secondaryClinic: { name: string } | null;
@@ -62,7 +62,8 @@ function useDayLabels(): Record<string, string> {
   };
 }
 
-function parseHours(start: string, end: string): number {
+function parseHours(start: string | null, end: string | null): number {
+  if (!start || !end) return 0;
   const [sh, sm] = start.split(":").map(Number);
   const [eh, em] = end.split(":").map(Number);
   return (eh * 60 + em - (sh * 60 + sm)) / 60;
@@ -130,9 +131,11 @@ function DayCard({
               <span className="text-muted-foreground"> + {secondaryName}</span>
             )}
           </div>
-          <div className="text-sm text-muted-foreground">
-            {assignment.shiftStart} — {assignment.shiftEnd} ({hours}h)
-          </div>
+          {assignment.shiftStart && assignment.shiftEnd && (
+            <div className="text-sm text-muted-foreground">
+              {assignment.shiftStart} — {assignment.shiftEnd} ({hours}h)
+            </div>
+          )}
           {assignment.patientCallProgram && (
             <div className="text-sm text-muted-foreground">
               {t("program")}: {assignment.patientCallProgram}
@@ -173,9 +176,11 @@ function CompactDayRow({ assignment }: { assignment: Assignment }) {
             ({assignment.patientCallProgram})
           </span>
         )}
-        <span className="text-muted-foreground ms-2">
-          {assignment.shiftStart}-{assignment.shiftEnd}
-        </span>
+        {assignment.shiftStart && assignment.shiftEnd && (
+          <span className="text-muted-foreground ms-2">
+            {assignment.shiftStart}-{assignment.shiftEnd}
+          </span>
+        )}
       </div>
     </div>
   );
