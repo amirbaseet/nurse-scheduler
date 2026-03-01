@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Download, CalendarPlus } from "lucide-react";
+import { Loader2, Download, CalendarPlus, Send } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekNavigator } from "@/components/week-navigator";
 import { StatusBadge } from "@/components/status-badge";
 import { getWeekStart, formatDate } from "@/lib/utils";
+import { useTranslation } from "@/i18n/use-translation";
 import type {
   ScheduleWithAssignments,
   ScheduleAssignment,
@@ -34,6 +35,9 @@ export function SchedulePageClient() {
   );
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+
+  const { t } = useTranslation();
 
   // Reference data (fetched once)
   const [nurseMap, setNurseMap] = useState<Map<string, NurseInfo>>(new Map());
@@ -107,6 +111,23 @@ export function SchedulePageClient() {
       setExporting(false);
     }
   }, [schedule, weekStart]);
+
+  // Publish handler
+  const handlePublish = useCallback(async () => {
+    if (!schedule) return;
+    setPublishing(true);
+    try {
+      const res = await fetch(`/api/schedule/${schedule.id}/publish`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error(t("publish_error"));
+      setSchedule({ ...schedule, status: "PUBLISHED" });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : t("publish_error"));
+    } finally {
+      setPublishing(false);
+    }
+  }, [schedule, t]);
 
   // Cell click → open edit dialog
   const handleCellClick = useCallback((assignment: ScheduleAssignment) => {
@@ -203,35 +224,49 @@ export function SchedulePageClient() {
           )}
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={!schedule || exporting}
-          onClick={handleExport}
-        >
-          {exporting ? (
-            <Loader2 className="h-4 w-4 animate-spin me-2" />
-          ) : (
-            <Download className="h-4 w-4 me-2" />
+        <div className="flex items-center gap-2">
+          {schedule && schedule.status === "GENERATED" && (
+            <Button size="sm" disabled={publishing} onClick={handlePublish}>
+              {publishing ? (
+                <Loader2 className="h-4 w-4 animate-spin me-2" />
+              ) : (
+                <Send className="h-4 w-4 me-2" />
+              )}
+              {publishing ? t("publishing") : t("publish_schedule")}
+            </Button>
           )}
-          ייצוא לאקסל
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!schedule || exporting}
+            onClick={handleExport}
+          >
+            {exporting ? (
+              <Loader2 className="h-4 w-4 animate-spin me-2" />
+            ) : (
+              <Download className="h-4 w-4 me-2" />
+            )}
+            {t("export_excel")}
+          </Button>
+        </div>
       </div>
 
       {/* Main content */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          <span className="me-2 text-muted-foreground">טוען לו״ז...</span>
+          <span className="me-2 text-muted-foreground">
+            {t("loading_schedule")}
+          </span>
         </div>
       ) : !schedule ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-4 py-16">
-            <p className="text-muted-foreground">אין לו״ז לשבוע זה</p>
+            <p className="text-muted-foreground">{t("no_schedule_for_week")}</p>
             <Link href="/manager/schedule/generate">
               <Button>
                 <CalendarPlus className="h-4 w-4 me-2" />
-                יצירת לו״ז
+                {t("generate_schedule")}
               </Button>
             </Link>
           </CardContent>

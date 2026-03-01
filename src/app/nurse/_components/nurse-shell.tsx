@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BottomNav } from "@/components/bottom-nav";
 import { useTranslation } from "@/i18n/use-translation";
 
@@ -63,35 +64,62 @@ export function NurseShell({
           </button>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -start-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                  {unreadCount}
-                </span>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72">
-            {notifications.length === 0 ? (
-              <DropdownMenuItem disabled>
-                {t("notifications")} — {t("no_tasks")}
-              </DropdownMenuItem>
-            ) : (
-              notifications.slice(0, 5).map((n) => (
-                <DropdownMenuItem
-                  key={n.id}
-                  onClick={() => handleMarkRead(n.id)}
-                  className={n.isRead ? "opacity-60" : "font-medium"}
-                >
-                  <span className="truncate">{n.title}</span>
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -start-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72">
+              {notifications.length === 0 ? (
+                <DropdownMenuItem disabled>
+                  {t("notifications")} — {t("no_tasks")}
                 </DropdownMenuItem>
-              ))
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              ) : (
+                notifications.slice(0, 5).map((n) => (
+                  <DropdownMenuItem
+                    key={n.id}
+                    onClick={() => handleMarkRead(n.id)}
+                    className={n.isRead ? "opacity-60" : "font-medium"}
+                  >
+                    <span className="truncate">{n.title}</span>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-xs">
+                    {userName.slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem disabled className="text-xs opacity-70">
+                {userName}
+              </DropdownMenuItem>
+              <form action="/api/auth/logout" method="POST">
+                <DropdownMenuItem asChild>
+                  <button type="submit" className="w-full">
+                    <LogOut className="h-4 w-4 me-2" />
+                    {t("logout")}
+                  </button>
+                </DropdownMenuItem>
+              </form>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       {/* Main content — padded for bottom nav */}
