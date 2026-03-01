@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +23,7 @@ import {
 import { DAY_ORDER } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/i18n/use-translation";
+import { EditClinicDialog } from "./edit-clinic-dialog";
 import type { ClinicWithDefaults } from "@/types/clinic";
 
 type DayConfig = {
@@ -59,7 +61,11 @@ export function DefaultScheduleTab({
 }: {
   clinics: ClinicWithDefaults[];
 }) {
+  const router = useRouter();
   const { t } = useTranslation();
+  const [editingClinic, setEditingClinic] = useState<ClinicWithDefaults | null>(
+    null,
+  );
 
   const DAY_LABELS: Record<string, string> = {
     SUN: t("sun"),
@@ -141,6 +147,15 @@ export function DefaultScheduleTab({
 
   return (
     <div className="space-y-3 pt-4">
+      <EditClinicDialog
+        clinic={editingClinic}
+        onClose={() => setEditingClinic(null)}
+        onSaved={() => {
+          setEditingClinic(null);
+          router.refresh();
+        }}
+      />
+
       {message && (
         <div
           className={`rounded-md px-4 py-2 text-sm ${
@@ -175,6 +190,16 @@ export function DefaultScheduleTab({
                       {t("inactive")}
                     </Badge>
                   )}
+                  <button
+                    type="button"
+                    className="rounded p-1 hover:bg-muted"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingClinic(clinic);
+                    }}
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
                 </div>
                 <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
               </button>

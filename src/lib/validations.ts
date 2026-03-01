@@ -66,6 +66,16 @@ export const updateClinicSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+export const createClinicSchema = z.object({
+  name: z.string().min(1).max(255),
+  nameAr: z.string().max(255).optional(),
+  code: z.string().min(1).max(50),
+  genderPref: GenderPrefEnum.optional(),
+  canBeSecondary: z.boolean().optional(),
+  secondaryHours: z.number().optional(),
+  secondaryNursesNeeded: z.number().int().min(0).optional(),
+});
+
 const clinicConfigItemSchema = z.object({
   clinicId: z.string().min(1),
   day: DayOfWeekEnum,

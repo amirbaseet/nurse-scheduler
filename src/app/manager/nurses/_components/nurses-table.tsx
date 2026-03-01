@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { Check, X, Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,15 +12,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/use-translation";
 import type { SerializedNurse } from "@/types/nurse";
 import { parseJsonArray } from "@/lib/json-arrays";
+import { CreateNurseDialog } from "./create-nurse-dialog";
 
 const PERMANENT_SENTINEL = "1970-01-01T00:00:00.000Z";
 
 export function NursesTable({ nurses }: { nurses: SerializedNurse[] }) {
   const router = useRouter();
   const { t } = useTranslation();
+  const [showCreate, setShowCreate] = useState(false);
 
   const SHIFT_LABELS: Record<string, string> = {
     MORNING: t("morning"),
@@ -29,7 +33,22 @@ export function NursesTable({ nurses }: { nurses: SerializedNurse[] }) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t("nurses")}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t("nurses")}</h1>
+        <Button size="sm" onClick={() => setShowCreate(true)}>
+          <Plus className="h-4 w-4 me-1" />
+          {t("add_nurse")}
+        </Button>
+      </div>
+
+      <CreateNurseDialog
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onCreated={() => {
+          setShowCreate(false);
+          router.refresh();
+        }}
+      />
       <Table>
         <TableHeader>
           <TableRow>
