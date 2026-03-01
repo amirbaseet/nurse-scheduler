@@ -172,38 +172,37 @@ export function DefaultScheduleTab({
         const gender = GENDER_LABELS[clinic.genderPref];
         return (
           <Collapsible key={clinic.id}>
-            <CollapsibleTrigger asChild>
-              <button className="flex w-full items-center justify-between rounded-md border p-4 text-start hover:bg-muted/50">
-                <div className="flex items-center gap-3">
-                  <span className="font-medium">{clinic.name}</span>
-                  <Badge variant="outline" className={gender.variant}>
-                    {gender.label}
-                  </Badge>
-                  {clinic.canBeSecondary && (
-                    <Badge variant="outline">{t("secondary_clinic")}</Badge>
-                  )}
-                  {!clinic.isActive && (
-                    <Badge
-                      variant="outline"
-                      className="bg-red-100 text-red-800 border-red-300"
-                    >
-                      {t("inactive")}
+            <div className="flex items-center rounded-md border">
+              <CollapsibleTrigger asChild>
+                <button className="flex flex-1 items-center justify-between p-4 text-start hover:bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">{clinic.name}</span>
+                    <Badge variant="outline" className={gender.variant}>
+                      {gender.label}
                     </Badge>
-                  )}
-                  <button
-                    type="button"
-                    className="rounded p-1 hover:bg-muted"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingClinic(clinic);
-                    }}
-                  >
-                    <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
-                </div>
-                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                    {clinic.canBeSecondary && (
+                      <Badge variant="outline">{t("secondary_clinic")}</Badge>
+                    )}
+                    {!clinic.isActive && (
+                      <Badge
+                        variant="outline"
+                        className="bg-red-100 text-red-800 border-red-300"
+                      >
+                        {t("inactive")}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+                </button>
+              </CollapsibleTrigger>
+              <button
+                type="button"
+                className="rounded p-2 me-2 hover:bg-muted"
+                onClick={() => setEditingClinic(clinic)}
+              >
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
-            </CollapsibleTrigger>
+            </div>
             <CollapsibleContent className="px-4 pb-4">
               <Table>
                 <TableHeader>
