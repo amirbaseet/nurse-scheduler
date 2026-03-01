@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/use-translation";
 import type { SerializedNurse } from "@/types/nurse";
-import { parseJsonArray } from "@/lib/json-arrays";
 import { CreateNurseDialog } from "./create-nurse-dialog";
 
 const PERMANENT_SENTINEL = "1970-01-01T00:00:00.000Z";

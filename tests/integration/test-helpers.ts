@@ -173,7 +173,7 @@ export async function seedTestData(db: PrismaClient): Promise<SeedResult> {
           canWorkSaturday: false,
           maxDaysPerWeek: 5,
           employmentType: "FULL_TIME",
-          recurringOffDays: "[]",
+          recurringOffDays: [],
         },
       },
     },
@@ -197,7 +197,7 @@ export async function seedTestData(db: PrismaClient): Promise<SeedResult> {
           canWorkSaturday: false,
           maxDaysPerWeek: 5,
           employmentType: "FULL_TIME",
-          recurringOffDays: "[]",
+          recurringOffDays: [],
         },
       },
     },
@@ -250,10 +250,14 @@ export async function seedTestData(db: PrismaClient): Promise<SeedResult> {
     managerId: manager.id,
     managerToken,
     nurse1Id: nurse1.id,
-    nurse1ProfileId: nurse1.nurseProfile!.id,
+    nurse1ProfileId: (
+      nurse1 as typeof nurse1 & { nurseProfile: { id: string } }
+    ).nurseProfile.id,
     nurse1Token,
     nurse2Id: nurse2.id,
-    nurse2ProfileId: nurse2.nurseProfile!.id,
+    nurse2ProfileId: (
+      nurse2 as typeof nurse2 & { nurseProfile: { id: string } }
+    ).nurseProfile.id,
     nurse2Token,
     clinicIds,
   };

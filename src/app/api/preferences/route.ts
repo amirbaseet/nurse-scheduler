@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { submitPreferenceSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
-import { toJsonArray } from "@/lib/json-arrays";
 
 export async function POST(request: Request) {
   try {
@@ -15,15 +14,10 @@ export async function POST(request: Request) {
     const weekStart = parseWeekParam(input.weekStart);
 
     if (!weekStart) {
-      return NextResponse.json(
-        { error: "תאריך לא תקין" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "תאריך לא תקין" }, { status: 400 });
     }
 
-    const preferredDaysOff = input.preferredDaysOff
-      ? toJsonArray(input.preferredDaysOff)
-      : "[]";
+    const preferredDaysOff = input.preferredDaysOff ?? [];
 
     const preference = await db.weeklyPreference.upsert({
       where: {

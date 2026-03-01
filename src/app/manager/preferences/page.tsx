@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/use-translation";
 import { getWeekStart, formatDate, DAY_ORDER } from "@/lib/utils";
-import { parseJsonArray } from "@/lib/json-arrays";
 import { addWeeks } from "date-fns";
 
 type NursePreference = {
@@ -16,7 +15,7 @@ type NursePreference = {
   nurse: { name: string };
   weekStart: string;
   shiftPreference: string | null;
-  preferredDaysOff: string | null;
+  preferredDaysOff: string[];
   notes: string | null;
   submittedAt: string;
 };
@@ -103,7 +102,7 @@ export default function ManagerPreferencesPage() {
       {!loading && preferences.length > 0 && (
         <div className="space-y-3">
           {preferences.map((pref) => {
-            const daysOff = parseJsonArray(pref.preferredDaysOff);
+            const daysOff = pref.preferredDaysOff ?? [];
             const dayLabels = daysOff.map((day) => {
               const idx = (DAY_ORDER as readonly string[]).indexOf(day);
               return idx >= 0 ? t(DAY_KEYS[idx]) : day;

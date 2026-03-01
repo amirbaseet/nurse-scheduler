@@ -7,14 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/use-translation";
 import { getWeekStart, formatDate, DAY_ORDER } from "@/lib/utils";
-import { parseJsonArray } from "@/lib/json-arrays";
 import { addWeeks } from "date-fns";
 
 type WeeklyPreference = {
   id: string;
   weekStart: string;
   shiftPreference: string | null;
-  preferredDaysOff: string | null;
+  preferredDaysOff: string[];
   notes: string | null;
   submittedAt: string;
 };
@@ -60,7 +59,7 @@ export default function NursePreferencesPage() {
         setExisting(data);
         if (data) {
           setShiftPref(data.shiftPreference ?? "ANYTIME");
-          setDaysOff(parseJsonArray(data.preferredDaysOff));
+          setDaysOff(data.preferredDaysOff ?? []);
           setNotes(data.notes ?? "");
         } else {
           setShiftPref("ANYTIME");

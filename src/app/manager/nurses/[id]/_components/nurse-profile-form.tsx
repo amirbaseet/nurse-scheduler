@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslation } from "@/i18n/use-translation";
 import { DAY_ORDER } from "@/lib/utils";
-import { parseJsonArray } from "@/lib/json-arrays";
 import type { SerializedNurse } from "@/types/nurse";
 
 type Clinic = { id: string; name: string };
@@ -66,7 +65,7 @@ export function NurseProfileForm({
     canWorkFriday: nurse.canWorkFriday,
     canWorkSaturday: nurse.canWorkSaturday,
     maxDaysPerWeek: nurse.maxDaysPerWeek,
-    recurringOffDays: parseJsonArray(nurse.recurringOffDays),
+    recurringOffDays: nurse.recurringOffDays ?? [],
   });
   const [profileSaving, setProfileSaving] = useState(false);
 

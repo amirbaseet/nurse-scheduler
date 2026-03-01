@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { updateNurseSchema } from "@/lib/validations";
-import { toJsonArray } from "@/lib/json-arrays";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     await authGuard("MANAGER");
@@ -20,10 +19,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "אחות לא נמצאה" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "אחות לא נמצאה" }, { status: 404 });
     }
 
     const { recurringOffDays, ...rest } = input;
@@ -32,9 +28,7 @@ export async function PUT(
       where: { id: params.id },
       data: {
         ...rest,
-        ...(recurringOffDays !== undefined && {
-          recurringOffDays: toJsonArray(recurringOffDays),
-        }),
+        ...(recurringOffDays !== undefined && { recurringOffDays }),
       },
       include: { user: true },
     });

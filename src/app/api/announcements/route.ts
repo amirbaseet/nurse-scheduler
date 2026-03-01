@@ -2,17 +2,18 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { createAnnouncementSchema } from "@/lib/validations";
-import { parseJsonArray, toJsonArray } from "@/lib/json-arrays";
 
 export async function GET() {
   try {
     const user = await authGuard();
 
-    // Fetch non-expired announcements, then filter targeting in memory
-    // (SQLite stores targetNurseIds as JSON string — `contains` does LIKE match which is unsafe)
-    const allAnnouncements = await db.announcement.findMany({
+    // PostgreSQL native array query: filter targeting at the DB level
+    const targeted = await db.announcement.findMany({
       where: {
-        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        AND: [
+          { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+          { OR: [{ targetAll: true }, { targetNurseIds: { has: user.id } }] },
+        ],
       },
       include: {
         author: true,
@@ -20,11 +21,6 @@ export async function GET() {
       },
       orderBy: { createdAt: "desc" },
     });
-
-    // Filter: targetAll OR user.id is in the parsed JSON array
-    const targeted = allAnnouncements.filter(
-      (a) => a.targetAll || parseJsonArray(a.targetNurseIds).includes(user.id),
-    );
 
     // Add computed isRead field
     const withReadStatus = targeted.map(({ reads, ...rest }) => ({
@@ -66,9 +62,7 @@ export async function POST(request: Request) {
         body: input.body,
         priority: input.priority,
         targetAll: input.targetAll,
-        targetNurseIds: input.targetNurseIds
-          ? toJsonArray(input.targetNurseIds)
-          : "[]",
+        targetNurseIds: input.targetNurseIds ?? [],
         expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
       },
     });

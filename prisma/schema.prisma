@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ═══════════════════════════════════════════
@@ -58,7 +59,7 @@ model NurseProfile {
   employmentType   Employment @default(FULL_TIME)
   isManager        Boolean    @default(false)
   managementHours  Float?
-  recurringOffDays String     @default("[]")      // JSON array of DayOfWeek, e.g. ["THU"]
+  recurringOffDays DayOfWeek[]
 
   blockedClinics   NurseBlockedClinic[]
   fixedAssignments FixedAssignment[]
@@ -304,10 +305,10 @@ model WeeklyPreference {
   nurse            User      @relation(fields: [nurseId], references: [id])
   weekStart        DateTime
   shiftPreference  ShiftPref?
-  preferredDaysOff String    @default("[]")   // JSON array: ["TUE","FRI"]
-  preferredDaysOn  String    @default("[]")   // JSON array
-  preferredClinics String    @default("[]")   // JSON array of clinic codes
-  avoidClinics     String    @default("[]")   // JSON array of clinic codes
+  preferredDaysOff DayOfWeek[]
+  preferredDaysOn  DayOfWeek[]
+  preferredClinics String[]
+  avoidClinics     String[]
   notes            String?
   submittedAt      DateTime  @default(now())
 
@@ -358,7 +359,7 @@ model Announcement {
   body           String
   priority       Priority @default(NORMAL)
   targetAll      Boolean  @default(true)
-  targetNurseIds String   @default("[]")    // JSON array of user IDs
+  targetNurseIds String[]
   expiresAt      DateTime?
   createdAt      DateTime @default(now())
 

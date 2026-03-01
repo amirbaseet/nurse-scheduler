@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nurse_scheduler}
+      POSTGRES_USER: ${POSTGRES_USER:-nurse_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nurse_app} -d ${POSTGRES_DB:-nurse_scheduler}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-nurse_app}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-nurse_scheduler}
+      DIRECT_URL: postgresql://${POSTGRES_USER:-nurse_app}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-nurse_scheduler}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.production}
+      NODE_ENV: production
+      SEED_ON_STARTUP: ${SEED_ON_STARTUP:-false}
+
+volumes:
+  pgdata:

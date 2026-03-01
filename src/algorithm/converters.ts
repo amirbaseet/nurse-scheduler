@@ -13,8 +13,6 @@ import type {
   PreferenceEntry,
   AssignmentData,
 } from "./types";
-import { parseJsonArray } from "@/lib/json-arrays";
-
 // ── Input types (Prisma query results) ──
 
 type NurseProfileWithRelations = {
@@ -28,7 +26,7 @@ type NurseProfileWithRelations = {
   maxDaysPerWeek: number;
   isManager: boolean;
   managementHours: number | null;
-  recurringOffDays: string;
+  recurringOffDays: DayOfWeek[];
   user: { name: string };
   blockedClinics: Array<{ clinicId: string }>;
 };
@@ -100,7 +98,7 @@ type ProgramAssignmentRow = {
 type WeeklyPreferenceRow = {
   nurseId: string; // User.id
   shiftPreference: string | null;
-  preferredDaysOff: string;
+  preferredDaysOff: DayOfWeek[];
 };
 
 // ═══════════════════════════════════════════
@@ -201,7 +199,7 @@ export function dbToAlgorithmConfig(
     maxDaysPerWeek: np.maxDaysPerWeek,
     isManager: np.isManager,
     managementHours: np.managementHours,
-    recurringOffDays: parseJsonArray(np.recurringOffDays) as DayOfWeek[],
+    recurringOffDays: np.recurringOffDays,
     blockedClinicIds: np.blockedClinics.map((bc) => bc.clinicId),
   }));
 
@@ -239,7 +237,7 @@ export function dbToAlgorithmConfig(
   const prefEntries: PreferenceEntry[] = preferences.map((p) => ({
     nurseUserId: p.nurseId,
     shiftPreference: p.shiftPreference as PreferenceEntry["shiftPreference"],
-    preferredDaysOff: parseJsonArray(p.preferredDaysOff) as DayOfWeek[],
+    preferredDaysOff: p.preferredDaysOff,
   }));
 
   return {
