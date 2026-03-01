@@ -20,7 +20,7 @@ export function layer6_programs(
     if (!cell || cell.status !== "ASSIGNED") {
       warnings.push({
         level: "warning",
-        message: `Cannot add calls: nurse ${addon.nurseId} not working on ${addon.day}`,
+        message: `לא ניתן להוסיף שיחות: אחות ${addon.nurseId} לא עובדת ביום ${addon.day}`,
         nurseId: addon.nurseId,
         day: addon.day,
       });

@@ -31,7 +31,7 @@ export function layer2_fixed(
     if (cell.status === "BLOCKED") {
       warnings.push({
         level: "warning",
-        message: `Fixed assignment skipped: nurse ${entry.nurseId} is blocked on ${entry.day}`,
+        message: `שיבוץ קבוע דולג: אחות ${entry.nurseId} חסומה ביום ${entry.day}`,
         nurseId: entry.nurseId,
         clinicId: entry.clinicId,
         day: entry.day,
@@ -64,7 +64,7 @@ export function layer2_fixed(
     if (cell.status === "BLOCKED") {
       warnings.push({
         level: "warning",
-        message: `Program assignment skipped: nurse ${entry.nurseId} is blocked on ${entry.day}`,
+        message: `שיבוץ תוכנית דולג: אחות ${entry.nurseId} חסומה ביום ${entry.day}`,
         nurseId: entry.nurseId,
         day: entry.day,
       });

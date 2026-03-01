@@ -57,7 +57,7 @@ export function layer7_gapFill(
     if (remaining >= 4) {
       warnings.push({
         level: "info",
-        message: `${nurse.name} has ${remaining}h unfilled`,
+        message: `${nurse.name} — ${remaining} שעות לא מאוישות`,
         nurseId: nurse.id,
       });
     }

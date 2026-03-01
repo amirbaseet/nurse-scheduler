@@ -20,21 +20,32 @@ function readJwtSecret(): string {
   return match[1];
 }
 
-// Query the dev SQLite DB for the first active nurse (uses execFileSync — no shell)
+// Query the database for the first active nurse via Prisma client (works with any DB provider)
 function findNurseInDb(): { id: string; name: string } {
-  const dbPath = resolve(PROJECT_ROOT, "prisma/dev.db");
-  const row = execFileSync(
-    "sqlite3",
-    [
-      dbPath,
-      "SELECT id, name FROM User WHERE role = 'NURSE' AND isActive = 1 LIMIT 1;",
-    ],
-    { encoding: "utf-8" },
-  ).trim();
-  const [id, name] = row.split("|");
-  if (!id || !name)
-    throw new Error("No active nurse found in dev.db — run prisma db seed");
-  return { id, name };
+  const script = [
+    "const{PrismaClient}=require('@prisma/client');",
+    "const db=new PrismaClient();",
+    "db.user.findFirst({where:{role:'NURSE',isActive:true},select:{id:true,name:true}})",
+    ".then(u=>{console.log(JSON.stringify(u));process.exit(0)})",
+    ".catch(e=>{console.error(e);process.exit(1)});",
+  ].join("");
+
+  const raw = execFileSync("node", ["-e", script], {
+    cwd: PROJECT_ROOT,
+    encoding: "utf-8",
+  }).trim();
+
+  const lines = raw.split("\n").filter((l) => l.trim());
+  for (const line of lines) {
+    try {
+      const obj = JSON.parse(line);
+      if (obj?.id && obj?.name) return { id: obj.id, name: obj.name };
+    } catch {
+      continue;
+    }
+  }
+
+  throw new Error("No active nurse found in database — run prisma db seed");
 }
 
 // Create a JWT and inject it as an httpOnly cookie, bypassing the login UI.

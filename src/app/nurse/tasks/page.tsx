@@ -48,7 +48,7 @@ export default function NurseTasksPage() {
   const handleComplete = useCallback(async (taskId: string) => {
     setCompleting(taskId);
     try {
-      const res = await fetch(`/api/tasks/${taskId}/complete`, {
+      const res = await fetch(`/api/tasks/${taskId}/done`, {
         method: "PUT",
       });
       if (res.ok) {

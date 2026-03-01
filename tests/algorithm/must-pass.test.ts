@@ -319,7 +319,7 @@ describe("MUST-PASS — Category 3: Fixed Assignments", () => {
 
     expect(
       result.warnings.some(
-        (w) => w.message.includes("skipped") || w.message.includes("blocked"),
+        (w) => w.message.includes("דולג") || w.message.includes("חסומה"),
       ),
     ).toBe(true);
   });

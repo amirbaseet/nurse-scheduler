@@ -8,6 +8,7 @@ import {
   algorithmToDbAssignments,
 } from "@/algorithm/converters";
 import { generateWeeklySchedule } from "@/algorithm/index";
+import { loadCorrectionAdjustments } from "@/learning/corrections";
 
 export async function POST(request: Request) {
   try {
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
       programs,
       preferences,
       allClinics,
+      adjustments,
     ] = await Promise.all([
       db.nurseProfile.findMany({
         where: { user: { isActive: true } },
@@ -117,6 +119,8 @@ export async function POST(request: Request) {
       db.clinic.findMany({
         select: { id: true, name: true, code: true },
       }),
+
+      loadCorrectionAdjustments(),
     ]);
 
     // ── Convert DB → Algorithm types ──
@@ -130,6 +134,11 @@ export async function POST(request: Request) {
       programs,
       preferences,
     );
+
+    // Wire correction-learning adjustments into the algorithm config
+    if (adjustments.size > 0) {
+      config.adjustments = adjustments;
+    }
 
     // ── Run algorithm ──
 

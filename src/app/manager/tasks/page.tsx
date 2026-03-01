@@ -34,7 +34,7 @@ type Task = {
   assignedTo: { id: string; name: string } | null;
   isForAll: boolean;
   priority: "LOW" | "NORMAL" | "URGENT";
-  status: "PENDING" | "COMPLETED";
+  status: "PENDING" | "IN_PROGRESS" | "DONE";
   dueDate: string | null;
   createdAt: string;
   completedAt: string | null;
@@ -141,7 +141,7 @@ export default function TasksPage() {
   }
 
   const pendingTasks = tasks.filter((t) => t.status === "PENDING");
-  const completedTasks = tasks.filter((t) => t.status === "COMPLETED");
+  const completedTasks = tasks.filter((t) => t.status === "DONE");
 
   return (
     <div className="flex flex-col gap-4">

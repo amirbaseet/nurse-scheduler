@@ -43,7 +43,7 @@ export function layer3_gender(
       if (candidates.length === 0 && slot.genderPref === "FEMALE_ONLY") {
         warnings.push({
           level: "error",
-          message: `No female nurse available for FEMALE_ONLY clinic`,
+          message: `אין אחות זמינה למרפאה לנשים בלבד`,
           clinicId: slot.clinicId,
           day: slot.day,
         });
@@ -56,7 +56,7 @@ export function layer3_gender(
         if (candidates.length > 0) {
           warnings.push({
             level: "warning",
-            message: `Non-female nurse assigned to FEMALE_PREFERRED clinic`,
+            message: `אחות לא-נשית שובצה למרפאה המעדיפה נשים`,
             clinicId: slot.clinicId,
             day: slot.day,
           });
@@ -66,7 +66,7 @@ export function layer3_gender(
       if (candidates.length === 0) {
         warnings.push({
           level: "error",
-          message: `No nurse available for clinic slot`,
+          message: `אין אחות זמינה למשבצת מרפאה`,
           clinicId: slot.clinicId,
           day: slot.day,
         });

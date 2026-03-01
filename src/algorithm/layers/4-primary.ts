@@ -72,7 +72,7 @@ export function layer4_primary(
       if (!recovered) {
         warnings.push({
           level: "error",
-          message: `Cannot fill slot: no candidates available`,
+          message: `לא ניתן לאייש משבצת: אין מועמדות זמינות`,
           clinicId: slot.clinicId,
           day: slot.day,
         });
