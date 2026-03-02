@@ -137,6 +137,15 @@ export const respondRequestSchema = z.object({
   managerNote: z.string().max(1000).optional(),
 });
 
+export const recordAbsenceSchema = z.object({
+  nurseId: z.string().min(1),
+  type: RequestTypeEnum,
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
+  reason: z.string().max(1000).optional(),
+  managerNote: z.string().max(1000).optional(),
+});
+
 // ═══════════════════════════════════════════
 // Preferences
 // ═══════════════════════════════════════════

@@ -359,5 +359,17 @@
   "needed_label": "נדרשות",
   "assigned_label": "שובצו",
   "gap_label": "חסרות",
-  "of_total": "מתוך"
+  "of_total": "מתוך",
+  "reports": "דוחות",
+  "absence_report": "דוח היעדרויות",
+  "record_absence": "רישום היעדרות",
+  "record_absence_desc": "רישום היעדרות אחות ע״י המנהלת",
+  "absence_recorded": "ההיעדרות נרשמה",
+  "absence_record_error": "שגיאה ברישום היעדרות",
+  "select_month": "בחר חודש",
+  "total_absent_days": "סה״כ ימי היעדרות",
+  "no_absences": "אין היעדרויות בחודש זה",
+  "days_absent": "ימי היעדרות",
+  "select_nurse_for_absence": "בחר אחות לרישום היעדרות",
+  "recorded_by_manager": "נרשם ע״י מנהלת"
 }

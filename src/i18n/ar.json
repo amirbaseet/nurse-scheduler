@@ -359,5 +359,17 @@
   "needed_label": "المطلوب",
   "assigned_label": "المعين",
   "gap_label": "الناقص",
-  "of_total": "من"
+  "of_total": "من",
+  "reports": "التقارير",
+  "absence_report": "تقرير الغيابات",
+  "record_absence": "تسجيل غياب",
+  "record_absence_desc": "تسجيل غياب ممرضة بواسطة المديرة",
+  "absence_recorded": "تم تسجيل الغياب",
+  "absence_record_error": "خطأ في تسجيل الغياب",
+  "select_month": "اختر الشهر",
+  "total_absent_days": "إجمالي أيام الغياب",
+  "no_absences": "لا يوجد غيابات في هذا الشهر",
+  "days_absent": "أيام الغياب",
+  "select_nurse_for_absence": "اختر ممرضة لتسجيل الغياب",
+  "recorded_by_manager": "مسجل بواسطة المديرة"
 }

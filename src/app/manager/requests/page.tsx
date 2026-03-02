@@ -8,12 +8,29 @@ import {
   Calendar,
   AlertTriangle,
   Clock,
+  Plus,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { StatusBadge } from "@/components/status-badge";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/i18n/use-translation";
@@ -30,7 +47,12 @@ type TimeOffRequest = {
   managerNote: string | null;
   requestedAt: string;
   respondedAt: string | null;
+  createdById?: string | null;
 };
+
+type NurseOption = { id: string; name: string };
+
+const ABSENCE_TYPES = ["VACATION", "SICK", "PERSONAL", "OFF_DAY"] as const;
 
 const TYPE_ICONS: Record<string, string> = {
   VACATION: "🏖",
@@ -57,6 +79,19 @@ export default function RequestsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+
+  // Record Absence dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [nurses, setNurses] = useState<NurseOption[]>([]);
+  const [absenceForm, setAbsenceForm] = useState({
+    nurseId: "",
+    type: "SICK" as (typeof ABSENCE_TYPES)[number],
+    startDate: "",
+    endDate: "",
+    reason: "",
+    managerNote: "",
+  });
+  const [absenceLoading, setAbsenceLoading] = useState(false);
 
   const { t } = useTranslation();
 
@@ -93,6 +128,53 @@ export default function RequestsPage() {
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
+
+  // Fetch nurses when dialog opens
+  useEffect(() => {
+    if (!dialogOpen) return;
+    fetch("/api/nurses")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: Array<{ user: NurseOption }>) =>
+        setNurses(data.map((n) => n.user)),
+      )
+      .catch(() => setNurses([]));
+  }, [dialogOpen]);
+
+  const handleRecordAbsence = async () => {
+    setAbsenceLoading(true);
+    try {
+      const res = await fetch("/api/requests/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nurseId: absenceForm.nurseId,
+          type: absenceForm.type,
+          startDate: absenceForm.startDate,
+          endDate: absenceForm.endDate,
+          reason: absenceForm.reason || undefined,
+          managerNote: absenceForm.managerNote || undefined,
+        }),
+      });
+
+      if (res.ok) {
+        const created = await res.json();
+        setHistory((prev) => [created, ...prev]);
+        setDialogOpen(false);
+        setAbsenceForm({
+          nurseId: "",
+          type: "SICK",
+          startDate: "",
+          endDate: "",
+          reason: "",
+          managerNote: "",
+        });
+      }
+    } catch (err) {
+      console.error("Record absence failed:", err);
+    } finally {
+      setAbsenceLoading(false);
+    }
+  };
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
     setActionLoading(id);
@@ -132,7 +214,13 @@ export default function RequestsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold">{t("vacation_requests")}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">{t("vacation_requests")}</h1>
+        <Button size="sm" onClick={() => setDialogOpen(true)}>
+          <Plus className="h-4 w-4 me-1" />
+          {t("record_absence")}
+        </Button>
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-2 border-b">
@@ -303,9 +391,16 @@ export default function RequestsPage() {
                         {formatDateHe(req.endDate)}
                       </span>
                     </div>
-                    <StatusBadge
-                      status={req.status as "APPROVED" | "REJECTED"}
-                    />
+                    <div className="flex items-center gap-2">
+                      {req.createdById && (
+                        <Badge variant="secondary" className="text-xs">
+                          {t("recorded_by_manager")}
+                        </Badge>
+                      )}
+                      <StatusBadge
+                        status={req.status as "APPROVED" | "REJECTED"}
+                      />
+                    </div>
                   </div>
                   {req.managerNote && (
                     <p className="text-xs text-muted-foreground mt-1">
@@ -318,6 +413,151 @@ export default function RequestsPage() {
           )}
         </div>
       )}
+
+      {/* Record Absence Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("record_absence")}</DialogTitle>
+            <DialogDescription>{t("record_absence_desc")}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Nurse select */}
+            <div className="space-y-2">
+              <Label>{t("nurse_label")}</Label>
+              <Select
+                value={absenceForm.nurseId}
+                onValueChange={(v) =>
+                  setAbsenceForm((prev) => ({ ...prev, nurseId: v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("select_nurse")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {nurses.map((n) => (
+                    <SelectItem key={n.id} value={n.id}>
+                      {n.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Type select */}
+            <div className="space-y-2">
+              <Label>{t("select_type")}</Label>
+              <Select
+                value={absenceForm.type}
+                onValueChange={(v) =>
+                  setAbsenceForm((prev) => ({
+                    ...prev,
+                    type: v as (typeof ABSENCE_TYPES)[number],
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ABSENCE_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {TYPE_ICONS[type]} {TYPE_LABELS[type]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date inputs */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>{t("start_date")}</Label>
+                <Input
+                  type="date"
+                  value={absenceForm.startDate}
+                  onChange={(e) =>
+                    setAbsenceForm((prev) => ({
+                      ...prev,
+                      startDate: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("end_date")}</Label>
+                <Input
+                  type="date"
+                  value={absenceForm.endDate}
+                  onChange={(e) =>
+                    setAbsenceForm((prev) => ({
+                      ...prev,
+                      endDate: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Reason */}
+            <div className="space-y-2">
+              <Label>{t("reason")}</Label>
+              <Input
+                placeholder={t("note_optional")}
+                value={absenceForm.reason}
+                onChange={(e) =>
+                  setAbsenceForm((prev) => ({
+                    ...prev,
+                    reason: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            {/* Manager note */}
+            <div className="space-y-2">
+              <Label>{t("manager_note")}</Label>
+              <Input
+                placeholder={t("note_optional")}
+                value={absenceForm.managerNote}
+                onChange={(e) =>
+                  setAbsenceForm((prev) => ({
+                    ...prev,
+                    managerNote: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+              disabled={absenceLoading}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={handleRecordAbsence}
+              disabled={
+                absenceLoading ||
+                !absenceForm.nurseId ||
+                !absenceForm.startDate ||
+                !absenceForm.endDate
+              }
+            >
+              {absenceLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin me-1" />
+              ) : (
+                <Check className="h-4 w-4 me-1" />
+              )}
+              {t("save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

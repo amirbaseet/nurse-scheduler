@@ -28,8 +28,9 @@ model User {
   updatedAt      DateTime @updatedAt
 
   nurseProfile      NurseProfile?
-  timeOffRequests   TimeOffRequest[]
-  preferences       WeeklyPreference[]
+  timeOffRequests        TimeOffRequest[] @relation("NurseRequests")
+  createdTimeOffRequests TimeOffRequest[] @relation("CreatedRequests")
+  preferences            WeeklyPreference[]
   assignedTasks     Task[]              @relation("AssignedTo")
   createdTasks      Task[]              @relation("CreatedBy")
   announcements     Announcement[]      @relation("Author")
@@ -271,13 +272,15 @@ model ScheduleAssignment {
 model TimeOffRequest {
   id          String        @id @default(cuid())
   nurseId     String
-  nurse       User          @relation(fields: [nurseId], references: [id])
+  nurse       User          @relation("NurseRequests", fields: [nurseId], references: [id])
   type        RequestType
   startDate   DateTime
   endDate     DateTime
   reason      String?
   status      RequestStatus @default(PENDING)
   managerNote String?
+  createdById String?
+  createdBy   User?         @relation("CreatedRequests", fields: [createdById], references: [id])
   requestedAt DateTime      @default(now())
   respondedAt DateTime?
 }

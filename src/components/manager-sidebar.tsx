@@ -15,6 +15,7 @@ import {
   CheckSquare,
   Megaphone,
   UserCog,
+  BarChart3,
   LogOut,
   Languages,
 } from "lucide-react";
@@ -27,15 +28,24 @@ const navItems = [
   { href: "/manager", icon: LayoutDashboard, labelKey: "dashboard" },
   { href: "/manager/schedule", icon: Calendar, labelKey: "schedule" },
   { href: "/manager/schedule/generate", icon: Zap, labelKey: "generate" },
-  { href: "/manager/schedule/self-assign", icon: UserCheck, labelKey: "self_assign" },
+  {
+    href: "/manager/schedule/self-assign",
+    icon: UserCheck,
+    labelKey: "self_assign",
+  },
   { href: "/manager/nurses", icon: Users, labelKey: "nurses" },
   { href: "/manager/clinics", icon: Building2, labelKey: "clinics" },
   { href: "/manager/programs", icon: ClipboardList, labelKey: "programs" },
   { href: "/manager/requests", icon: FileText, labelKey: "requests" },
   { href: "/manager/preferences", icon: Settings, labelKey: "preferences" },
   { href: "/manager/tasks", icon: CheckSquare, labelKey: "tasks" },
-  { href: "/manager/announcements", icon: Megaphone, labelKey: "announcements" },
+  {
+    href: "/manager/announcements",
+    icon: Megaphone,
+    labelKey: "announcements",
+  },
   { href: "/manager/users", icon: UserCog, labelKey: "users" },
+  { href: "/manager/reports", icon: BarChart3, labelKey: "reports" },
 ];
 
 export function ManagerSidebar() {
@@ -45,7 +55,9 @@ export function ManagerSidebar() {
   return (
     <aside className="flex h-screen w-60 flex-col border-e bg-card">
       <div className="flex h-14 items-center justify-center border-b px-4">
-        <span className="text-lg font-bold text-primary">NurseScheduler Pro</span>
+        <span className="text-lg font-bold text-primary">
+          NurseScheduler Pro
+        </span>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-2">
