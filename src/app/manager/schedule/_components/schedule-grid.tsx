@@ -78,11 +78,13 @@ function DndClinicCell({
   nurseShiftPref,
   onClick,
   activeId,
+  timeOffType,
 }: {
   assignment: ScheduleAssignment | undefined;
   nurseShiftPref?: "MORNING" | "AFTERNOON" | "ANYTIME";
   onClick: () => void;
   activeId: string | null;
+  timeOffType?: string;
 }) {
   const canDrag = isDraggable(assignment);
   const id = assignment?.id ?? "";
@@ -118,6 +120,7 @@ function DndClinicCell({
         onClick={onClick}
         isDragging={activeId === id}
         variant="clinic"
+        timeOffType={timeOffType}
       />
     </div>
   );
@@ -129,11 +132,13 @@ function DndHoursCell({
   nurseShiftPref,
   onClick,
   activeId,
+  timeOffType,
 }: {
   assignment: ScheduleAssignment | undefined;
   nurseShiftPref?: "MORNING" | "AFTERNOON" | "ANYTIME";
   onClick: () => void;
   activeId: string | null;
+  timeOffType?: string;
 }) {
   const id = assignment?.id ? `${assignment.id}-hours` : "";
   const baseId = assignment?.id ?? "";
@@ -159,6 +164,7 @@ function DndHoursCell({
         onClick={onClick}
         isDragging={activeId === baseId}
         variant="hours"
+        timeOffType={timeOffType}
       />
     </div>
   );
@@ -181,12 +187,14 @@ export function ScheduleGrid({
   assignments,
   nurseMap,
   weekStart,
+  timeOffMap,
   onCellClick,
   onSwap,
 }: {
   assignments: ScheduleAssignment[];
   nurseMap: Map<string, NurseInfo>;
   weekStart: Date;
+  timeOffMap?: Map<string, string>;
   onCellClick: (assignment: ScheduleAssignment) => void;
   onSwap: (sourceId: string, targetId: string) => void;
 }) {
@@ -315,6 +323,10 @@ export function ScheduleGrid({
                     </td>
                     {DAY_ORDER.map((day) => {
                       const a = nurse.days.get(day);
+                      const userId = a?.nurse.user.id;
+                      const toType = userId
+                        ? timeOffMap?.get(`${userId}-${day}`)
+                        : undefined;
                       return (
                         <td key={day} className="border-e px-0.5 py-0.5">
                           <DndClinicCell
@@ -322,6 +334,7 @@ export function ScheduleGrid({
                             nurseShiftPref={nurse.shiftPref}
                             onClick={() => a && onCellClick(a)}
                             activeId={activeId}
+                            timeOffType={toType}
                           />
                         </td>
                       );
@@ -350,6 +363,10 @@ export function ScheduleGrid({
                     </td>
                     {DAY_ORDER.map((day) => {
                       const a = nurse.days.get(day);
+                      const userId = a?.nurse.user.id;
+                      const toType = userId
+                        ? timeOffMap?.get(`${userId}-${day}`)
+                        : undefined;
                       return (
                         <td key={day} className="border-e px-0.5 py-0.5">
                           <DndHoursCell
@@ -357,6 +374,7 @@ export function ScheduleGrid({
                             nurseShiftPref={nurse.shiftPref}
                             onClick={() => a && onCellClick(a)}
                             activeId={activeId}
+                            timeOffType={toType}
                           />
                         </td>
                       );

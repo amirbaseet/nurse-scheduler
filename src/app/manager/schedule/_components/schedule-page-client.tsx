@@ -1,17 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { addDays } from "date-fns";
 import { Loader2, Download, CalendarPlus, Send } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { WeekNavigator } from "@/components/week-navigator";
 import { StatusBadge } from "@/components/status-badge";
-import { getWeekStart, formatDate } from "@/lib/utils";
+import { getWeekStart, formatDate, DAY_ORDER } from "@/lib/utils";
 import { useTranslation } from "@/i18n/use-translation";
 import type {
   ScheduleWithAssignments,
   ScheduleAssignment,
+  TimeOffInfo,
 } from "@/types/schedule";
 import { ScheduleGrid } from "./schedule-grid";
 import { EditAssignmentDialog } from "./edit-assignment-dialog";
@@ -232,6 +234,26 @@ export function SchedulePageClient() {
     [nurseMap, schedule],
   );
 
+  // Build a lookup: "${nurseUserId}-${day}" → time-off type (VACATION, SICK, etc.)
+  const timeOffMap = useMemo(() => {
+    const map = new Map<string, string>();
+    const timeOffList: TimeOffInfo[] = schedule?.timeOff ?? [];
+    if (timeOffList.length === 0) return map;
+
+    for (const entry of timeOffList) {
+      const start = new Date(entry.startDate);
+      const end = new Date(entry.endDate);
+
+      for (let i = 0; i < 7; i++) {
+        const dayDate = addDays(weekStart, i);
+        if (dayDate >= start && dayDate <= end) {
+          map.set(`${entry.nurseUserId}-${DAY_ORDER[i]}`, entry.type);
+        }
+      }
+    }
+    return map;
+  }, [schedule, weekStart]);
+
   // After edit dialog saves
   const handleAssignmentSaved = useCallback(
     (updated: ScheduleAssignment) => {
@@ -313,6 +335,7 @@ export function SchedulePageClient() {
             assignments={schedule.assignments}
             nurseMap={nurseMap}
             weekStart={weekStart}
+            timeOffMap={timeOffMap}
             onCellClick={handleCellClick}
             onSwap={handleSwap}
           />

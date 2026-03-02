@@ -371,5 +371,7 @@
   "no_absences": "אין היעדרויות בחודש זה",
   "days_absent": "ימי היעדרות",
   "select_nurse_for_absence": "בחר אחות לרישום היעדרות",
-  "recorded_by_manager": "נרשם ע״י מנהלת"
+  "recorded_by_manager": "נרשם ע״י מנהלת",
+  "delete_absence": "מחיקת היעדרות",
+  "absence_deleted": "ההיעדרות נמחקה"
 }

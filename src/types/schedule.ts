@@ -63,6 +63,15 @@ export type ScheduleAssignment = {
   };
 };
 
+// ── Time-off info attached to a schedule week ──
+
+export type TimeOffInfo = {
+  nurseUserId: string;
+  type: string; // VACATION | SICK | PERSONAL | OFF_DAY
+  startDate: string;
+  endDate: string;
+};
+
 // ── Full schedule from GET /api/schedule/week/[week] ──
 
 export type ScheduleWithAssignments = {
@@ -71,4 +80,5 @@ export type ScheduleWithAssignments = {
   status: string;
   qualityScore: number | null;
   assignments: ScheduleAssignment[];
+  timeOff?: TimeOffInfo[];
 };

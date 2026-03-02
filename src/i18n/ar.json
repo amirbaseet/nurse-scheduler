@@ -371,5 +371,7 @@
   "no_absences": "لا يوجد غيابات في هذا الشهر",
   "days_absent": "أيام الغياب",
   "select_nurse_for_absence": "اختر ممرضة لتسجيل الغياب",
-  "recorded_by_manager": "مسجل بواسطة المديرة"
+  "recorded_by_manager": "مسجل بواسطة المديرة",
+  "delete_absence": "حذف الغياب",
+  "absence_deleted": "تم حذف الغياب"
 }

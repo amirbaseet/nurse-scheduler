@@ -105,19 +105,17 @@ export default function RequestsPage() {
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const [pendingRes, allRes] = await Promise.all([
+      const [pendingRes, historyRes] = await Promise.all([
         fetch("/api/requests/pending"),
-        // For history, we'll fetch pending and manually separate
-        // The pending endpoint returns only PENDING; for history we need all
-        fetch("/api/requests/pending"),
+        fetch("/api/requests/history"),
       ]);
 
       if (pendingRes.ok) {
         setPending(await pendingRes.json());
       }
-      // History: fetch all users' requests that are not pending
-      // We'll use the same pending data and show resolved ones separately
-      // Actually, we need a different approach - fetch all from pending endpoint
+      if (historyRes.ok) {
+        setHistory(await historyRes.json());
+      }
     } catch (err) {
       console.error("Failed to fetch requests:", err);
     } finally {
@@ -134,8 +132,10 @@ export default function RequestsPage() {
     if (!dialogOpen) return;
     fetch("/api/nurses")
       .then((r) => (r.ok ? r.json() : []))
-      .then((data: Array<{ user: NurseOption }>) =>
-        setNurses(data.map((n) => n.user)),
+      .then((data: Array<{ user: NurseOption & { role: string } }>) =>
+        setNurses(
+          data.filter((n) => n.user.role === "NURSE").map((n) => n.user),
+        ),
       )
       .catch(() => setNurses([]));
   }, [dialogOpen]);
@@ -173,6 +173,19 @@ export default function RequestsPage() {
       console.error("Record absence failed:", err);
     } finally {
       setAbsenceLoading(false);
+    }
+  };
+
+  const handleDeleteAbsence = async (id: string) => {
+    try {
+      const res = await fetch(`/api/requests/${id}/delete`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setHistory((prev) => prev.filter((r) => r.id !== id));
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
     }
   };
 
@@ -407,6 +420,17 @@ export default function RequestsPage() {
                       {t("notes")}: {req.managerNote}
                     </p>
                   )}
+                  <div className="flex justify-end mt-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 text-xs"
+                      onClick={() => handleDeleteAbsence(req.id)}
+                    >
+                      <X className="h-3 w-3 me-1" />
+                      {t("delete")}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))
