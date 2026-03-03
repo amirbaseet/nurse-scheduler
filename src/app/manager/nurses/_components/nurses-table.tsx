@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Plus, Eye, EyeOff } from "lucide-react";
 import {
@@ -25,17 +25,24 @@ export function NursesTable({ nurses }: { nurses: SerializedNurse[] }) {
   const [showCreate, setShowCreate] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
 
-  const visibleNurses = showInactive
-    ? nurses
-    : nurses.filter((n) => n.user.isActive);
+  const inactiveCount = useMemo(
+    () => nurses.filter((n) => !n.user.isActive).length,
+    [nurses],
+  );
 
-  const inactiveCount = nurses.filter((n) => !n.user.isActive).length;
+  const visibleNurses = useMemo(
+    () => (showInactive ? nurses : nurses.filter((n) => n.user.isActive)),
+    [nurses, showInactive],
+  );
 
-  const SHIFT_LABELS: Record<string, string> = {
-    MORNING: t("morning"),
-    AFTERNOON: t("afternoon"),
-    ANYTIME: t("anytime"),
-  };
+  const SHIFT_LABELS = useMemo(
+    () => ({
+      MORNING: t("morning"),
+      AFTERNOON: t("afternoon"),
+      ANYTIME: t("anytime"),
+    }),
+    [t],
+  );
 
   return (
     <div className="space-y-6">
