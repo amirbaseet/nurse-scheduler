@@ -19,6 +19,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Use .env.seed if present, otherwise fall back to .env.seed.example (committed to repo)
+RUN test -f .env.seed || cp .env.seed.example .env.seed
+
 # Generate Prisma client for linux-musl (Alpine)
 RUN pnpm prisma generate
 
