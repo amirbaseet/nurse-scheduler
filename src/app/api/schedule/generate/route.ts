@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       preferences,
       allClinics,
       adjustments,
+      monthlyDates,
     ] = await Promise.all([
       db.nurseProfile.findMany({
         where: { user: { isActive: true } },
@@ -121,6 +122,24 @@ export async function POST(request: Request) {
       }),
 
       loadCorrectionAdjustments(),
+
+      db.clinicMonthlyDate.findMany({
+        where: {
+          date: { gte: weekStart, lte: weekEnd },
+          isActive: true,
+        },
+        include: {
+          clinic: {
+            select: {
+              code: true,
+              genderPref: true,
+              canBeSecondary: true,
+              secondaryHours: true,
+              secondaryNursesNeeded: true,
+            },
+          },
+        },
+      }),
     ]);
 
     // ── Convert DB → Algorithm types ──
@@ -133,6 +152,8 @@ export async function POST(request: Request) {
       fixedAssignments,
       programs,
       preferences,
+      monthlyDates,
+      weekStart,
     );
 
     // Wire correction-learning adjustments into the algorithm config

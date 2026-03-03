@@ -101,6 +101,7 @@ model Clinic {
 
   defaultConfigs       ClinicDefaultConfig[]
   weeklyConfigs        ClinicWeeklyConfig[]
+  monthlyDates         ClinicMonthlyDate[]
   blockedNurses        NurseBlockedClinic[]
   fixedAssignments     FixedAssignment[]
   primaryAssignments   ScheduleAssignment[] @relation("PrimaryClinic")
@@ -142,6 +143,22 @@ model ClinicWeeklyConfig {
   isActive     Boolean   @default(true)
 
   @@unique([clinicId, weekStart, day])
+}
+
+// MONTHLY clinic dates — specific calendar dates a clinic operates on
+// Highest priority: overrides both weekly and default configs.
+// If a clinic has monthly dates and a given date is NOT listed → clinic is skipped that day.
+model ClinicMonthlyDate {
+  id           String   @id @default(cuid())
+  clinicId     String
+  clinic       Clinic   @relation(fields: [clinicId], references: [id])
+  date         DateTime // specific calendar date (e.g., 2026-03-05)
+  shiftStart   String   // "08:00"
+  shiftEnd     String   // "16:00"
+  nursesNeeded Int      @default(1)
+  isActive     Boolean  @default(true)
+
+  @@unique([clinicId, date])
 }
 
 enum DayOfWeek {

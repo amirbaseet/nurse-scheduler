@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DefaultScheduleTab } from "./default-schedule-tab";
 import { WeeklyOverridesTab } from "./weekly-overrides-tab";
+import { MonthlyDatesTab } from "./monthly-dates-tab";
 import { CreateClinicDialog } from "./create-clinic-dialog";
 import { useTranslation } from "@/i18n/use-translation";
 import type { ClinicWithDefaults } from "@/types/clinic";
@@ -39,12 +40,16 @@ export function ClinicsConfig({ clinics }: { clinics: ClinicWithDefaults[] }) {
         <TabsList>
           <TabsTrigger value="defaults">{t("default_schedule")}</TabsTrigger>
           <TabsTrigger value="overrides">{t("weekly_overrides")}</TabsTrigger>
+          <TabsTrigger value="monthly">{t("monthly_dates_tab")}</TabsTrigger>
         </TabsList>
         <TabsContent value="defaults">
           <DefaultScheduleTab clinics={clinics} />
         </TabsContent>
         <TabsContent value="overrides">
           <WeeklyOverridesTab clinics={clinics} />
+        </TabsContent>
+        <TabsContent value="monthly">
+          <MonthlyDatesTab clinics={clinics} />
         </TabsContent>
       </Tabs>
     </div>

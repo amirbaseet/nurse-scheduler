@@ -113,12 +113,45 @@ export function calcHours(shiftStart: string, shiftEnd: string): number {
 }
 
 // ═══════════════════════════════════════════
-// Merge ClinicDefaultConfig + ClinicWeeklyConfig
+// Monthly date types
+// ═══════════════════════════════════════════
+
+export type MonthlyDateRow = {
+  clinicId: string;
+  date: Date;
+  shiftStart: string;
+  shiftEnd: string;
+  nursesNeeded: number;
+  isActive: boolean;
+  clinic: {
+    code: string;
+    genderPref: string;
+    canBeSecondary: boolean;
+    secondaryHours: number | null;
+    secondaryNursesNeeded: number;
+  };
+};
+
+// Day index → DayOfWeek (JS Date.getUTCDay(): 0=SUN, 1=MON, ...)
+const DAY_INDEX_TO_DAY: DayOfWeek[] = [
+  "SUN",
+  "MON",
+  "TUE",
+  "WED",
+  "THU",
+  "FRI",
+  "SAT",
+];
+
+// ═══════════════════════════════════════════
+// Merge: MonthlyDates > WeeklyConfig > DefaultConfig
 // ═══════════════════════════════════════════
 
 export function mergeClinicConfigs(
   defaults: ClinicDefaultConfigRow[],
   overrides: ClinicWeeklyConfigRow[],
+  monthlyDates?: MonthlyDateRow[],
+  weekStart?: Date,
 ): ClinicSlot[] {
   const result: ClinicSlot[] = [];
   const overrideMap = new Map<string, ClinicWeeklyConfigRow>();
@@ -127,8 +160,53 @@ export function mergeClinicConfigs(
     overrideMap.set(`${o.clinicId}-${o.day}`, o);
   }
 
+  // Build monthly date map: "clinicId-DAY" → MonthlyDateRow
+  // Only if we have monthly dates for this week
+  const monthlyMap = new Map<string, MonthlyDateRow>();
+  const clinicsWithMonthly = new Set<string>();
+
+  if (monthlyDates && weekStart) {
+    for (const md of monthlyDates) {
+      const dayOfWeek = DAY_INDEX_TO_DAY[md.date.getUTCDay()];
+      monthlyMap.set(`${md.clinicId}-${dayOfWeek}`, md);
+      clinicsWithMonthly.add(md.clinicId);
+    }
+  }
+
   for (const d of defaults) {
     const key = `${d.clinicId}-${d.day}`;
+
+    // If this clinic has monthly dates defined, check if this day has one
+    if (clinicsWithMonthly.has(d.clinicId)) {
+      const monthly = monthlyMap.get(key);
+      if (monthly) {
+        // Monthly date exists — use it (highest priority)
+        if (monthly.isActive) {
+          result.push({
+            clinicId: monthly.clinicId,
+            clinicCode: monthly.clinic.code,
+            day: d.day as DayOfWeek,
+            shiftStart: monthly.shiftStart,
+            shiftEnd: monthly.shiftEnd,
+            nursesNeeded: monthly.nursesNeeded,
+            shiftHours: calcHours(monthly.shiftStart, monthly.shiftEnd),
+            genderPref: monthly.clinic.genderPref as ClinicSlot["genderPref"],
+            canBeSecondary: monthly.clinic.canBeSecondary,
+            secondaryHours: monthly.clinic.secondaryHours ?? undefined,
+            secondaryNursesNeeded: monthly.clinic.secondaryNursesNeeded,
+          });
+        }
+        // If monthly exists but !isActive → skip (clinic not active this day)
+        monthlyMap.delete(key);
+        overrideMap.delete(key);
+        continue;
+      }
+      // Clinic has monthly dates but NOT for this day → skip
+      overrideMap.delete(key);
+      continue;
+    }
+
+    // No monthly dates for this clinic — fall back to weekly/default merge
     const effective = overrideMap.get(key) ?? d;
 
     if (effective.isActive) {
@@ -152,6 +230,9 @@ export function mergeClinicConfigs(
 
   // Any overrides for clinics NOT in defaults (new one-off clinic for this week)
   for (const [, o] of Array.from(overrideMap)) {
+    // Skip if this clinic uses monthly dates and has no entry for this day
+    if (clinicsWithMonthly.has(o.clinicId)) continue;
+
     if (o.isActive) {
       result.push({
         clinicId: o.clinicId,
@@ -165,6 +246,26 @@ export function mergeClinicConfigs(
         canBeSecondary: o.clinic.canBeSecondary,
         secondaryHours: o.clinic.secondaryHours ?? undefined,
         secondaryNursesNeeded: o.clinic.secondaryNursesNeeded,
+      });
+    }
+  }
+
+  // Any monthly dates for clinics NOT in defaults (clinic with no default schedule)
+  for (const [, md] of Array.from(monthlyMap)) {
+    if (md.isActive) {
+      const dayOfWeek = DAY_INDEX_TO_DAY[md.date.getUTCDay()];
+      result.push({
+        clinicId: md.clinicId,
+        clinicCode: md.clinic.code,
+        day: dayOfWeek,
+        shiftStart: md.shiftStart,
+        shiftEnd: md.shiftEnd,
+        nursesNeeded: md.nursesNeeded,
+        shiftHours: calcHours(md.shiftStart, md.shiftEnd),
+        genderPref: md.clinic.genderPref as ClinicSlot["genderPref"],
+        canBeSecondary: md.clinic.canBeSecondary,
+        secondaryHours: md.clinic.secondaryHours ?? undefined,
+        secondaryNursesNeeded: md.clinic.secondaryNursesNeeded,
       });
     }
   }
@@ -184,8 +285,15 @@ export function dbToAlgorithmConfig(
   fixedAssignments: FixedAssignmentRow[],
   programs: ProgramAssignmentRow[],
   preferences: WeeklyPreferenceRow[],
+  monthlyDates?: MonthlyDateRow[],
+  weekStart?: Date,
 ): AlgorithmConfig {
-  const clinics = mergeClinicConfigs(clinicDefaults, clinicOverrides);
+  const clinics = mergeClinicConfigs(
+    clinicDefaults,
+    clinicOverrides,
+    monthlyDates,
+    weekStart,
+  );
 
   const nurses: AlgoNurse[] = nurseProfiles.map((np) => ({
     id: np.id,

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -74,6 +74,14 @@ export function NurseProfileForm({
   const [blockedSet, setBlockedSet] = useState<Set<string>>(blockedIds);
   const [blockedSaving, setBlockedSaving] = useState(false);
 
+  // ── Card 3: Fixed assignments state ──
+  const [fixedDialogOpen, setFixedDialogOpen] = useState(false);
+  const [fixedClinicId, setFixedClinicId] = useState("");
+  const [fixedDay, setFixedDay] = useState("");
+  const [fixedPermanent, setFixedPermanent] = useState(true);
+  const [fixedSaving, setFixedSaving] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
   // ── Card 4: Dialogs ──
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
   const [newPin, setNewPin] = useState("");
@@ -130,6 +138,64 @@ export function NurseProfileForm({
       showMessage(t("save_error"), "error");
     } finally {
       setBlockedSaving(false);
+    }
+  }
+
+  // ── Card 3: Add fixed assignment ──
+  async function addFixedAssignment() {
+    if (!fixedClinicId || !fixedDay) return;
+    setFixedSaving(true);
+    try {
+      const body: Record<string, string> = {
+        clinicId: fixedClinicId,
+        day: fixedDay,
+      };
+      if (!fixedPermanent) {
+        // Next Sunday as default week start
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const nextSunday = new Date(now);
+        nextSunday.setDate(now.getDate() + ((7 - dayOfWeek) % 7));
+        body.weekStart = nextSunday.toISOString().slice(0, 10);
+      }
+      const res = await fetch(`/api/nurses/${nurse.id}/fixed-assignments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 409) {
+        showMessage(t("fixed_duplicate"), "error");
+        return;
+      }
+      if (!res.ok) throw new Error();
+      showMessage(t("fixed_added"), "success");
+      setFixedDialogOpen(false);
+      setFixedClinicId("");
+      setFixedDay("");
+      setFixedPermanent(true);
+      router.refresh();
+    } catch {
+      showMessage(t("fixed_add_error"), "error");
+    } finally {
+      setFixedSaving(false);
+    }
+  }
+
+  // ── Card 3: Remove fixed assignment ──
+  async function removeFixedAssignment(assignmentId: string) {
+    setRemovingId(assignmentId);
+    try {
+      const res = await fetch(
+        `/api/nurses/${nurse.id}/fixed-assignments/${assignmentId}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error();
+      showMessage(t("fixed_removed"), "success");
+      router.refresh();
+    } catch {
+      showMessage(t("fixed_remove_error"), "error");
+    } finally {
+      setRemovingId(null);
     }
   }
 
@@ -364,10 +430,18 @@ export function NurseProfileForm({
         </CardContent>
       </Card>
 
-      {/* ── Card 3: Fixed Assignments (read-only) ── */}
+      {/* ── Card 3: Fixed Assignments ── */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{t("fixed_assignments")}</CardTitle>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setFixedDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4 me-1" />
+            {t("add_fixed")}
+          </Button>
         </CardHeader>
         <CardContent>
           {nurse.fixedAssignments.length === 0 ? (
@@ -385,6 +459,15 @@ export function NurseProfileForm({
                       ? t("permanent")
                       : new Date(fa.weekStart).toLocaleDateString("he-IL")}
                   </Badge>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 text-destructive hover:text-destructive"
+                    disabled={removingId === fa.id}
+                    onClick={() => removeFixedAssignment(fa.id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -435,6 +518,70 @@ export function NurseProfileForm({
             </Button>
             <Button onClick={resetPin} disabled={newPin.length !== 4}>
               {t("save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Add Fixed Assignment Dialog ── */}
+      <Dialog open={fixedDialogOpen} onOpenChange={setFixedDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("add_fixed")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label>{t("select_clinic")}</Label>
+              <Select value={fixedClinicId} onValueChange={setFixedClinicId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("select_clinic")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {allClinics.map((clinic) => (
+                    <SelectItem key={clinic.id} value={clinic.id}>
+                      {clinic.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>{t("select_day")}</Label>
+              <Select value={fixedDay} onValueChange={setFixedDay}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("select_day")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {DAY_ORDER.map((day) => (
+                    <SelectItem key={day} value={day}>
+                      {DAY_LABELS[day]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="fixedPermanent"
+                checked={fixedPermanent}
+                onCheckedChange={setFixedPermanent}
+              />
+              <Label htmlFor="fixedPermanent">
+                {fixedPermanent
+                  ? t("permanent_assignment")
+                  : t("one_week_only")}
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFixedDialogOpen(false)}>
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={addFixedAssignment}
+              disabled={!fixedClinicId || !fixedDay || fixedSaving}
+            >
+              {fixedSaving ? t("saving") : t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -53,6 +53,31 @@ export const updateBlockedClinicsSchema = z.object({
   clinicIds: z.array(z.string().min(1)),
 });
 
+export const createFixedAssignmentSchema = z.object({
+  clinicId: z.string().min(1, "יש לבחור מרפאה"),
+  day: DayOfWeekEnum,
+  weekStart: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD")
+    .optional(),
+});
+
+// ═══════════════════════════════════════════
+// Monthly Dates
+// ═══════════════════════════════════════════
+
+const monthlyDateItemSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
+  shiftStart: z.string().regex(/^\d{2}:\d{2}$/, "שעה בפורמט HH:MM"),
+  shiftEnd: z.string().regex(/^\d{2}:\d{2}$/, "שעה בפורמט HH:MM"),
+  nursesNeeded: z.number().int().min(0).default(1),
+  isActive: z.boolean().default(true),
+});
+
+export const upsertMonthlyDatesSchema = z.object({
+  dates: z.array(monthlyDateItemSchema).min(1, "יש לשלוח לפחות תאריך אחד"),
+});
+
 // ═══════════════════════════════════════════
 // Clinics
 // ═══════════════════════════════════════════
