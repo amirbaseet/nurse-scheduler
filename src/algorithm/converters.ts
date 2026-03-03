@@ -108,6 +108,7 @@ type WeeklyPreferenceRow = {
 export function calcHours(shiftStart: string, shiftEnd: string): number {
   const [sh, sm] = shiftStart.split(":").map(Number);
   const [eh, em] = shiftEnd.split(":").map(Number);
+  if ([sh, sm, eh, em].some(isNaN)) return 0;
   const diff = (eh * 60 + em - (sh * 60 + sm)) / 60;
   return Math.max(0, diff);
 }
@@ -147,11 +148,12 @@ const DAY_INDEX_TO_DAY: DayOfWeek[] = [
 // Merge: MonthlyDates > WeeklyConfig > DefaultConfig
 // ═══════════════════════════════════════════
 
+// Note: caller (generate/route.ts) MUST pre-filter monthlyDates to the
+// current week's date range before passing them here.
 export function mergeClinicConfigs(
   defaults: ClinicDefaultConfigRow[],
   overrides: ClinicWeeklyConfigRow[],
   monthlyDates?: MonthlyDateRow[],
-  weekStart?: Date,
 ): ClinicSlot[] {
   const result: ClinicSlot[] = [];
   const overrideMap = new Map<string, ClinicWeeklyConfigRow>();
@@ -160,12 +162,13 @@ export function mergeClinicConfigs(
     overrideMap.set(`${o.clinicId}-${o.day}`, o);
   }
 
-  // Build monthly date map: "clinicId-DAY" → MonthlyDateRow
-  // Only if we have monthly dates for this week
+  // Build monthly date map keyed by "clinicId-DAY" (within a 7-day week,
+  // each day-of-week appears exactly once, so no key collision is possible
+  // as long as the caller pre-filters to a single week).
   const monthlyMap = new Map<string, MonthlyDateRow>();
   const clinicsWithMonthly = new Set<string>();
 
-  if (monthlyDates && weekStart) {
+  if (monthlyDates) {
     for (const md of monthlyDates) {
       const dayOfWeek = DAY_INDEX_TO_DAY[md.date.getUTCDay()];
       monthlyMap.set(`${md.clinicId}-${dayOfWeek}`, md);
@@ -286,13 +289,11 @@ export function dbToAlgorithmConfig(
   programs: ProgramAssignmentRow[],
   preferences: WeeklyPreferenceRow[],
   monthlyDates?: MonthlyDateRow[],
-  weekStart?: Date,
 ): AlgorithmConfig {
   const clinics = mergeClinicConfigs(
     clinicDefaults,
     clinicOverrides,
     monthlyDates,
-    weekStart,
   );
 
   const nurses: AlgoNurse[] = nurseProfiles.map((np) => ({

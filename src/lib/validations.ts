@@ -53,12 +53,38 @@ export const updateBlockedClinicsSchema = z.object({
   clinicIds: z.array(z.string().min(1)),
 });
 
+// Reusable validated time string (HH:MM, 00:00–23:59)
+const timeString = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/, "שעה בפורמט HH:MM")
+  .refine((val) => {
+    const [h, m] = val.split(":").map(Number);
+    return h >= 0 && h <= 23 && m >= 0 && m <= 59;
+  }, "שעה לא תקינה (00:00–23:59)");
+
+// Reusable validated date that checks calendar rollover
+const validDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD")
+  .refine((val) => {
+    const d = new Date(val + "T00:00:00.000Z");
+    if (isNaN(d.getTime())) return false;
+    const [y, m, day] = val.split("-").map(Number);
+    return (
+      d.getUTCFullYear() === y &&
+      d.getUTCMonth() + 1 === m &&
+      d.getUTCDate() === day
+    );
+  }, "תאריך לא תקין");
+
 export const createFixedAssignmentSchema = z.object({
   clinicId: z.string().min(1, "יש לבחור מרפאה"),
   day: DayOfWeekEnum,
-  weekStart: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD")
+  weekStart: validDate
+    .refine((val) => {
+      const d = new Date(val + "T00:00:00.000Z");
+      return d.getUTCDay() === 0; // Must be Sunday
+    }, "weekStart חייב להיות יום ראשון")
     .optional(),
 });
 
@@ -66,16 +92,25 @@ export const createFixedAssignmentSchema = z.object({
 // Monthly Dates
 // ═══════════════════════════════════════════
 
-const monthlyDateItemSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
-  shiftStart: z.string().regex(/^\d{2}:\d{2}$/, "שעה בפורמט HH:MM"),
-  shiftEnd: z.string().regex(/^\d{2}:\d{2}$/, "שעה בפורמט HH:MM"),
-  nursesNeeded: z.number().int().min(0).default(1),
-  isActive: z.boolean().default(true),
-});
+const monthlyDateItemSchema = z
+  .object({
+    date: validDate,
+    shiftStart: timeString,
+    shiftEnd: timeString,
+    nursesNeeded: z.number().int().min(0).max(15).default(1),
+    isActive: z.boolean().default(true),
+  })
+  .refine((d) => d.shiftEnd > d.shiftStart, {
+    message: "שעת סיום חייבת להיות אחרי שעת התחלה",
+    path: ["shiftEnd"],
+  });
 
 export const upsertMonthlyDatesSchema = z.object({
-  dates: z.array(monthlyDateItemSchema).min(1, "יש לשלוח לפחות תאריך אחד"),
+  dates: z
+    .array(monthlyDateItemSchema)
+    .min(1, "יש לשלוח לפחות תאריך אחד")
+    .max(62, "לא ניתן לשלוח יותר מ-62 תאריכים בבקשה אחת"),
+  deleteIds: z.array(z.string().min(1)).optional(),
 });
 
 // ═══════════════════════════════════════════

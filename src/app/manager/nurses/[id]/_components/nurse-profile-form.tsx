@@ -151,11 +151,12 @@ export function NurseProfileForm({
         day: fixedDay,
       };
       if (!fixedPermanent) {
-        // Next Sunday as default week start
+        // Next Sunday (always at least 1 day ahead; if today is Sunday, target next week)
         const now = new Date();
         const dayOfWeek = now.getDay();
+        const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek;
         const nextSunday = new Date(now);
-        nextSunday.setDate(now.getDate() + ((7 - dayOfWeek) % 7));
+        nextSunday.setDate(now.getDate() + daysUntilSunday);
         body.weekStart = nextSunday.toISOString().slice(0, 10);
       }
       const res = await fetch(`/api/nurses/${nurse.id}/fixed-assignments`, {

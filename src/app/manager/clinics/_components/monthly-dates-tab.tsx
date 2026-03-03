@@ -87,7 +87,7 @@ export function MonthlyDatesTab({
         setPendingDates(map);
       }
     } catch {
-      /* ignore */
+      showMessage(t("monthly_dates_save_error"), "error");
     }
   }, [selectedClinicId, month]);
 
@@ -120,7 +120,11 @@ export function MonthlyDatesTab({
     });
   }
 
-  function updatePending(dateStr: string, field: string, value: string | number) {
+  function updatePending(
+    dateStr: string,
+    field: string,
+    value: string | number,
+  ) {
     setPendingDates((prev) => {
       const next = new Map(prev);
       const entry = next.get(dateStr);
@@ -136,29 +140,23 @@ export function MonthlyDatesTab({
     setSaving(true);
     try {
       const dates = Array.from(pendingDates.values());
+
+      // Find saved dates that were toggled off (need to be deleted)
+      const pendingDateStrs = new Set(pendingDates.keys());
+      const deleteIds = savedDates
+        .filter((saved) => !pendingDateStrs.has(saved.date.slice(0, 10)))
+        .map((saved) => saved.id);
+
       const res = await fetch(
         `/api/clinics/${selectedClinicId}/monthly-dates`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ dates }),
+          body: JSON.stringify({ dates, deleteIds }),
         },
       );
       if (!res.ok) throw new Error();
       showMessage(t("monthly_dates_saved"), "success");
-
-      // Remove any saved dates that are no longer in pending (they were toggled off)
-      const pendingDateStrs = new Set(pendingDates.keys());
-      for (const saved of savedDates) {
-        const dateStr = saved.date.slice(0, 10);
-        if (!pendingDateStrs.has(dateStr)) {
-          await fetch(
-            `/api/clinics/${selectedClinicId}/monthly-dates/${saved.id}`,
-            { method: "DELETE" },
-          );
-        }
-      }
-
       await fetchDates();
     } catch {
       showMessage(t("monthly_dates_save_error"), "error");
@@ -169,16 +167,12 @@ export function MonthlyDatesTab({
 
   function prevMonth() {
     const d = new Date(yearNum, monthNum - 2, 1);
-    setMonth(
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-    );
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
   }
 
   function nextMonth() {
     const d = new Date(yearNum, monthNum, 1);
-    setMonth(
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-    );
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
   }
 
   const dayLabels = [
@@ -344,7 +338,10 @@ export function MonthlyDatesTab({
                           updatePending(
                             dateStr,
                             "nursesNeeded",
-                            parseInt(e.target.value) || 1,
+                            (() => {
+                              const v = parseInt(e.target.value, 10);
+                              return isNaN(v) ? 1 : v;
+                            })(),
                           )
                         }
                         className="w-16"
@@ -354,7 +351,9 @@ export function MonthlyDatesTab({
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive"
-                        onClick={() => toggleDate(parseInt(dateStr.slice(-2)))}
+                        onClick={() =>
+                          toggleDate(parseInt(dateStr.split("-")[2], 10))
+                        }
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>

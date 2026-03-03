@@ -153,7 +153,6 @@ export async function POST(request: Request) {
       programs,
       preferences,
       monthlyDates,
-      weekStart,
     );
 
     // Wire correction-learning adjustments into the algorithm config
