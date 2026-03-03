@@ -53,46 +53,43 @@ export async function PUT(
       return NextResponse.json({ error: "מרפאה לא נמצאה" }, { status: 404 });
     }
 
-    // Build all operations for a single atomic transaction
-    const operations = dates.map((d) => {
-      const dateObj = new Date(d.date + "T00:00:00.000Z");
-      return db.clinicMonthlyDate.upsert({
-        where: {
-          clinicId_date: {
+    // Atomic transaction: upsert all dates + delete removed ones
+    await db.$transaction(async (tx) => {
+      for (const d of dates) {
+        const dateObj = new Date(d.date + "T00:00:00.000Z");
+        await tx.clinicMonthlyDate.upsert({
+          where: {
+            clinicId_date: {
+              clinicId: params.id,
+              date: dateObj,
+            },
+          },
+          update: {
+            shiftStart: d.shiftStart,
+            shiftEnd: d.shiftEnd,
+            nursesNeeded: d.nursesNeeded,
+            isActive: d.isActive,
+          },
+          create: {
             clinicId: params.id,
             date: dateObj,
+            shiftStart: d.shiftStart,
+            shiftEnd: d.shiftEnd,
+            nursesNeeded: d.nursesNeeded,
+            isActive: d.isActive,
           },
-        },
-        update: {
-          shiftStart: d.shiftStart,
-          shiftEnd: d.shiftEnd,
-          nursesNeeded: d.nursesNeeded,
-          isActive: d.isActive,
-        },
-        create: {
-          clinicId: params.id,
-          date: dateObj,
-          shiftStart: d.shiftStart,
-          shiftEnd: d.shiftEnd,
-          nursesNeeded: d.nursesNeeded,
-          isActive: d.isActive,
-        },
-      });
-    });
+        });
+      }
 
-    // Delete removed dates in same transaction
-    if (deleteIds && deleteIds.length > 0) {
-      operations.push(
-        db.clinicMonthlyDate.deleteMany({
+      if (deleteIds && deleteIds.length > 0) {
+        await tx.clinicMonthlyDate.deleteMany({
           where: {
             id: { in: deleteIds },
-            clinicId: params.id, // ensure ownership
+            clinicId: params.id,
           },
-        }) as never, // type coercion for mixed transaction array
-      );
-    }
-
-    await db.$transaction(operations);
+        });
+      }
+    });
 
     return NextResponse.json({ success: true, count: dates.length });
   } catch (error) {

@@ -110,7 +110,7 @@ export const upsertMonthlyDatesSchema = z.object({
     .array(monthlyDateItemSchema)
     .min(1, "יש לשלוח לפחות תאריך אחד")
     .max(62, "לא ניתן לשלוח יותר מ-62 תאריכים בבקשה אחת"),
-  deleteIds: z.array(z.string().min(1)).optional(),
+  deleteIds: z.array(z.string().cuid()).max(62).optional(),
 });
 
 // ═══════════════════════════════════════════

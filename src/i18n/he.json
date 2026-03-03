@@ -95,6 +95,7 @@
   "no_monthly_dates": "לא הוגדרו תאריכים חודשיים",
   "monthly_dates_saved": "תאריכים חודשיים נשמרו",
   "monthly_dates_save_error": "שגיאה בשמירת תאריכים",
+  "monthly_dates_load_error": "שגיאה בטעינת תאריכים",
   "monthly_date_removed": "תאריך הוסר",
   "monthly_date_remove_error": "שגיאה בהסרת תאריך",
   "add_dates": "הוסף תאריכים",

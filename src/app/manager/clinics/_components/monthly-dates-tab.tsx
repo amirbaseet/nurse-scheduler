@@ -87,7 +87,7 @@ export function MonthlyDatesTab({
         setPendingDates(map);
       }
     } catch {
-      showMessage(t("monthly_dates_save_error"), "error");
+      showMessage(t("monthly_dates_load_error"), "error");
     }
   }, [selectedClinicId, month]);
 

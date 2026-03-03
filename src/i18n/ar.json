@@ -95,6 +95,7 @@
   "no_monthly_dates": "لم يتم تحديد تواريخ شهرية",
   "monthly_dates_saved": "تم حفظ التواريخ الشهرية",
   "monthly_dates_save_error": "خطأ في حفظ التواريخ",
+  "monthly_dates_load_error": "خطأ في تحميل التواريخ",
   "monthly_date_removed": "تم إزالة التاريخ",
   "monthly_date_remove_error": "خطأ في إزالة التاريخ",
   "add_dates": "إضافة تواريخ",

@@ -108,6 +108,7 @@ type WeeklyPreferenceRow = {
 export function calcHours(shiftStart: string, shiftEnd: string): number {
   const [sh, sm] = shiftStart.split(":").map(Number);
   const [eh, em] = shiftEnd.split(":").map(Number);
+  // Returns 0 for malformed times — treated as zero-hour shift by the algorithm
   if ([sh, sm, eh, em].some(isNaN)) return 0;
   const diff = (eh * 60 + em - (sh * 60 + sm)) / 60;
   return Math.max(0, diff);
