@@ -4,11 +4,15 @@ import type { SerializedNurse } from "@/types/nurse";
 
 async function getNurses(): Promise<SerializedNurse[]> {
   const nurses = await db.nurseProfile.findMany({
-    where: { user: { isActive: true, role: "NURSE" } },
+    where: { user: { role: "NURSE" } },
     include: {
       user: { select: { id: true, name: true, nameAr: true, isActive: true } },
-      blockedClinics: { include: { clinic: { select: { id: true, name: true } } } },
-      fixedAssignments: { include: { clinic: { select: { id: true, name: true } } } },
+      blockedClinics: {
+        include: { clinic: { select: { id: true, name: true } } },
+      },
+      fixedAssignments: {
+        include: { clinic: { select: { id: true, name: true } } },
+      },
     },
     orderBy: { user: { name: "asc" } },
   });

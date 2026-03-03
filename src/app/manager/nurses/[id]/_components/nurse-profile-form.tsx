@@ -218,14 +218,22 @@ export function NurseProfileForm({
     }
   }
 
-  // ── Card 4: Deactivate ──
-  async function deactivateNurse() {
+  // ── Card 4: Toggle active/inactive ──
+  async function toggleNurseActive() {
+    const newIsActive = !nurse.user.isActive;
     try {
       const res = await fetch(`/api/users/${nurse.user.id}/deactivate`, {
         method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: newIsActive }),
       });
       if (!res.ok) throw new Error();
-      router.push("/manager/nurses");
+      showMessage(
+        newIsActive ? t("nurse_reactivated") : t("nurse_deactivated"),
+        "success",
+      );
+      setDeactivateDialogOpen(false);
+      router.refresh();
     } catch {
       showMessage(t("deactivate_error"), "error");
     }
@@ -481,16 +489,23 @@ export function NurseProfileForm({
         <CardHeader>
           <CardTitle>{t("account_actions")}</CardTitle>
         </CardHeader>
-        <CardContent className="flex gap-3">
-          <Button variant="outline" onClick={() => setPinDialogOpen(true)}>
-            {t("reset_pin")}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => setDeactivateDialogOpen(true)}
-          >
-            {t("deactivate")}
-          </Button>
+        <CardContent className="space-y-3">
+          {!nurse.user.isActive && (
+            <div className="rounded-md bg-yellow-50 px-4 py-2 text-sm text-yellow-800">
+              {t("nurse_inactive_warning")}
+            </div>
+          )}
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setPinDialogOpen(true)}>
+              {t("reset_pin")}
+            </Button>
+            <Button
+              variant={nurse.user.isActive ? "destructive" : "default"}
+              onClick={() => setDeactivateDialogOpen(true)}
+            >
+              {nurse.user.isActive ? t("deactivate") : t("reactivate")}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -588,18 +603,23 @@ export function NurseProfileForm({
         </DialogContent>
       </Dialog>
 
-      {/* ── Deactivate Dialog ── */}
+      {/* ── Deactivate/Reactivate Dialog ── */}
       <Dialog
         open={deactivateDialogOpen}
         onOpenChange={setDeactivateDialogOpen}
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("deactivate_account")}</DialogTitle>
+            <DialogTitle>
+              {nurse.user.isActive
+                ? t("deactivate_account")
+                : t("reactivate_account")}
+            </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            {t("deactivate_warning")} {nurse.user.name}
-            {t("deactivate_irreversible")}
+            {nurse.user.isActive
+              ? `${t("deactivate_warning")} ${nurse.user.name}?`
+              : `${t("reactivate_confirm")} ${nurse.user.name}?`}
           </p>
           <DialogFooter>
             <Button
@@ -608,8 +628,11 @@ export function NurseProfileForm({
             >
               {t("cancel")}
             </Button>
-            <Button variant="destructive" onClick={deactivateNurse}>
-              {t("deactivate")}
+            <Button
+              variant={nurse.user.isActive ? "destructive" : "default"}
+              onClick={toggleNurseActive}
+            >
+              {nurse.user.isActive ? t("deactivate") : t("reactivate")}
             </Button>
           </DialogFooter>
         </DialogContent>
