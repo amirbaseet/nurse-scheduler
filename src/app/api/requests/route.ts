@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { createRequestSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function POST(request: Request) {
   try {
@@ -15,34 +16,22 @@ export async function POST(request: Request) {
     const endDate = parseWeekParam(input.endDate);
 
     if (!startDate || !endDate) {
-      return NextResponse.json(
-        { error: "תאריך לא תקין" },
-        { status: 400 }
-      );
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     // startDate must be in the future
     if (startDate <= new Date()) {
-      return NextResponse.json(
-        { error: "תאריך התחלה חייב להיות בעתיד" },
-        { status: 400 }
-      );
+      return apiError(API_ERRORS.START_DATE_MUST_BE_FUTURE, 400);
     }
 
     // endDate >= startDate
     if (endDate < startDate) {
-      return NextResponse.json(
-        { error: "תאריך סיום חייב להיות אחרי תאריך התחלה" },
-        { status: 400 }
-      );
+      return apiError(API_ERRORS.END_DATE_AFTER_START, 400);
     }
 
     // OFF_DAY: startDate must equal endDate
     if (input.type === "OFF_DAY" && startDate.getTime() !== endDate.getTime()) {
-      return NextResponse.json(
-        { error: "יום חופש חייב להיות ליום אחד בלבד" },
-        { status: 400 }
-      );
+      return apiError(API_ERRORS.OFF_DAY_SINGLE_DAY_ONLY, 400);
     }
 
     // No duplicate pending request for same dates
@@ -56,10 +45,7 @@ export async function POST(request: Request) {
     });
 
     if (duplicate) {
-      return NextResponse.json(
-        { error: "כבר קיימת בקשה ממתינה לתאריכים אלה" },
-        { status: 409 }
-      );
+      return apiError(API_ERRORS.DUPLICATE_PENDING_REQUEST, 409);
     }
 
     const timeOffRequest = await db.timeOffRequest.create({

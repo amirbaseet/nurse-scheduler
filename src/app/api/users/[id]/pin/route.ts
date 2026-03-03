@@ -3,10 +3,11 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { changePinSchema } from "@/lib/validations";
 import { hashPin, verifyPin } from "@/lib/pin";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     await authGuard("MANAGER");
@@ -19,10 +20,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "משתמש לא נמצא" },
-        { status: 404 }
-      );
+      return apiError(API_ERRORS.USER_NOT_FOUND, 404);
     }
 
     // Check PIN uniqueness
@@ -34,10 +32,7 @@ export async function PUT(
     for (const candidate of candidates) {
       const isMatch = await verifyPin(newPin, candidate.pinHash);
       if (isMatch) {
-        return NextResponse.json(
-          { error: "קוד PIN כבר בשימוש" },
-          { status: 409 }
-        );
+        return apiError(API_ERRORS.PIN_ALREADY_USED, 409);
       }
     }
 

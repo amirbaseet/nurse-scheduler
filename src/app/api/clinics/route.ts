@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { createClinicSchema } from "@/lib/validations";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function GET() {
   try {
@@ -30,10 +31,7 @@ export async function POST(req: NextRequest) {
       where: { code: data.code },
     });
     if (existing) {
-      return NextResponse.json(
-        { error: "Clinic code already exists" },
-        { status: 409 },
-      );
+      return apiError(API_ERRORS.CLINIC_CODE_EXISTS, 409);
     }
 
     const clinic = await db.clinic.create({

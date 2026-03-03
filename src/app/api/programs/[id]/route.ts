@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { updateProgramSchema } from "@/lib/validations";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     await authGuard("MANAGER");
@@ -18,10 +19,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "תכנית לא נמצאה" },
-        { status: 404 }
-      );
+      return apiError(API_ERRORS.PROGRAM_NOT_FOUND, 404);
     }
 
     const updated = await db.patientProgram.update({

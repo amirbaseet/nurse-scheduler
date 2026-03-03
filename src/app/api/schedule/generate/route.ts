@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { generateScheduleSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 import {
   dbToAlgorithmConfig,
   algorithmToDbAssignments,
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     const weekStart = parseWeekParam(weekStr);
 
     if (!weekStart) {
-      return NextResponse.json({ error: "תאריך לא תקין" }, { status: 400 });
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     // Compute weekEnd (Saturday end of week)

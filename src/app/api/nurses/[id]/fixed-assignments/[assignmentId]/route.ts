@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function DELETE(
   _request: Request,
@@ -15,10 +16,7 @@ export async function DELETE(
     });
 
     if (!assignment) {
-      return NextResponse.json(
-        { error: "שיבוץ קבוע לא נמצא" },
-        { status: 404 },
-      );
+      return apiError(API_ERRORS.FIXED_ASSIGNMENT_NOT_FOUND, 404);
     }
 
     await db.fixedAssignment.delete({

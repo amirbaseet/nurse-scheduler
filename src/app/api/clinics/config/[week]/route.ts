@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { updateClinicConfigSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 type MergedConfig = {
   clinicId: string;
@@ -37,7 +38,7 @@ function mergeClinicConfigs(
     shiftEnd: string;
     nursesNeeded: number;
     isActive: boolean;
-  }>
+  }>,
 ): MergedConfig[] {
   const overrideMap = new Map<string, (typeof overrides)[number]>();
   for (const o of overrides) {
@@ -76,17 +77,14 @@ function mergeClinicConfigs(
 
 export async function GET(
   _request: Request,
-  { params }: { params: { week: string } }
+  { params }: { params: { week: string } },
 ) {
   try {
     await authGuard("MANAGER");
     const weekStart = parseWeekParam(params.week);
 
     if (!weekStart) {
-      return NextResponse.json(
-        { error: "תאריך לא תקין" },
-        { status: 400 }
-      );
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     const defaults = await db.clinicDefaultConfig.findMany({
@@ -108,17 +106,14 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { week: string } }
+  { params }: { params: { week: string } },
 ) {
   try {
     await authGuard("MANAGER");
     const weekStart = parseWeekParam(params.week);
 
     if (!weekStart) {
-      return NextResponse.json(
-        { error: "תאריך לא תקין" },
-        { status: 400 }
-      );
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     const body = await request.json();

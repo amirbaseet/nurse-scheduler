@@ -4,6 +4,7 @@ import { authGuard, handleApiError } from "@/lib/permissions";
 import { createUserSchema } from "@/lib/validations";
 import { hashPin } from "@/lib/pin";
 import { verifyPin } from "@/lib/pin";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function GET() {
   try {
@@ -40,16 +41,10 @@ export async function POST(request: Request) {
 
     // Validate PIN length matches role
     if (input.role === "NURSE" && input.pin.length !== 4) {
-      return NextResponse.json(
-        { error: "PIN של אחות חייב להיות 4 ספרות" },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.NURSE_PIN_MUST_BE_4, 400);
     }
     if (input.role === "MANAGER" && input.pin.length !== 6) {
-      return NextResponse.json(
-        { error: "PIN של מנהלת חייב להיות 6 ספרות" },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.MANAGER_PIN_MUST_BE_6, 400);
     }
 
     // Check PIN uniqueness: find all users with same prefix, verify no collision
@@ -61,10 +56,7 @@ export async function POST(request: Request) {
     for (const candidate of candidates) {
       const isMatch = await verifyPin(input.pin, candidate.pinHash);
       if (isMatch) {
-        return NextResponse.json(
-          { error: "קוד PIN כבר בשימוש" },
-          { status: 409 },
-        );
+        return apiError(API_ERRORS.PIN_ALREADY_USED, 409);
       }
     }
 

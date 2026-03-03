@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { updateBlockedClinicsSchema } from "@/lib/validations";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function PUT(
   request: Request,
@@ -19,7 +20,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "אחות לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.NURSE_NOT_FOUND, 404);
     }
 
     // Validate all clinic IDs exist
@@ -29,10 +30,7 @@ export async function PUT(
         select: { id: true },
       });
       if (clinics.length !== clinicIds.length) {
-        return NextResponse.json(
-          { error: "אחת או יותר מהמרפאות לא נמצאו" },
-          { status: 400 },
-        );
+        return apiError(API_ERRORS.SOME_CLINICS_NOT_FOUND, 400);
       }
     }
 

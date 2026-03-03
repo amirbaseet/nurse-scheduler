@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function PUT(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const user = await authGuard();
@@ -14,10 +15,7 @@ export async function PUT(
     });
 
     if (!notification || notification.userId !== user.id) {
-      return NextResponse.json(
-        { error: "התראה לא נמצאה" },
-        { status: 404 }
-      );
+      return apiError(API_ERRORS.NOTIFICATION_NOT_FOUND, 404);
     }
 
     await db.notification.update({

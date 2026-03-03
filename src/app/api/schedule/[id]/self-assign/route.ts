@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 const selfAssignSchema = z.object({
   gaps: z.array(
@@ -31,7 +32,7 @@ export async function POST(
     });
 
     if (!schedule) {
-      return NextResponse.json({ error: "לו״ז לא נמצא" }, { status: 404 });
+      return apiError(API_ERRORS.SCHEDULE_NOT_FOUND, 404);
     }
 
     // Find manager's nurse profile
@@ -40,20 +41,16 @@ export async function POST(
     });
 
     if (!nurseProfile) {
-      return NextResponse.json(
-        { error: "פרופיל אחות לא נמצא" },
-        { status: 404 },
-      );
+      return apiError(API_ERRORS.NURSE_PROFILE_NOT_FOUND, 404);
     }
 
     // Validate no duplicate days in the request
     const daySet = new Set<string>();
     for (const gap of gaps) {
       if (daySet.has(gap.day)) {
-        return NextResponse.json(
-          { error: `יום כפול בבקשה: ${gap.day}` },
-          { status: 400 },
-        );
+        return apiError(API_ERRORS.DUPLICATE_DAY_IN_REQUEST, 400, {
+          day: gap.day,
+        });
       }
       daySet.add(gap.day);
     }
@@ -61,12 +58,10 @@ export async function POST(
     // Validate total hours don't exceed contract
     const totalHours = gaps.reduce((sum, g) => sum + g.hours, 0);
     if (totalHours > nurseProfile.contractHours) {
-      return NextResponse.json(
-        {
-          error: `סה״כ שעות (${totalHours}) חורג משעות החוזה (${nurseProfile.contractHours})`,
-        },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.HOURS_EXCEED_CONTRACT, 400, {
+        totalHours,
+        contractHours: nurseProfile.contractHours,
+      });
     }
 
     // Replace all manager self-assignments in a transaction

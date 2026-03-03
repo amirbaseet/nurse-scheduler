@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 const cuidParam = z.string().cuid();
 
@@ -13,7 +14,7 @@ export async function PUT(
     await authGuard("MANAGER");
 
     if (!cuidParam.safeParse(params.id).success) {
-      return NextResponse.json({ error: "מזהה לא תקין" }, { status: 400 });
+      return apiError(API_ERRORS.INVALID_ID, 400);
     }
 
     const existing = await db.user.findUnique({
@@ -21,15 +22,12 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "משתמש לא נמצא" }, { status: 404 });
+      return apiError(API_ERRORS.USER_NOT_FOUND, 404);
     }
 
     // Only allow toggling nurses — managers cannot be deactivated via this endpoint
     if (existing.role === "MANAGER") {
-      return NextResponse.json(
-        { error: "לא ניתן להשבית חשבון מנהל" },
-        { status: 403 },
-      );
+      return apiError(API_ERRORS.CANNOT_DEACTIVATE_MANAGER, 403);
     }
 
     // Toggle: if body has isActive, use it; otherwise deactivate (backwards compatible)

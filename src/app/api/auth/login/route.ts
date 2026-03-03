@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyPin } from "@/lib/pin";
 import { signJwt } from "@/lib/auth";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 const MAX_ATTEMPTS = 3;
 const LOCKOUT_MINUTES = 5;
@@ -14,17 +15,14 @@ export async function POST(request: Request) {
   // Parse body
   const body = await request.json().catch(() => null);
   if (!body?.pin || typeof body.pin !== "string") {
-    return NextResponse.json({ error: "יש להזין קוד PIN" }, { status: 400 });
+    return apiError(API_ERRORS.PIN_REQUIRED, 400);
   }
 
   const { pin } = body;
 
   // Validate PIN format: 4 digits (nurse) or 6 digits (manager)
   if (!/^\d{4}$/.test(pin) && !/^\d{6}$/.test(pin)) {
-    return NextResponse.json(
-      { error: "קוד PIN חייב להיות 4 או 6 ספרות" },
-      { status: 400 },
-    );
+    return apiError(API_ERRORS.PIN_INVALID_FORMAT, 400);
   }
 
   // 1. Fast filter by pinPrefix (first 2 digits)
@@ -45,10 +43,7 @@ export async function POST(request: Request) {
     );
 
   if (allLocked) {
-    return NextResponse.json(
-      { error: "נחסמת ל-5 דקות עקב ניסיונות כושלים" },
-      { status: 429 },
-    );
+    return apiError(API_ERRORS.ACCOUNT_LOCKED, 429);
   }
 
   // 3. Verify PIN — bcrypt on all matching candidates (constant-time: no early exit)
@@ -102,7 +97,7 @@ export async function POST(request: Request) {
           }),
         ),
     );
-    return NextResponse.json({ error: "קוד PIN שגוי" }, { status: 401 });
+    return apiError(API_ERRORS.PIN_WRONG, 401);
   }
 
   // 5. Match — reset failures, update lastLogin, issue JWT, set cookie

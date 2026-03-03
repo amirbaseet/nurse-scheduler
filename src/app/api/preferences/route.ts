@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { submitPreferenceSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
     const weekStart = parseWeekParam(input.weekStart);
 
     if (!weekStart) {
-      return NextResponse.json({ error: "תאריך לא תקין" }, { status: 400 });
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     const preferredDaysOff = input.preferredDaysOff ?? [];

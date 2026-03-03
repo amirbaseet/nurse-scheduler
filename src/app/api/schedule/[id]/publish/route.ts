@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     await authGuard("MANAGER");
@@ -14,10 +15,7 @@ export async function POST(
     });
 
     if (!schedule) {
-      return NextResponse.json(
-        { error: "לו״ז לא נמצא" },
-        { status: 404 }
-      );
+      return apiError(API_ERRORS.SCHEDULE_NOT_FOUND, 404);
     }
 
     await db.weeklySchedule.update({

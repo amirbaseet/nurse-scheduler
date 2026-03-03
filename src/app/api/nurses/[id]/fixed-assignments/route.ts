@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { createFixedAssignmentSchema } from "@/lib/validations";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 const PERMANENT_SENTINEL = new Date("1970-01-01T00:00:00.000Z");
 
@@ -13,14 +14,15 @@ export async function POST(
     await authGuard("MANAGER");
 
     const body = await request.json();
-    const { clinicId, day, weekStart } = createFixedAssignmentSchema.parse(body);
+    const { clinicId, day, weekStart } =
+      createFixedAssignmentSchema.parse(body);
 
     // Check nurse exists
     const nurse = await db.nurseProfile.findUnique({
       where: { id: params.id },
     });
     if (!nurse) {
-      return NextResponse.json({ error: "אחות לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.NURSE_NOT_FOUND, 404);
     }
 
     // Check clinic exists
@@ -28,7 +30,7 @@ export async function POST(
       where: { id: clinicId },
     });
     if (!clinic) {
-      return NextResponse.json({ error: "מרפאה לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.CLINIC_NOT_FOUND, 404);
     }
 
     const resolvedWeekStart = weekStart
@@ -47,10 +49,7 @@ export async function POST(
       },
     });
     if (existing) {
-      return NextResponse.json(
-        { error: "שיבוץ קבוע זהה כבר קיים" },
-        { status: 409 },
-      );
+      return apiError(API_ERRORS.FIXED_ASSIGNMENT_DUPLICATE, 409);
     }
 
     const assignment = await db.fixedAssignment.create({

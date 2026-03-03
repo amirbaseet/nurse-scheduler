@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { updateNurseSchema } from "@/lib/validations";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function PUT(
   request: Request,
@@ -19,7 +20,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "אחות לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.NURSE_NOT_FOUND, 404);
     }
 
     const { recurringOffDays, ...rest } = input;

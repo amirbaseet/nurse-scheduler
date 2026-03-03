@@ -4,6 +4,7 @@ import { authGuard, handleApiError } from "@/lib/permissions";
 import { parseWeekParam, DAY_ORDER } from "@/lib/utils";
 import ExcelJS from "exceljs";
 import { addDays, format } from "date-fns";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 const DAY_NAMES_HE = [
   "ראשון (א)",
@@ -46,7 +47,7 @@ export async function GET(
     const weekStart = parseWeekParam(params.week);
 
     if (!weekStart) {
-      return NextResponse.json({ error: "תאריך לא תקין" }, { status: 400 });
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     const schedule = await db.weeklySchedule.findUnique({
@@ -63,7 +64,7 @@ export async function GET(
     });
 
     if (!schedule) {
-      return NextResponse.json({ error: "לו״ז לא נמצא" }, { status: 404 });
+      return apiError(API_ERRORS.SCHEDULE_NOT_FOUND, 404);
     }
 
     // Group assignments by nurse

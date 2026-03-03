@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { createTaskSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function GET() {
   try {
@@ -28,10 +29,7 @@ export async function POST(request: Request) {
 
     // If not for all, assignedToId is required
     if (!input.isForAll && !input.assignedToId) {
-      return NextResponse.json(
-        { error: "יש לבחור אחות או לסמן כמשימה לכולן" },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.TASK_MUST_ASSIGN_OR_ALL, 400);
     }
 
     // Validate assignee exists and is an active nurse
@@ -40,10 +38,7 @@ export async function POST(request: Request) {
         where: { id: input.assignedToId },
       });
       if (!assignee || assignee.role !== "NURSE" || !assignee.isActive) {
-        return NextResponse.json(
-          { error: "אחות לא נמצאה או לא פעילה" },
-          { status: 400 },
-        );
+        return apiError(API_ERRORS.NURSE_NOT_FOUND_OR_INACTIVE, 400);
       }
     }
 

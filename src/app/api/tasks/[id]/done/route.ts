@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function PUT(
   _request: Request,
@@ -14,15 +15,12 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "משימה לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.TASK_NOT_FOUND, 404);
     }
 
     // Only the assigned nurse or any nurse (if isForAll) can mark done
     if (!existing.isForAll && existing.assignedToId !== user.id) {
-      return NextResponse.json(
-        { error: "אין הרשאה לסמן משימה זו" },
-        { status: 403 },
-      );
+      return apiError(API_ERRORS.TASK_NOT_AUTHORIZED, 403);
     }
 
     const task = await db.task.update({

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { assignScheduleSchema } from "@/lib/validations";
 import { determineCorrectionType } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function PUT(
   request: Request,
@@ -20,7 +21,7 @@ export async function PUT(
     });
 
     if (!schedule) {
-      return NextResponse.json({ error: "לו״ז לא נמצא" }, { status: 404 });
+      return apiError(API_ERRORS.SCHEDULE_NOT_FOUND, 404);
     }
 
     // Fetch original assignment
@@ -29,7 +30,7 @@ export async function PUT(
     });
 
     if (!old || old.scheduleId !== params.id) {
-      return NextResponse.json({ error: "שיבוץ לא נמצא" }, { status: 404 });
+      return apiError(API_ERRORS.ASSIGNMENT_NOT_FOUND, 404);
     }
 
     // Update the assignment

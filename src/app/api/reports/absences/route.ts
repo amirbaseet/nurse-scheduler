@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 function getMonthBounds(monthStr: string) {
   const match = monthStr.match(/^(\d{4})-(\d{2})$/);
@@ -34,18 +35,12 @@ export async function GET(request: NextRequest) {
 
     const monthParam = request.nextUrl.searchParams.get("month");
     if (!monthParam) {
-      return NextResponse.json(
-        { error: "חסר פרמטר month (YYYY-MM)" },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.MISSING_MONTH_PARAM, 400);
     }
 
     const bounds = getMonthBounds(monthParam);
     if (!bounds) {
-      return NextResponse.json(
-        { error: "פורמט month לא תקין (YYYY-MM)" },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.INVALID_DATE_FORMAT, 400);
     }
 
     const { start: monthStart, end: monthEnd } = bounds;

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { upsertMonthlyDatesSchema } from "@/lib/validations";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function GET(
   request: Request,
@@ -15,7 +16,7 @@ export async function GET(
 
     const clinic = await db.clinic.findUnique({ where: { id: params.id } });
     if (!clinic) {
-      return NextResponse.json({ error: "מרפאה לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.CLINIC_NOT_FOUND, 404);
     }
 
     const where: Record<string, unknown> = { clinicId: params.id };
@@ -50,7 +51,7 @@ export async function PUT(
 
     const clinic = await db.clinic.findUnique({ where: { id: params.id } });
     if (!clinic) {
-      return NextResponse.json({ error: "מרפאה לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.CLINIC_NOT_FOUND, 404);
     }
 
     // Atomic transaction: upsert all dates + delete removed ones

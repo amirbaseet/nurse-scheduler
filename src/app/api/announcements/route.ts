@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { createAnnouncementSchema } from "@/lib/validations";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function GET() {
   try {
@@ -48,10 +49,7 @@ export async function POST(request: Request) {
         select: { id: true },
       });
       if (nurses.length !== input.targetNurseIds.length) {
-        return NextResponse.json(
-          { error: "אחת או יותר מהאחיות לא נמצאו" },
-          { status: 400 },
-        );
+        return apiError(API_ERRORS.SOME_NURSES_NOT_FOUND, 400);
       }
     }
 

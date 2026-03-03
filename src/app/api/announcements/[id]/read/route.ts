@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function POST(
   _request: Request,
@@ -15,17 +16,14 @@ export async function POST(
     });
 
     if (!announcement) {
-      return NextResponse.json({ error: "הודעה לא נמצאה" }, { status: 404 });
+      return apiError(API_ERRORS.ANNOUNCEMENT_NOT_FOUND, 404);
     }
 
     if (
       !announcement.targetAll &&
       !announcement.targetNurseIds.includes(user.id)
     ) {
-      return NextResponse.json(
-        { error: "אין הרשאה לגשת להודעה זו" },
-        { status: 403 },
-      );
+      return apiError(API_ERRORS.ANNOUNCEMENT_NOT_AUTHORIZED, 403);
     }
 
     // Upsert to handle duplicate reads gracefully

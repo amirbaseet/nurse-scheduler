@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { recordAbsenceSchema } from "@/lib/validations";
 import { parseWeekParam } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function POST(request: Request) {
   try {
@@ -15,17 +16,11 @@ export async function POST(request: Request) {
     const endDate = parseWeekParam(input.endDate);
 
     if (!startDate || !endDate) {
-      return NextResponse.json(
-        { error: "תאריך לא תקין" },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     if (endDate < startDate) {
-      return NextResponse.json(
-        { error: "תאריך סיום חייב להיות אחרי תאריך התחלה" },
-        { status: 400 },
-      );
+      return apiError(API_ERRORS.END_DATE_AFTER_START, 400);
     }
 
     // Verify nurse exists and is active
@@ -34,10 +29,7 @@ export async function POST(request: Request) {
     });
 
     if (!nurse) {
-      return NextResponse.json(
-        { error: "אחות לא נמצאה או לא פעילה" },
-        { status: 404 },
-      );
+      return apiError(API_ERRORS.NURSE_NOT_FOUND_OR_INACTIVE, 404);
     }
 
     // Create auto-approved absence record

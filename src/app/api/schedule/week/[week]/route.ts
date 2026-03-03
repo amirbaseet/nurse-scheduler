@@ -3,6 +3,7 @@ import { addDays } from "date-fns";
 import { db } from "@/lib/db";
 import { authGuard, handleApiError } from "@/lib/permissions";
 import { parseWeekParam } from "@/lib/utils";
+import { apiError, API_ERRORS } from "@/lib/api-errors";
 
 export async function GET(
   _request: Request,
@@ -13,7 +14,7 @@ export async function GET(
     const weekStart = parseWeekParam(params.week);
 
     if (!weekStart) {
-      return NextResponse.json({ error: "תאריך לא תקין" }, { status: 400 });
+      return apiError(API_ERRORS.INVALID_DATE, 400);
     }
 
     const weekEnd = addDays(weekStart, 6); // Saturday
