@@ -51,10 +51,11 @@ COPY --from=builder /app/public ./public
 # Copy full node_modules (needed for prisma migrate deploy + optional seed)
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy Prisma schema + migrations + seed config
+# Copy Prisma schema + migrations + seed config + seed PINs
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/.env.seed ./.env.seed
+COPY --from=builder /app/.env.seed.example ./.env.seed.example
+RUN cp .env.seed.example .env.seed
 
 # Copy learning models (probability matrices used by algorithm at runtime)
 COPY --from=builder /app/data/models ./data/models
