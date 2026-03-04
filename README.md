@@ -14,7 +14,7 @@ Replaces manual Excel scheduling with a 9-layer algorithm engine.
 - [Local Development](#local-development)
 - [Database Schema (17 models)](#database-schema-17-models)
 - [Authentication System](#authentication-system)
-- [API Routes (44 endpoints)](#api-routes-44-endpoints)
+- [API Routes (50 endpoints)](#api-routes-50-endpoints)
 - [Scheduling Algorithm (9 layers)](#scheduling-algorithm-9-layers)
 - [Learning Engine](#learning-engine)
 - [Manager UI (Desktop)](#manager-ui-desktop)
@@ -133,7 +133,7 @@ docker compose --env-file .env.production up -d
 
 ### Login PINs
 
-PINs are in `.env.seed` (copied into the Docker image at build time).
+PINs are in `.env.seed.example` (copied into the Docker image as `.env.seed` at build time).
 
 - **Manager:** 6-digit PIN (`MANAGER_PIN`)
 - **Nurses:** 4-digit PINs (`NURSE_PINS`, comma-separated)
@@ -229,6 +229,7 @@ All models in `prisma/schema.prisma`, managed via Prisma ORM on PostgreSQL.
 |-----------|--------|
 | `20260301132827_init_postgresql` | Full initial schema |
 | `20260302120000_add_created_by_to_time_off` | Added `createdById` to `TimeOffRequest` |
+| `20260303000000_add_clinic_monthly_dates` | Added `ClinicMonthlyDate` model for monthly clinic scheduling |
 
 ---
 
@@ -259,7 +260,7 @@ PIN input → extract pinPrefix (first 2 digits)
 
 ---
 
-## API Routes (44 endpoints)
+## API Routes (50 endpoints)
 
 ### Auth (2)
 
@@ -287,23 +288,27 @@ PIN input → extract pinPrefix (first 2 digits)
 | GET | `/api/schedule/nurse/me` | Nurse | Current week schedule |
 | GET | `/api/schedule/nurse/me/[week]` | Nurse | Specific week schedule |
 
-### Nurses (3)
+### Nurses (6)
 
 | Method | Route | Purpose |
 |--------|-------|---------|
 | GET | `/api/nurses` | List all nurse profiles |
-| GET/PATCH | `/api/nurses/[id]` | Get/update nurse profile |
+| PUT | `/api/nurses/[id]` | Update nurse profile |
 | PUT | `/api/nurses/[id]/blocked-clinics` | Set blocked clinics |
+| POST | `/api/nurses/[id]/fixed-assignments` | Create fixed assignment |
+| DELETE | `/api/nurses/[id]/fixed-assignments/[assignmentId]` | Delete fixed assignment |
 
-### Clinics (6)
+### Clinics (9)
 
 | Method | Route | Purpose |
 |--------|-------|---------|
 | GET/POST | `/api/clinics` | List/create clinics |
-| GET/PATCH | `/api/clinics/[id]` | Get/update clinic |
-| GET/PUT | `/api/clinics/config/defaults` | Default weekly config |
+| PUT | `/api/clinics/[id]` | Update clinic |
+| PUT | `/api/clinics/config/defaults` | Default weekly config |
 | GET/PUT | `/api/clinics/config/[week]` | Weekly override config |
 | POST | `/api/clinics/config/copy` | Copy config between weeks |
+| GET/PUT | `/api/clinics/[id]/monthly-dates` | Get/set monthly clinic dates |
+| DELETE | `/api/clinics/[id]/monthly-dates/[dateId]` | Delete monthly date |
 
 ### Programs (4)
 
@@ -582,6 +587,34 @@ API returns `timeOff[]` alongside assignments. Client builds lookup map. Grid th
 - Root, manager, and nurse error boundaries
 - Loading skeletons for schedule pages
 
+### Fixed Assignment CRUD (2026-03-03)
+
+Manager can create and delete fixed nurse-clinic assignments from the nurse profile page:
+- `POST /api/nurses/[id]/fixed-assignments` — create permanent or one-week assignment
+- `DELETE /api/nurses/[id]/fixed-assignments/[assignmentId]` — remove assignment
+- CUID validation on all ID parameters
+
+### Clinic Monthly Dates (2026-03-03)
+
+Manager can set specific dates when clinics operate (for monthly/irregular clinics):
+- `GET/PUT /api/clinics/[id]/monthly-dates` — list/set dates for a month
+- `DELETE /api/clinics/[id]/monthly-dates/[dateId]` — remove a date
+- New `ClinicMonthlyDate` model + migration
+- Monthly dates tab in clinic config UI
+
+### Nurse Deactivation/Reactivation (2026-03-03)
+
+- Toggle nurse active status from the nurses table
+- `PUT /api/users/[id]/deactivate` — deactivate or reactivate
+- Manager cannot deactivate themselves
+- Deactivated nurses excluded from scheduling
+
+### Centralized API Error Codes (2026-03-04)
+
+- `src/lib/api-errors.ts` — all API error messages as typed constants
+- Replaced hardcoded Hebrew strings across all route files
+- Consistent error responses project-wide
+
 ### Docker Hardening (2026-03-02)
 
 - Health endpoint excluded from auth
@@ -598,13 +631,13 @@ nurse-scheduler/
 ├── prisma/
 │   ├── schema.prisma              — 17 models, PostgreSQL
 │   ├── seed.ts                    — Seeds all reference data
-│   └── migrations/                — 2 migrations
+│   └── migrations/                — 3 migrations
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx               — Login page
 │   │   ├── layout.tsx             — Root layout (RTL, i18n)
 │   │   ├── error.tsx              — Root error boundary
-│   │   ├── api/                   — 44 API routes
+│   │   ├── api/                   — 50 API routes
 │   │   ├── manager/               — 15+ manager screens
 │   │   └── nurse/                 — 6 nurse screens
 │   ├── algorithm/
@@ -620,8 +653,10 @@ nurse-scheduler/
 │   │   ├── models.ts              — Probability model loader
 │   │   └── corrections.ts         — Correction adjustments
 │   ├── lib/
+│   │   ├── api-errors.ts          — Centralized API error codes
 │   │   ├── auth.ts                — JWT sign/verify
 │   │   ├── db.ts                  — Prisma singleton
+│   │   ├── json-arrays.ts         — JSON array helpers (SQLite compat)
 │   │   ├── permissions.ts         — Auth guard + error handler
 │   │   ├── pin.ts                 — PIN hash/verify
 │   │   ├── utils.ts               — Shared utilities
