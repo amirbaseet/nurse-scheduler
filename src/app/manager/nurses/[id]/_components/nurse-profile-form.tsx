@@ -168,15 +168,23 @@ export function NurseProfileForm({
         showMessage(t("fixed_duplicate"), "error");
         return;
       }
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const detail = data?.details ?? data?.error ?? `HTTP ${res.status}`;
+        throw new Error(detail);
+      }
       showMessage(t("fixed_added"), "success");
       setFixedDialogOpen(false);
       setFixedClinicId("");
       setFixedDay("");
       setFixedPermanent(true);
       router.refresh();
-    } catch {
-      showMessage(t("fixed_add_error"), "error");
+    } catch (err) {
+      const msg =
+        err instanceof Error && err.message !== ""
+          ? err.message
+          : t("fixed_add_error");
+      showMessage(msg, "error");
     } finally {
       setFixedSaving(false);
     }
