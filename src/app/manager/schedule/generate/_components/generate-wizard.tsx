@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn, getWeekStart, formatDate } from "@/lib/utils";
 import type { GenerateResponse } from "@/types/schedule";
+import type { AlgorithmVersion } from "@/algorithm/algorithm-options";
 import { StepSelectWeek } from "./step-select-week";
 import { StepReviewConfig } from "./step-review-config";
 import { StepReviewEdit } from "./step-review-edit";
@@ -28,6 +29,8 @@ export function GenerateWizard() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [activeNurseCount, setActiveNurseCount] = useState(0);
+  const [algorithmVersion, setAlgorithmVersion] =
+    useState<AlgorithmVersion>("v1-clinic-first");
 
   async function handleGenerate() {
     setIsGenerating(true);
@@ -35,7 +38,10 @@ export function GenerateWizard() {
       const res = await fetch("/api/schedule/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ weekStart: formatDate(weekStart) }),
+        body: JSON.stringify({
+          weekStart: formatDate(weekStart),
+          algorithmVersion,
+        }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -127,6 +133,8 @@ export function GenerateWizard() {
         <StepReviewConfig
           weekStart={weekStart}
           isGenerating={isGenerating}
+          algorithmVersion={algorithmVersion}
+          onAlgorithmChange={setAlgorithmVersion}
           onBack={() => setStep(1)}
           onGenerate={handleGenerate}
         />

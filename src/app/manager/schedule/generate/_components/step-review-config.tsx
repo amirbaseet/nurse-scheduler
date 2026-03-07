@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -15,6 +22,8 @@ import {
 } from "@/components/ui/table";
 import { formatDate, DAY_ORDER } from "@/lib/utils";
 import type { MergedConfig } from "@/types/clinic";
+import type { AlgorithmVersion } from "@/algorithm/algorithm-options";
+import { ALGORITHM_OPTIONS } from "@/algorithm/algorithm-options";
 import { useTranslation } from "@/i18n/use-translation";
 
 type TimeOff = {
@@ -64,11 +73,15 @@ const PERMANENT_SENTINEL = "1970-01-01T00:00:00.000Z";
 export function StepReviewConfig({
   weekStart,
   isGenerating,
+  algorithmVersion,
+  onAlgorithmChange,
   onBack,
   onGenerate,
 }: {
   weekStart: Date;
   isGenerating: boolean;
+  algorithmVersion: AlgorithmVersion;
+  onAlgorithmChange: (v: AlgorithmVersion) => void;
   onBack: () => void;
   onGenerate: () => void;
 }) {
@@ -262,6 +275,37 @@ export function StepReviewConfig({
               ))}
             </ul>
           )}
+        </CardContent>
+      </Card>
+
+      {/* 5. Algorithm Selection */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">{t("algorithm_label")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select
+            value={algorithmVersion}
+            onValueChange={(v) => onAlgorithmChange(v as AlgorithmVersion)}
+          >
+            <SelectTrigger className="w-full max-w-md">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ALGORITHM_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <div className="flex flex-col">
+                    <span>{t(opt.labelKey)}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {algorithmVersion === "v1-clinic-first"
+              ? t("algo_v1_desc")
+              : t("algo_v2_desc")}
+          </p>
         </CardContent>
       </Card>
 

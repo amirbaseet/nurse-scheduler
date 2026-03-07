@@ -18,8 +18,14 @@ const RoleEnum = z.enum(["MANAGER", "NURSE"]);
 // Schedule
 // ═══════════════════════════════════════════
 
+export const AlgorithmVersionEnum = z.enum([
+  "v1-clinic-first",
+  "v2-nurse-first",
+]);
+
 export const generateScheduleSchema = z.object({
   weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
+  algorithmVersion: AlgorithmVersionEnum.optional(),
 });
 
 export const assignScheduleSchema = z.object({

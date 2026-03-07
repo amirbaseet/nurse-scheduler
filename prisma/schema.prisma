@@ -237,14 +237,15 @@ model ProgramAssignment {
 // ═══════════════════════════════════════════
 
 model WeeklySchedule {
-  id           String         @id @default(cuid())
-  weekStart    DateTime       @unique
-  status       ScheduleStatus @default(DRAFT)
-  qualityScore Float?
-  publishedAt  DateTime?
-  generatedAt  DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id               String         @id @default(cuid())
+  weekStart        DateTime       @unique
+  status           ScheduleStatus @default(DRAFT)
+  qualityScore     Float?
+  algorithmVersion String         @default("v1-clinic-first")
+  publishedAt      DateTime?
+  generatedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   assignments ScheduleAssignment[]
 }

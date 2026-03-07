@@ -8,7 +8,10 @@ import {
   dbToAlgorithmConfig,
   algorithmToDbAssignments,
 } from "@/algorithm/converters";
-import { generateWeeklySchedule } from "@/algorithm/index";
+import {
+  runScheduleAlgorithm,
+  type AlgorithmVersion,
+} from "@/algorithm/router";
 import { loadCorrectionAdjustments } from "@/learning/corrections";
 
 export async function POST(request: Request) {
@@ -16,7 +19,9 @@ export async function POST(request: Request) {
     await authGuard("MANAGER");
 
     const body = await request.json();
-    const { weekStart: weekStr } = generateScheduleSchema.parse(body);
+    const { weekStart: weekStr, algorithmVersion } =
+      generateScheduleSchema.parse(body);
+    const version: AlgorithmVersion = algorithmVersion ?? "v1-clinic-first";
     const weekStart = parseWeekParam(weekStr);
 
     if (!weekStart) {
@@ -163,7 +168,7 @@ export async function POST(request: Request) {
 
     // ── Run algorithm ──
 
-    const result = generateWeeklySchedule(weekStart, config);
+    const result = runScheduleAlgorithm(version, weekStart, config);
 
     // ── Save results ──
 
@@ -173,11 +178,13 @@ export async function POST(request: Request) {
         weekStart,
         status: "GENERATED",
         qualityScore: result.qualityScore,
+        algorithmVersion: version,
         generatedAt: new Date(),
       },
       update: {
         status: "GENERATED",
         qualityScore: result.qualityScore,
+        algorithmVersion: version,
         generatedAt: new Date(),
       },
     });
