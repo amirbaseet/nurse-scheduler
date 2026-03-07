@@ -5,6 +5,8 @@
 
 export type AlgorithmVersion = "v1-clinic-first" | "v2-nurse-first";
 
+export type ShiftBuilderMode = "off" | "on";
+
 export const ALGORITHM_OPTIONS: Array<{
   value: AlgorithmVersion;
   labelKey: string;

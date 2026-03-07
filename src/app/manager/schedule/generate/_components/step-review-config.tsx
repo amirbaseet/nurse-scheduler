@@ -20,9 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDate, DAY_ORDER } from "@/lib/utils";
+import { cn, formatDate, DAY_ORDER } from "@/lib/utils";
 import type { MergedConfig } from "@/types/clinic";
-import type { AlgorithmVersion } from "@/algorithm/algorithm-options";
+import type {
+  AlgorithmVersion,
+  ShiftBuilderMode,
+} from "@/algorithm/algorithm-options";
 import { ALGORITHM_OPTIONS } from "@/algorithm/algorithm-options";
 import { useTranslation } from "@/i18n/use-translation";
 
@@ -75,6 +78,8 @@ export function StepReviewConfig({
   isGenerating,
   algorithmVersion,
   onAlgorithmChange,
+  shiftBuilder,
+  onShiftBuilderChange,
   onBack,
   onGenerate,
 }: {
@@ -82,6 +87,8 @@ export function StepReviewConfig({
   isGenerating: boolean;
   algorithmVersion: AlgorithmVersion;
   onAlgorithmChange: (v: AlgorithmVersion) => void;
+  shiftBuilder: ShiftBuilderMode;
+  onShiftBuilderChange: (v: ShiftBuilderMode) => void;
   onBack: () => void;
   onGenerate: () => void;
 }) {
@@ -305,6 +312,46 @@ export function StepReviewConfig({
             {algorithmVersion === "v1-clinic-first"
               ? t("algo_v1_desc")
               : t("algo_v2_desc")}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* 6. Shift Builder Toggle */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">
+            {t("shift_builder_label")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={shiftBuilder === "on"}
+              onClick={() =>
+                onShiftBuilderChange(shiftBuilder === "on" ? "off" : "on")
+              }
+              className={cn(
+                "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors",
+                shiftBuilder === "on" ? "bg-primary" : "bg-muted",
+              )}
+            >
+              <span
+                className={cn(
+                  "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform",
+                  shiftBuilder === "on" ? "translate-x-5" : "translate-x-0",
+                )}
+              />
+            </button>
+            <span className="text-sm">
+              {shiftBuilder === "on"
+                ? t("shift_builder_on")
+                : t("shift_builder_off")}
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t("shift_builder_desc")}
           </p>
         </CardContent>
       </Card>

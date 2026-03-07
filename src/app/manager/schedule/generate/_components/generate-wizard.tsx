@@ -6,7 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn, getWeekStart, formatDate } from "@/lib/utils";
 import type { GenerateResponse } from "@/types/schedule";
-import type { AlgorithmVersion } from "@/algorithm/algorithm-options";
+import type {
+  AlgorithmVersion,
+  ShiftBuilderMode,
+} from "@/algorithm/algorithm-options";
 import { StepSelectWeek } from "./step-select-week";
 import { StepReviewConfig } from "./step-review-config";
 import { StepReviewEdit } from "./step-review-edit";
@@ -31,6 +34,7 @@ export function GenerateWizard() {
   const [activeNurseCount, setActiveNurseCount] = useState(0);
   const [algorithmVersion, setAlgorithmVersion] =
     useState<AlgorithmVersion>("v1-clinic-first");
+  const [shiftBuilder, setShiftBuilder] = useState<ShiftBuilderMode>("off");
 
   async function handleGenerate() {
     setIsGenerating(true);
@@ -41,6 +45,7 @@ export function GenerateWizard() {
         body: JSON.stringify({
           weekStart: formatDate(weekStart),
           algorithmVersion,
+          shiftBuilder,
         }),
       });
       if (!res.ok) {
@@ -135,6 +140,8 @@ export function GenerateWizard() {
           isGenerating={isGenerating}
           algorithmVersion={algorithmVersion}
           onAlgorithmChange={setAlgorithmVersion}
+          shiftBuilder={shiftBuilder}
+          onShiftBuilderChange={setShiftBuilder}
           onBack={() => setStep(1)}
           onGenerate={handleGenerate}
         />

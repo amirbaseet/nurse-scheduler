@@ -450,6 +450,8 @@ describe("MUST-PASS — Category 5: Config Merge", () => {
     shiftEnd: "15:00",
     nursesNeeded: 2,
     isActive: true,
+    canSplit: false,
+    minSplitHours: 3.0,
     clinic: {
       code: "test_clinic",
       genderPref: "ANY",

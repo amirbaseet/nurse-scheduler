@@ -38,6 +38,8 @@ type ClinicDefaultConfigRow = {
   shiftEnd: string;
   nursesNeeded: number;
   isActive: boolean;
+  canSplit: boolean;
+  minSplitHours: number;
   clinic: {
     code: string;
     genderPref: string;
@@ -54,6 +56,8 @@ type ClinicWeeklyConfigRow = {
   shiftEnd: string;
   nursesNeeded: number;
   isActive: boolean;
+  canSplit: boolean | null;
+  minSplitHours: number | null;
   clinic: {
     code: string;
     genderPref: string;
@@ -198,6 +202,7 @@ export function mergeClinicConfigs(
             canBeSecondary: monthly.clinic.canBeSecondary,
             secondaryHours: monthly.clinic.secondaryHours ?? undefined,
             secondaryNursesNeeded: monthly.clinic.secondaryNursesNeeded,
+            canSplit: d.canSplit,
           });
         }
         // If monthly exists but !isActive → skip (clinic not active this day)
@@ -214,6 +219,13 @@ export function mergeClinicConfigs(
     const effective = overrideMap.get(key) ?? d;
 
     if (effective.isActive) {
+      // canSplit: weekly override wins if set, else use default
+      const splitFlag =
+        "canSplit" in effective &&
+        (effective as ClinicWeeklyConfigRow).canSplit != null
+          ? (effective as ClinicWeeklyConfigRow).canSplit!
+          : d.canSplit;
+
       result.push({
         clinicId: effective.clinicId,
         clinicCode: effective.clinic.code,
@@ -226,6 +238,7 @@ export function mergeClinicConfigs(
         canBeSecondary: effective.clinic.canBeSecondary,
         secondaryHours: effective.clinic.secondaryHours ?? undefined,
         secondaryNursesNeeded: effective.clinic.secondaryNursesNeeded,
+        canSplit: splitFlag,
       });
     }
 
@@ -250,6 +263,7 @@ export function mergeClinicConfigs(
         canBeSecondary: o.clinic.canBeSecondary,
         secondaryHours: o.clinic.secondaryHours ?? undefined,
         secondaryNursesNeeded: o.clinic.secondaryNursesNeeded,
+        canSplit: o.canSplit ?? false,
       });
     }
   }
@@ -270,6 +284,7 @@ export function mergeClinicConfigs(
         canBeSecondary: md.clinic.canBeSecondary,
         secondaryHours: md.clinic.secondaryHours ?? undefined,
         secondaryNursesNeeded: md.clinic.secondaryNursesNeeded,
+        canSplit: false, // Monthly dates don't support splitting
       });
     }
   }

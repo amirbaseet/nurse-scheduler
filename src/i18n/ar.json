@@ -409,5 +409,9 @@
   "select_nurse_for_absence": "اختر ممرضة لتسجيل الغياب",
   "recorded_by_manager": "مسجل بواسطة المديرة",
   "delete_absence": "حذف الغياب",
-  "absence_deleted": "تم حذف الغياب"
+  "absence_deleted": "تم حذف الغياب",
+  "shift_builder_label": "تقسيم الورديات",
+  "shift_builder_on": "مفعّل",
+  "shift_builder_off": "معطّل",
+  "shift_builder_desc": "تقسيم تلقائي للورديات الطويلة إلى صباح/بعد الظهر للممرضات بدوام جزئي. فقط العيادات المحددة كقابلة للتقسيم ستتأثر."
 }

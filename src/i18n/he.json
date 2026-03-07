@@ -409,5 +409,9 @@
   "select_nurse_for_absence": "בחר אחות לרישום היעדרות",
   "recorded_by_manager": "נרשם ע״י מנהלת",
   "delete_absence": "מחיקת היעדרות",
-  "absence_deleted": "ההיעדרות נמחקה"
+  "absence_deleted": "ההיעדרות נמחקה",
+  "shift_builder_label": "פיצול משמרות",
+  "shift_builder_on": "פעיל",
+  "shift_builder_off": "כבוי",
+  "shift_builder_desc": "פיצול אוטומטי של משמרות ארוכות לבוקר/אחה״צ עבור אחיות במשרה חלקית. רק מרפאות שסומנו כניתנות לפיצול יושפעו."
 }

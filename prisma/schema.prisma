@@ -117,14 +117,16 @@ enum GenderPref {
 // DEFAULT clinic config — the template used every week
 // Manager sets this up once. Algorithm uses it unless overridden.
 model ClinicDefaultConfig {
-  id           String    @id @default(cuid())
-  clinicId     String
-  clinic       Clinic    @relation(fields: [clinicId], references: [id])
-  day          DayOfWeek
-  shiftStart   String                          // "08:00"
-  shiftEnd     String                          // "16:00"
-  nursesNeeded Int       @default(1)
-  isActive     Boolean   @default(true)
+  id            String    @id @default(cuid())
+  clinicId      String
+  clinic        Clinic    @relation(fields: [clinicId], references: [id])
+  day           DayOfWeek
+  shiftStart    String                          // "08:00"
+  shiftEnd      String                          // "16:00"
+  nursesNeeded  Int       @default(1)
+  isActive      Boolean   @default(true)
+  canSplit      Boolean   @default(false)       // Allow shift builder to split into AM/PM
+  minSplitHours Float     @default(3.0)         // Minimum segment length when splitting
 
   @@unique([clinicId, day])
 }
@@ -132,15 +134,17 @@ model ClinicDefaultConfig {
 // WEEKLY clinic config — overrides for specific weeks only
 // Only created when manager needs to change something for one week.
 model ClinicWeeklyConfig {
-  id           String    @id @default(cuid())
-  clinicId     String
-  clinic       Clinic    @relation(fields: [clinicId], references: [id])
-  weekStart    DateTime
-  day          DayOfWeek
-  shiftStart   String
-  shiftEnd     String
-  nursesNeeded Int       @default(1)
-  isActive     Boolean   @default(true)
+  id            String    @id @default(cuid())
+  clinicId      String
+  clinic        Clinic    @relation(fields: [clinicId], references: [id])
+  weekStart     DateTime
+  day           DayOfWeek
+  shiftStart    String
+  shiftEnd      String
+  nursesNeeded  Int       @default(1)
+  isActive      Boolean   @default(true)
+  canSplit      Boolean?                        // Weekly override (null = use default)
+  minSplitHours Float?                          // Weekly override (null = use default)
 
   @@unique([clinicId, weekStart, day])
 }

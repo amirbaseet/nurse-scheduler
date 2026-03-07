@@ -23,9 +23,12 @@ export const AlgorithmVersionEnum = z.enum([
   "v2-nurse-first",
 ]);
 
+export const ShiftBuilderEnum = z.enum(["off", "on"]);
+
 export const generateScheduleSchema = z.object({
   weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "תאריך בפורמט YYYY-MM-DD"),
   algorithmVersion: AlgorithmVersionEnum.optional(),
+  shiftBuilder: ShiftBuilderEnum.optional(),
 });
 
 export const assignScheduleSchema = z.object({

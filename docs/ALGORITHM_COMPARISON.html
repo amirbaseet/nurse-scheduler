@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Comparison: V1 Clinic-First vs V2 Nurse-First</title>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+  <style>
+    :root { --bg: #f8f9fa; --card: #fff; --border: #dee2e6; --text: #212529; --accent: #0d6efd; --code-bg: #f1f3f5; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: var(--text); background: var(--bg); padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: var(--accent); }
+    h2 { font-size: 1.5rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+    h3 { font-size: 1.2rem; margin: 1.5rem 0 0.75rem; }
+    p, li { margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: var(--card); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    th, td { padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    th { background: var(--accent); color: #fff; font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f0f7ff; }
+    code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85rem; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 1.2rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; font-size: 0.85rem; line-height: 1.5; }
+    .card { background: var(--card); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .mermaid { margin: 1.5rem 0; text-align: center; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+    .badge-v1 { background: #dbeafe; color: #1d4ed8; }
+    .badge-v2 { background: #dcfce7; color: #166534; }
+    .badge-shared { background: #fef3c7; color: #92400e; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+  </style>
+</head>
+<body>
+
+<h1>Algorithm Comparison</h1>
+<p>V1 Clinic-First vs V2 Nurse-First &mdash; NurseScheduler Pro</p>
+
+<hr>
+
+<h2>Overview</h2>
+<table>
+  <tr><th>Aspect</th><th><span class="badge badge-v1">V1: Clinic-First</span></th><th><span class="badge badge-v2">V2: Nurse-First</span></th></tr>
+  <tr><td><strong>Philosophy</strong></td><td>Demand-driven: fill clinic slots</td><td>Supply-driven: distribute nurse hours</td></tr>
+  <tr><td><strong>Core Question</strong></td><td>"Which nurse best fits this slot?"</td><td>"Which slot best fits this nurse?"</td></tr>
+  <tr><td><strong>Starting Point</strong></td><td>Clinic demand (slots to fill)</td><td>Nurse budget (hours to schedule)</td></tr>
+  <tr><td><strong>Algorithm ID</strong></td><td><code>v1-clinic-first</code></td><td><code>v2-nurse-first</code></td></tr>
+  <tr><td><strong>Score Range</strong></td><td>0&ndash;1400</td><td>0&ndash;1200</td></tr>
+  <tr><td><strong>Best For</strong></td><td>Ensuring all clinics are staffed</td><td>Fair hour distribution across nurses</td></tr>
+</table>
+
+<hr>
+
+<h2>Architecture</h2>
+<p>Both algorithms share the same input (<code>AlgorithmConfig</code>) and output (<code>ScheduleResult</code>).</p>
+
+<h3>Shared Layers <span class="badge badge-shared">Used by both V1 and V2</span></h3>
+<table>
+  <tr><th>Layer</th><th>Name</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Block</td><td>Mark unavailable days (time-off, preferred days off)</td></tr>
+  <tr><td>2</td><td>Fixed</td><td>Place fixed assignments + pure programs</td></tr>
+  <tr><td>3</td><td>Gender</td><td>Fill gender-restricted clinic slots</td></tr>
+  <tr><td>5</td><td>Secondary</td><td>Stack secondary clinic assignments</td></tr>
+  <tr><td>6</td><td>Programs</td><td>Add patient call program addons</td></tr>
+  <tr><td>7</td><td>Gap Fill</td><td>Fill remaining hours budget</td></tr>
+  <tr><td>8</td><td>Off Days</td><td>Mark remaining unassigned days as OFF</td></tr>
+  <tr><td>9</td><td>Optimize</td><td>Simulated annealing (10K iterations, cooling 0.9997)</td></tr>
+</table>
+
+<h3>Divergent Core Logic</h3>
+<table>
+  <tr><th></th><th><span class="badge badge-v1">V1 (Layer 4)</span></th><th><span class="badge badge-v2">V2 (nurseFirstAssign + clinicGapFill)</span></th></tr>
+  <tr><td><strong>Strategy</strong></td><td>3-pass: specialist auto &rarr; affinity pre-assign &rarr; difficulty queue with MCV</td><td>1-pass: constrained nurse ordering &rarr; best slot per day &rarr; gap fill</td></tr>
+  <tr><td><strong>Iteration</strong></td><td>Iterates over clinic slots</td><td>Iterates over nurses</td></tr>
+  <tr><td><strong>Ordering</strong></td><td>MCV heuristic (hardest slots first)</td><td>Most constrained nurse first (fewest available days)</td></tr>
+  <tr><td><strong>Backtracking</strong></td><td>Yes (via <code>tryBacktrack</code>)</td><td>Yes (in gap-fill phase)</td></tr>
+  <tr><td><strong>Look-ahead</strong></td><td>Yes (5 future slots)</td><td>No (relies on constraint ordering)</td></tr>
+</table>
+
+<hr>
+
+<h2>Execution Flow</h2>
+
+<h3><span class="badge badge-v1">V1: Clinic-First Flow</span></h3>
+<pre>
+Layer 1 &rarr; Block unavailable days
+Layer 2 &rarr; Place fixed assignments
+Layer 3 &rarr; Fill gender-restricted slots
+Layer 4 &rarr; PRIMARY ASSIGNMENT (clinic-first):
+  ├── Pass 0: Specialist auto-assign (P &gt; 0.85)
+  ├── Pass 1: Global affinity pre-assign (nurse's #1 clinic per day)
+  ├── Pass 2: Confidence fast path (P &gt; 0.50)
+  └── Pass 3: Difficulty queue + MCV + scoring + look-ahead + backtrack
+Layer 5 &rarr; Stack secondary clinics
+Layer 6 &rarr; Patient call programs
+Layer 7 &rarr; Fill remaining budget hours
+Layer 8 &rarr; Mark remaining as OFF
+Layer 9 &rarr; Simulated annealing optimization
+</pre>
+
+<h3><span class="badge badge-v2">V2: Nurse-First Flow</span></h3>
+<pre>
+Layer 1 &rarr; Block unavailable days
+Layer 2 &rarr; Place fixed assignments
+Layer 3 &rarr; Fill gender-restricted slots
+NurseFirstAssign &rarr; PRIMARY ASSIGNMENT (nurse-first):
+  ├── Sort nurses by constraint level (fewest available days first)
+  ├── For each nurse:
+  │   ├── Calculate dailyTarget = remainingHours / availableDays
+  │   ├── Sort available days by strongest clinic affinity
+  │   └── For each day: score unfilled slots, assign best match
+ClinicGapFill &rarr; Fill remaining clinic demands:
+  ├── Build difficulty queue (hardest unfilled slots first)
+  ├── For each unfilled slot: find candidates, score, assign best
+  └── Backtrack if no direct candidates available
+Layer 5 &rarr; Stack secondary clinics
+Layer 6 &rarr; Patient call programs
+Layer 7 &rarr; Fill remaining budget hours
+Layer 8 &rarr; Mark remaining as OFF
+Layer 9 &rarr; Simulated annealing optimization
+</pre>
+
+<hr>
+
+<h2>Scoring Comparison</h2>
+
+<h3><span class="badge badge-v1">V1: Clinic-Centric Scoring (0&ndash;1400)</span></h3>
+<p>Answers: <em>"How good is this <strong>nurse</strong> for this <strong>clinic slot</strong>?"</em></p>
+<table>
+  <tr><th>Component</th><th>Range</th><th>Description</th></tr>
+  <tr><td>S_hist</td><td>0&ndash;400</td><td>Historical probability P(nurse, clinic, day)</td></tr>
+  <tr><td>S_pref</td><td>0&ndash;300</td><td>Shift time preference match (morning/afternoon)</td></tr>
+  <tr><td>S_budget</td><td>0&ndash;200</td><td>Remaining hours ratio (higher = more available)</td></tr>
+  <tr><td>S_fair</td><td>0&ndash;100</td><td>Fairness (fewer assigned days = higher score)</td></tr>
+  <tr><td>S_specialist</td><td>0&ndash;200</td><td>Near-exclusive pairing bonus (P &gt; 0.85)</td></tr>
+  <tr><td>S_dayAffinity</td><td>0&ndash;200</td><td>Nurse's ranked preference for clinic on this day</td></tr>
+  <tr><td>S_lookahead</td><td>&minus;100 to +100</td><td>Impact on future slot difficulty</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>0&ndash;1400</strong></td><td></td></tr>
+</table>
+
+<h3><span class="badge badge-v2">V2: Nurse-Centric Scoring (0&ndash;1200)</span></h3>
+<p>Answers: <em>"How good is this <strong>clinic slot</strong> for this <strong>nurse</strong>?"</em></p>
+<table>
+  <tr><th>Component</th><th>Range</th><th>Description</th></tr>
+  <tr><td>S_affinity</td><td>0&ndash;400</td><td>Historical probability + top-choice bonus</td></tr>
+  <tr><td>S_hours</td><td>0&ndash;300</td><td>How close shift hours match daily target</td></tr>
+  <tr><td>S_pref</td><td>0&ndash;200</td><td>Shift time preference match</td></tr>
+  <tr><td>S_variety</td><td>0&ndash;100</td><td>Penalizes same-clinic repeats (&minus;25 per repeat)</td></tr>
+  <tr><td>S_demand</td><td>0&ndash;200</td><td>Clinic urgency (remaining demand / total needed)</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>0&ndash;1200</strong></td><td></td></tr>
+</table>
+
+<h3>Key Differences</h3>
+<div class="card">
+  <ol>
+    <li><strong>S_hours (V2 only)</strong>: Scores how close <code>shiftHours</code> matches <code>dailyTarget</code>. Perfect match = 300, within 30min = 250, within 1h = 200, within 2h = 100, poor = 30.</li>
+    <li><strong>S_variety (V2 only)</strong>: Encourages clinic diversity. Starts at 100, loses 25 per same-clinic repeat day.</li>
+    <li><strong>S_demand (V2 only)</strong>: Steers nurses toward high-need clinics. <code>urgency = remaining / nursesNeeded * 200</code>.</li>
+    <li><strong>S_lookahead (V1 only)</strong>: Checks impact on 5 future slots. V2 processes nurses by constraint level instead.</li>
+    <li><strong>S_budget (V1 only)</strong>: Uses budget ratio to prefer more-available nurses. V2 handles this via <code>dailyTarget</code>.</li>
+    <li><strong>S_fair (V1 only)</strong>: Uses fairness ratio. V2 handles fairness by processing most-constrained nurses first.</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>Algorithm Selection (Router)</h2>
+<pre>
+src/algorithm/router.ts
+  └── runScheduleAlgorithm(version, weekStart, config)
+        ├── "v1-clinic-first" &rarr; generateWeeklySchedule()   [src/algorithm/index.ts]
+        └── "v2-nurse-first"  &rarr; generateWeeklyScheduleV2() [src/algorithm/v2/index.ts]
+</pre>
+<p>The router is called from <code>src/app/api/schedule/generate/route.ts</code>. The <code>algorithmVersion</code> is:</p>
+<ul>
+  <li>Received in the POST body (optional, defaults to <code>v1-clinic-first</code>)</li>
+  <li>Stored in <code>WeeklySchedule.algorithmVersion</code> column</li>
+  <li>Selected by the manager via a dropdown in the generate wizard (Step 2: Review Config)</li>
+</ul>
+
+<hr>
+
+<h2>UML Diagrams</h2>
+
+<h3>Component Diagram</h3>
+<div class="mermaid">
+graph TB
+    subgraph "Algorithm Router"
+        Router["router.ts"]
+    end
+
+    subgraph "V1: Clinic-First"
+        V1["index.ts"]
+        L4["Layer 4: Primary"]
+        Scoring1["scoring.ts"]
+        LookAhead["look-ahead.ts"]
+    end
+
+    subgraph "V2: Nurse-First"
+        V2["v2/index.ts"]
+        NFA["nurse-first-assign.ts"]
+        CGF["clinic-gap-fill.ts"]
+        Scoring2["nurse-scoring.ts"]
+    end
+
+    subgraph "Shared Layers"
+        L1["Layer 1: Block"]
+        L2["Layer 2: Fixed"]
+        L3["Layer 3: Gender"]
+        L5["Layer 5: Secondary"]
+        L6["Layer 6: Programs"]
+        L7["Layer 7: Gap Fill"]
+        L8["Layer 8: Off Days"]
+        L9["Layer 9: Optimize"]
+    end
+
+    subgraph "Shared Utilities"
+        DQ["difficulty-queue.ts"]
+        BT["backtrack.ts"]
+        Learning["learning/models.ts"]
+    end
+
+    Router -->|v1-clinic-first| V1
+    Router -->|v2-nurse-first| V2
+
+    V1 --> L1
+    V1 --> L2
+    V1 --> L3
+    V1 --> L4
+    V1 --> L5
+    V1 --> L6
+    V1 --> L7
+    V1 --> L8
+    V1 --> L9
+
+    V2 --> L1
+    V2 --> L2
+    V2 --> L3
+    V2 --> NFA
+    V2 --> CGF
+    V2 --> L5
+    V2 --> L6
+    V2 --> L7
+    V2 --> L8
+    V2 --> L9
+
+    L4 --> Scoring1
+    L4 --> DQ
+    L4 --> LookAhead
+    L4 --> BT
+    NFA --> Scoring2
+    NFA --> DQ
+    NFA --> Learning
+    CGF --> Scoring2
+    CGF --> DQ
+    CGF --> BT
+</div>
+
+<h3>V1 Sequence Diagram</h3>
+<div class="mermaid">
+sequenceDiagram
+    participant API as API Route
+    participant Router
+    participant V1 as V1 Algorithm
+    participant DQ as DifficultyQueue
+    participant Score as Scoring
+    participant LA as LookAhead
+
+    API->>Router: runScheduleAlgorithm("v1-clinic-first", ...)
+    Router->>V1: generateWeeklySchedule(weekStart, config)
+
+    Note over V1: Layers 1-3 (shared preprocessing)
+
+    V1->>V1: Layer 4 Pass 0: Specialist auto-assign
+    V1->>V1: Layer 4 Pass 1: Affinity pre-assign
+
+    V1->>DQ: buildDifficultyQueue(grid, nurses, clinics)
+    DQ-->>V1: sorted slots (hardest first)
+
+    loop For each unfilled slot
+        V1->>V1: getCandidates(grid, nurses, slot)
+        loop For each candidate nurse
+            V1->>Score: calculateScore(nurse, slot, ...)
+            Score-->>V1: 0-1300
+            V1->>LA: checkLookAhead(nurse, slot, ...)
+            LA-->>V1: -100 to +100
+        end
+        V1->>V1: Assign best candidate
+    end
+
+    Note over V1: Layers 5-9 (shared postprocessing)
+    V1-->>Router: ScheduleResult
+</div>
+
+<h3>V2 Sequence Diagram</h3>
+<div class="mermaid">
+sequenceDiagram
+    participant API as API Route
+    participant Router
+    participant V2 as V2 Algorithm
+    participant NFA as NurseFirstAssign
+    participant CGF as ClinicGapFill
+    participant Score as NurseScoring
+
+    API->>Router: runScheduleAlgorithm("v2-nurse-first", ...)
+    Router->>V2: generateWeeklyScheduleV2(weekStart, config)
+
+    Note over V2: Layers 1-3 (shared preprocessing)
+
+    V2->>NFA: nurseFirstAssign(grid, nurses, clinics, ...)
+    NFA->>NFA: Sort nurses (most constrained first)
+
+    loop For each nurse
+        NFA->>NFA: dailyTarget = remaining / availableDays
+        NFA->>NFA: Sort days by clinic affinity
+        loop For each available day
+            NFA->>NFA: Find unfilled clinic slots
+            loop For each candidate slot
+                NFA->>Score: scoreSlotForNurse(nurse, slot, dailyTarget, ...)
+                Score-->>NFA: 0-1200
+            end
+            NFA->>NFA: Assign best slot
+        end
+    end
+
+    V2->>CGF: clinicGapFill(grid, nurses, clinics, ...)
+    CGF->>CGF: Build difficulty queue
+    loop For each unfilled slot
+        CGF->>CGF: Find candidate nurses
+        CGF->>Score: scoreSlotForNurse(...)
+        CGF->>CGF: Assign or backtrack
+    end
+
+    Note over V2: Layers 5-9 (shared postprocessing)
+    V2-->>Router: ScheduleResult
+</div>
+
+<h3>Cell Lifecycle State Machine</h3>
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> AVAILABLE: Grid initialized
+
+    AVAILABLE --> BLOCKED: Layer 1 (time-off/pref day-off)
+    AVAILABLE --> ASSIGNED: Layer 2 (fixed) / Layer 3 (gender)
+    AVAILABLE --> ASSIGNED: V1 Layer4 or V2 NurseFirstAssign
+    AVAILABLE --> ASSIGNED: Gap fill (V1 L7 / V2 ClinicGapFill)
+    AVAILABLE --> OFF: Layer 8 (remaining days)
+
+    ASSIGNED --> ASSIGNED: Layer 9 (swap optimization)
+    ASSIGNED --> ASSIGNED: Layer 5 (add secondary clinic)
+    ASSIGNED --> ASSIGNED: Layer 6 (add program addon)
+
+    BLOCKED --> [*]
+    OFF --> [*]
+    ASSIGNED --> [*]
+</div>
+
+<hr>
+
+<h2>File Structure</h2>
+<pre>
+src/algorithm/
+├── index.ts                    # V1 entry point
+├── router.ts                   # Version dispatcher
+├── algorithm-options.ts        # Client-safe type + UI options
+├── scoring.ts                  # V1 clinic-centric scoring (0-1400)
+├── types.ts                    # Shared types
+├── difficulty-queue.ts         # Shared: MCV difficulty ordering
+├── look-ahead.ts               # V1-only: 5-slot look-ahead
+├── backtrack.ts                # Shared: swap-based backtracking
+├── layers/
+│   ├── 1-block.ts              # Shared
+│   ├── 2-fixed.ts              # Shared
+│   ├── 3-gender.ts             # Shared
+│   ├── 4-primary.ts            # V1: clinic-first core logic
+│   ├── 5-secondary.ts          # Shared
+│   ├── 6-programs.ts           # Shared
+│   ├── 7-gap-fill.ts           # Shared
+│   ├── 8-off-days.ts           # Shared
+│   └── 9-optimize.ts           # Shared: simulated annealing
+└── v2/
+    ├── index.ts                # V2 entry point
+    ├── nurse-first-assign.ts   # V2: nurse-first core logic
+    ├── nurse-scoring.ts        # V2 nurse-centric scoring (0-1200)
+    └── clinic-gap-fill.ts      # V2: post-assignment gap fill
+</pre>
+
+<hr>
+
+<h2>When to Use Each Algorithm</h2>
+<table>
+  <tr><th>Scenario</th><th>Recommended</th></tr>
+  <tr><td>Normal weekly scheduling</td><td><span class="badge badge-v1">V1</span> (proven, well-tested)</td></tr>
+  <tr><td>Nurses have very different contract hours</td><td><span class="badge badge-v2">V2</span> (hour-budget-aware)</td></tr>
+  <tr><td>Many part-time nurses</td><td><span class="badge badge-v2">V2</span> (daily target adapts)</td></tr>
+  <tr><td>All nurses similar hours, many clinic constraints</td><td><span class="badge badge-v1">V1</span> (MCV + look-ahead)</td></tr>
+  <tr><td>Want to compare and pick better result</td><td>Run both, compare quality scores</td></tr>
+</table>
+
+<hr>
+
+<h2>Database Schema</h2>
+<p>The <code>WeeklySchedule</code> table includes:</p>
+<pre>algorithmVersion TEXT NOT NULL DEFAULT 'v1-clinic-first'</pre>
+<p>This tracks which algorithm generated each schedule for auditing and comparison.</p>
+
+</body>
+</html>

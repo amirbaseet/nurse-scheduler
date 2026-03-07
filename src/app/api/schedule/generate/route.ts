@@ -11,6 +11,7 @@ import {
 import {
   runScheduleAlgorithm,
   type AlgorithmVersion,
+  type ShiftBuilderMode,
 } from "@/algorithm/router";
 import { loadCorrectionAdjustments } from "@/learning/corrections";
 
@@ -19,9 +20,13 @@ export async function POST(request: Request) {
     await authGuard("MANAGER");
 
     const body = await request.json();
-    const { weekStart: weekStr, algorithmVersion } =
-      generateScheduleSchema.parse(body);
+    const {
+      weekStart: weekStr,
+      algorithmVersion,
+      shiftBuilder,
+    } = generateScheduleSchema.parse(body);
     const version: AlgorithmVersion = algorithmVersion ?? "v1-clinic-first";
+    const shiftBuilderMode: ShiftBuilderMode = shiftBuilder ?? "off";
     const weekStart = parseWeekParam(weekStr);
 
     if (!weekStart) {
@@ -168,7 +173,12 @@ export async function POST(request: Request) {
 
     // ── Run algorithm ──
 
-    const result = runScheduleAlgorithm(version, weekStart, config);
+    const result = runScheduleAlgorithm(
+      version,
+      weekStart,
+      config,
+      shiftBuilderMode,
+    );
 
     // ── Save results ──
 
